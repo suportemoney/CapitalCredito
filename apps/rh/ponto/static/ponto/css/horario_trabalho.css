@@ -1,0 +1,68 @@
+.form-check {
+    margin-bottom: 10px;
+}
+
+.form-check-label {
+    margin-left: 5px;
+    cursor: pointer;
+}
+
+.funcionario-checkbox {
+    margin-right: 8px;
+}
+
+.funcionario-checkbox + label {
+    cursor: pointer;
+    user-select: none;
+}
+
+.dia-horario-card {
+    margin-bottom: 15px;
+}
+
+.dia-horario-card .card {
+    border: 1px solid #dee2e6;
+    transition: all 0.3s ease;
+}
+
+.dia-horario-card .card:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.dia-horario-card .card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    padding: 12px 15px;
+}
+
+.dia-horario-card .card-header .form-check {
+    margin-bottom: 0;
+}
+
+.dia-horario-card .card-header .form-check-label {
+    font-size: 16px;
+    margin-left: 8px;
+}
+
+.dia-horario-card .card-body {
+    padding: 20px;
+}
+
+.dia-horario-card input[type="time"] {
+    font-size: 14px;
+}
+
+.dia-horario-card .form-label {
+    font-weight: 500;
+    font-size: 13px;
+    margin-bottom: 5px;
+}
+
+.fim-semana-checkbox {
+    margin-right: 8px;
+}
+
+.fim-semana-checkbox + label {
+    cursor: pointer;
+    user-select: none;
+}

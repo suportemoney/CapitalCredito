@@ -1,0 +1,342 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Acompanhamento Tabela - CapitalCredito{% endblock %}
+
+{% block header_title %}Acompanhamento de Contratos (Operacional){% endblock %}
+
+{% block addcss_extra %}
+<link rel="stylesheet" href="{% static 'contratos/css/acompanhamento_tabela.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid"
+     data-url-tabela="{% url 'contratos:api_contratos_tabela' %}"
+     data-url-tabulacoes="{% url 'contratos:api_tabulacoes' %}"
+     data-url-mover="{% url 'contratos:api_mover_contrato' %}"
+     data-url-mover-massa="{% url 'contratos:api_mover_contratos_massa' %}"
+     data-url-bancos="{% url 'contratos:api_bancos_ativos' %}"
+     data-url-sse="{% url 'contratos:api_sse_contratos' %}"
+     data-is-superuser="{{ request.user.is_superuser|yesno:'true,false' }}"
+     id="tabela-container">
+    
+    <!-- Header -->
+    <div class="section-header d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h4 class="mb-0"><i class="bx bx-table me-2"></i>Esteira de Contratos - Operacional</h4>
+            <small class="text-muted">Gerencie todos os contratos do sistema</small>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+            <div id="sse-status" class="badge bg-secondary">
+                <i class="bx bx-circle me-1"></i> Conectando...
+            </div>
+            <button class="btn btn-outline-primary btn-sm" onclick="carregarContratos()">
+                <i class="bx bx-refresh"></i> Atualizar
+            </button>
+        </div>
+    </div>
+    
+    <!-- Filtros -->
+    <div class="section-body mb-3">
+        <div class="card">
+            <div class="card-header py-2">
+                <h6 class="mb-0"><i class="bx bx-filter-alt me-2"></i>Filtros</h6>
+            </div>
+            <div class="card-body py-3">
+                <div class="row g-2">
+                    <div class="col-md-2">
+                        <label class="form-label small">Banco</label>
+                        <select class="form-select form-select-sm" id="filtro-banco" onchange="carregarContratos()">
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small">Convênio</label>
+                        <select class="form-select form-select-sm" id="filtro-convenio" onchange="carregarContratos()">
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small">Tabulação</label>
+                        <select class="form-select form-select-sm" id="filtro-tabulacao" onchange="carregarContratos()">
+                            <option value="">Todas</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small">Vendedor</label>
+                        <input type="text" class="form-control form-control-sm" id="filtro-vendedor" placeholder="Nome..." onkeyup="filtrarPorVendedor()">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small">CPF</label>
+                        <input type="text" class="form-control form-control-sm" id="filtro-cpf" placeholder="000.000.000-00" onkeyup="filtrarPorCPF()">
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button class="btn btn-secondary btn-sm w-100" onclick="limparFiltros()">
+                            <i class="bx bx-x me-1"></i>Limpar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Ações em Massa -->
+    <div class="section-body mb-3" id="acoes-massa-container" style="display: none;">
+        <div class="card border-primary">
+            <div class="card-body py-2">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span><strong id="qtd-selecionados">0</strong> contrato(s) selecionado(s)</span>
+                    <div class="d-flex gap-2">
+                        <select class="form-select form-select-sm" id="select-tabulacao-massa" style="width: 200px;">
+                            <option value="">Mover para...</option>
+                        </select>
+                        <button class="btn btn-primary btn-sm" onclick="moverEmMassa()">
+                            <i class="bx bx-transfer me-1"></i>Mover
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="deselecionarTodos()">
+                            Cancelar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tabela -->
+    <div class="section-body">
+        <div class="table-responsive">
+            <table class="table table-hover table-striped" id="tabela-contratos">
+                <thead class="table-dark">
+                    <tr>
+                        <th width="40"><input type="checkbox" id="select-all" onclick="toggleSelectAll()"></th>
+                        <th>ID / Nº Série</th>
+                        <th>Cliente</th>
+                        <th>CPF</th>
+                        <th>Banco</th>
+                        <th>Convênio/Operação</th>
+                        <th>Vendedor</th>
+                        <th>Tabulação</th>
+                        <th>Data</th>
+                        <th width="220">Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody-contratos">
+                    <tr>
+                        <td colspan="10" class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Carregando...</span>
+                            </div>
+                            <p class="mt-2 text-muted mb-0">Carregando contratos...</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Paginação -->
+        <div class="d-flex justify-content-between align-items-center mt-3">
+            <div class="text-muted small">
+                Mostrando <span id="info-inicio">0</span> a <span id="info-fim">0</span> de <span id="info-total">0</span> contratos
+            </div>
+            <nav>
+                <ul class="pagination pagination-sm mb-0" id="paginacao">
+                    <!-- Paginação dinâmica -->
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Marcar Incompleto -->
+<div class="modal fade" id="modalIncompleto" tabindex="-1" aria-hidden="true" style="z-index: 100002;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title"><i class="bx bx-error me-2"></i>Marcar como Incompleto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="incompleto-contrato-id">
+                
+                <div class="alert alert-info">
+                    <i class="bx bx-info-circle me-2"></i>
+                    Informe o que está faltando neste contrato. O consultor receberá essa informação.
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Observações <span class="text-danger">*</span></label>
+                    <textarea class="form-control" id="input-observacoes-incompleto" rows="4" 
+                              placeholder="Ex: Falta documento de RG, comprovante de residência desatualizado..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-warning" onclick="confirmarIncompleto()">
+                    <i class="bx bx-error me-2"></i>Marcar como Incompleto
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Informar Link -->
+<div class="modal fade" id="modalInformarLink" tabindex="-1" aria-hidden="true" style="z-index: 100002;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="bx bx-link me-2"></i>Informar Link de Formalização</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="link-contrato-id">
+                
+                <div class="alert alert-info">
+                    <i class="bx bx-info-circle me-2"></i>
+                    Informe o link de formalização que será enviado ao cliente pelo consultor.
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Link de Formalização <span class="text-danger">*</span></label>
+                    <input type="url" class="form-control" id="input-link-formalizacao" 
+                           placeholder="https://exemplo.com/formalizacao/...">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmarLink()">
+                    <i class="bx bx-check me-2"></i>Informar Link
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Solicitar Vídeo -->
+<div class="modal fade" id="modalSolicitarVideo" tabindex="-1" aria-hidden="true" style="z-index: 100002;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title"><i class="bx bx-video me-2"></i>Solicitar Vídeo do Cliente</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="video-solicit-contrato-id">
+                
+                <div class="alert alert-warning">
+                    <i class="bx bx-error me-2"></i>
+                    <strong>Atenção:</strong> Ao confirmar, o contrato será movido para "SOLICITAÇÃO DE VÍDEO" e o consultor será notificado para enviar o vídeo do cliente.
+                </div>
+                
+                <p>Deseja solicitar o vídeo de confirmação do cliente para este contrato?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-info" onclick="confirmarSolicitarVideo()">
+                    <i class="bx bx-video me-2"></i>Solicitar Vídeo
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Ver Vídeo -->
+<div class="modal fade" id="modalVerVideo" tabindex="-1" aria-hidden="true" style="z-index: 100002;">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title"><i class="bx bx-play-circle me-2"></i>Vídeo do Cliente</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0">
+                <video id="video-visualizar" controls class="w-100" style="max-height: 500px; background: #000;">
+                    Seu navegador não suporta vídeos HTML5.
+                </video>
+            </div>
+            <div class="modal-footer">
+                <a href="#" id="link-download-video" class="btn btn-outline-primary" download>
+                    <i class="bx bx-download me-2"></i>Download
+                </a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Detalhes -->
+<div class="modal fade" id="modalDetalhes" tabindex="-1" aria-hidden="true" style="z-index: 100002;">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bx bx-file me-2"></i>Detalhes do Contrato</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modal-detalhes-body">
+                <!-- Conteúdo dinâmico -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Mover -->
+<div class="modal fade" id="modalMover" tabindex="-1" aria-hidden="true" style="z-index: 100002;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-secondary text-white">
+                <h5 class="modal-title"><i class="bx bx-transfer me-2"></i>Mover Contrato</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="mover-contrato-id">
+                
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Nova Tabulação <span class="text-danger">*</span></label>
+                    <select class="form-select" id="select-nova-tabulacao" onchange="verificarCamposExtras()">
+                        <option value="">Selecione...</option>
+                    </select>
+                </div>
+                
+                <!-- Campo extra: Observações (Incompleto) -->
+                <div class="mb-3" id="campo-observacoes-mover" style="display: none;">
+                    <div class="alert alert-warning py-2 mb-2">
+                        <i class="bx bx-error me-1"></i> Informe o que está faltando neste contrato.
+                    </div>
+                    <label class="form-label fw-bold">Observações <span class="text-danger">*</span></label>
+                    <textarea class="form-control" id="input-observacoes-mover" rows="3" 
+                              placeholder="Ex: Falta documento de RG, comprovante desatualizado..."></textarea>
+                </div>
+                
+                <!-- Campo extra: Link de Formalização -->
+                <div class="mb-3" id="campo-link-mover" style="display: none;">
+                    <div class="alert alert-info py-2 mb-2">
+                        <i class="bx bx-info-circle me-1"></i> Informe o link de formalização para o cliente.
+                    </div>
+                    <label class="form-label fw-bold">Link de Formalização <span class="text-danger">*</span></label>
+                    <input type="url" class="form-control" id="input-link-mover" 
+                           placeholder="https://exemplo.com/formalizacao/...">
+                </div>
+                
+                <!-- Campo extra: Solicitar Vídeo -->
+                <div class="mb-3" id="campo-video-mover" style="display: none;">
+                    <div class="alert alert-info py-2 mb-2">
+                        <i class="bx bx-video me-1"></i> O consultor será notificado para enviar o vídeo do cliente.
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmarMover()">
+                    <i class="bx bx-check me-2"></i>Mover
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block addjs_extra %}
+<script src="{% static 'contratos/js/acompanhamento_tabela.js' %}"></script>
+{% endblock %}

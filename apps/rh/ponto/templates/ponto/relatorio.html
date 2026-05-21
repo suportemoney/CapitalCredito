@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load permissoes_tags %}
+
+{% block title %}Relatório de Presença - CapitalCredito{% endblock %}
+
+{% block header_title %}Relatório de Presença{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Filtros</h5>
+                </div>
+                <div class="card-body">
+                    <form id="formFiltrosRelatorio">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Funcionário</label>
+                                <select class="form-select" name="funcionario_id" id="filtroFuncionario">
+                                    <option value="">Todos</option>
+                                    {% for funcionario in funcionarios %}
+                                    <option value="{{ funcionario.id }}">{{ funcionario.nome_completo }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Data Início *</label>
+                                <input type="date" class="form-control" name="data_inicio" id="filtroDataInicio" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Data Fim *</label>
+                                <input type="date" class="form-control" name="data_fim" id="filtroDataFim" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <button type="button" class="btn btn-primary" onclick="gerarRelatorio()">
+                                    <i class='bx bx-search'></i> Gerar Relatório
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick="imprimirRelatorio()" id="btnImprimir" style="display: none;">
+                                    <i class='bx bx-printer'></i> Imprimir
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Resultado do Relatório</h5>
+                </div>
+                <div class="card-body">
+                    <div id="areaRelatorio" style="display: none;">
+                        <div id="dadosFuncionarioRelatorio" class="mb-2" style="display: none;"></div>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-bordered" id="tabelaRelatorio">
+                                <thead>
+                                    <tr id="theadRelatorio">
+                                        <th>Data</th>
+                                        <th>Entrada 1</th>
+                                        <th>Saída 1</th>
+                                        <th>Entrada 2</th>
+                                        <th>Saída 2</th>
+                                        <th>Horário Total</th>
+                                        <th>Horário Faltando</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyRelatorio">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalJustificativa" tabindex="-1" aria-labelledby="modalJustificativaLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalJustificativaLabel">Justificativa para Ajuste de Horário</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formJustificativa">
+                    <input type="hidden" id="justificativaFuncionarioId" name="funcionario_id">
+                    <input type="hidden" id="justificativaData" name="data">
+                    <div class="mb-3">
+                        <label for="justificativaTexto" class="form-label">Justificativa *</label>
+                        <textarea class="form-control" id="justificativaTexto" name="justificativa" rows="4" required placeholder="Descreva o motivo do ajuste de horário..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="justificativaArquivos" class="form-label">Arquivos (Opcional)</label>
+                        <input type="file" class="form-control" id="justificativaArquivos" name="arquivos" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+                        <small class="form-text text-muted">Você pode selecionar múltiplos arquivos</small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="salvarJustificativa()">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
+                    <div id="mensagemVazio" class="text-center text-muted">
+                        <p>Selecione os filtros e clique em "Gerar Relatório" para visualizar os dados.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block addcss_extra %}
+<link rel="stylesheet" href="{% static 'ponto/css/relatorio.css' %}">
+{% endblock %}
+
+{% block addjs_extra %}
+<script>
+    const IS_SUPERUSER = {% if is_superuser %}true{% else %}false{% endif %};
+</script>
+<script src="{% static 'ponto/js/relatorio.js' %}"></script>
+{% endblock %}

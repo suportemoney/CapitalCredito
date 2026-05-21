@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load permissoes_tags %}
+
+{% block title %}Presença - CapitalCredito{% endblock %}
+
+{% block header_title %}Registro de Presença{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="section-header">
+                        <h4 id="saudacao" data-nome-usuario="{{ user.first_name }} {{ user.last_name }}">Olá, {{ user.first_name }} {{ user.last_name }}!</h4>
+                    </div>
+                    <div class="section-body">
+                        <div class="d-flex justify-content-center align-items-center mb-4 flex-wrap gap-3">
+                            <div class="relogio-container">
+                                <div class="relogio-label">Horário Atual</div>
+                                <div class="relogio-display" id="relogioDisplay">
+                                    <span id="relogioHora">00</span>:<span id="relogioMinuto">00</span>:<span id="relogioSegundo">00</span>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-primary" id="btnRegistrarPonto" onclick="registrarPonto()">
+                                <i class='bx bx-log-in'></i> Registrar Presença
+                            </button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-bordered" id="tabelaPontos">
+                                <thead>
+                                    <tr>
+                                        <th>Tipo</th>
+                                        <th>Horário</th>
+                                        <th>Data</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyPontos">
+                                    <tr>
+                                        <td colspan="3" class="text-center">Carregando registros do dia...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block addcss_extra %}
+<link rel="stylesheet" href="{% static 'ponto/css/index.css' %}">
+{% endblock %}
+
+{% block addjs_extra %}
+<script src="{% static 'ponto/js/index.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,89 @@
+.campo-editavel {
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.campo-editavel:hover {
+    border-color: #D4AF37;
+    background-color: #fffef5;
+}
+
+.campo-editavel:focus {
+    border-color: #D4AF37;
+    box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.25);
+    background-color: #fff;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+.form-select-sm,
+.form-control-sm {
+    font-size: 0.875rem;
+    padding: 0.25rem 0.5rem;
+}
+
+.card-header {
+    background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%);
+    color: #D4AF37;
+    border-bottom: 2px solid #D4AF37;
+}
+
+.nav-tabs .nav-link {
+    color: #666;
+    border: none;
+    border-bottom: 2px solid transparent;
+}
+
+.nav-tabs .nav-link.active {
+    color: #D4AF37;
+    background-color: transparent;
+    border-bottom: 2px solid #D4AF37;
+    font-weight: 600;
+}
+
+.nav-tabs .nav-link:hover {
+    border-color: transparent;
+    border-bottom: 2px solid #D4AF37;
+}
+
+.table thead {
+    background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%);
+    color: #D4AF37;
+}
+
+.table thead th {
+    border-bottom: 2px solid #D4AF37;
+    font-weight: 600;
+    padding: 12px;
+}
+
+.table tbody tr {
+    transition: all 0.2s ease;
+}
+
+.table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.btn-danger {
+    background: #dc3545;
+    border: none;
+}
+
+.btn-danger:hover {
+    background: #c82333;
+}
+
+.card-resumo .resumo-metrica p.fs-4 {
+    color: #1a1a1a;
+    font-weight: 600;
+}
+
+.card-resumo .resumo-metrica small {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+

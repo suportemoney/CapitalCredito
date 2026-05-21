@@ -1,0 +1,30 @@
+.admin-card {
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 2px solid transparent;
+}
+
+.admin-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+    border-color: #D4AF37;
+}
+
+.admin-card .count-number {
+    font-size: 36px;
+    font-weight: bold;
+    color: #D4AF37;
+    margin: 10px 0;
+}
+
+.admin-card h5 {
+    color: #3d3d3d;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.admin-card .text-muted {
+    color: #6c757d;
+    font-size: 14px;
+}
+

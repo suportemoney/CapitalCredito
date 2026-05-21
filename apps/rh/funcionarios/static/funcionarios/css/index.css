@@ -1,0 +1,28 @@
+.funcionario-card {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.funcionario-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 16px rgba(212, 175, 55, 0.3);
+    border: 2px solid #D4AF37;
+}
+
+.funcionario-card .card-body {
+    padding: 30px 20px;
+}
+
+.funcionario-card h5 {
+    color: #2c2c2c;
+    font-weight: 600;
+    margin-top: 15px;
+}
+
+.funcionario-card .text-muted {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+

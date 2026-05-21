@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Editar Comunicado - CapitalCredito{% endblock %}
+
+{% block header_title %}Editar Comunicado: {{ comunicado.titulo }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <form id="form-editar-comunicado" method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="form-group">
+                                    <label for="titulo">Título *</label>
+                                    <input type="text" class="form-control" id="titulo" name="titulo" value="{{ comunicado.titulo }}" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="tipo">Tipo *</label>
+                                    <select class="form-control" id="tipo" name="tipo" required>
+                                        {% for tipo, nome in TIPO_CHOICES %}
+                                        <option value="{{ tipo }}" {% if comunicado.tipo == tipo %}selected{% endif %}>{{ nome }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="categoria">Categoria</label>
+                                    <select class="form-control" id="categoria" name="categoria">
+                                        <option value="">Selecione uma categoria</option>
+                                        {% for categoria in categorias %}
+                                        <option value="{{ categoria.id }}" {% if comunicado.categoria.id == categoria.id %}selected{% endif %}>{{ categoria.nome }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="prioridade">Prioridade *</label>
+                                    <select class="form-control" id="prioridade" name="prioridade" required>
+                                        {% for prioridade, nome in PRIORIDADE_CHOICES %}
+                                        <option value="{{ prioridade }}" {% if comunicado.prioridade == prioridade %}selected{% endif %}>{{ nome }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="data_evento">Data do Evento</label>
+                                    <input type="datetime-local" class="form-control" id="data_evento" name="data_evento" 
+                                           value="{% if comunicado.data_evento %}{{ comunicado.data_evento|date:'Y-m-d\TH:i' }}{% endif %}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="conteudo">Conteúdo *</label>
+                            <textarea class="form-control" id="conteudo" name="conteudo" rows="8" required>{{ comunicado.conteudo }}</textarea>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="banner">Banner</label>
+                                    {% if comunicado.banner %}
+                                    <div class="banner-preview">
+                                        <img src="{{ comunicado.banner.url }}" alt="Banner atual" style="max-width: 200px; margin-bottom: 10px;">
+                                        <p><small>Banner atual</small></p>
+                                    </div>
+                                    {% endif %}
+                                    <input type="file" class="form-control" id="banner" name="banner" accept="image/png,image/jpeg,image/jpg,image/webp">
+                                    <small class="form-text text-muted">Deixe em branco para manter o banner atual. Formatos aceitos: PNG, JPG, JPEG, WEBP</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Opções</label>
+                                    <div class="checkbox-group">
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" name="fixo" id="fixo" {% if comunicado.fixo %}checked{% endif %}>
+                                            <span>Fixo no Topo</span>
+                                        </label>
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" name="status" id="status" {% if comunicado.status %}checked{% endif %} value="on">
+                                            <span>Ativo</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Arquivos Anexos Existentes -->
+                        {% if comunicado.arquivos.all %}
+                        <div class="form-group">
+                            <label>Arquivos Anexos Existentes</label>
+                            <div class="arquivos-existentes">
+                                {% for arquivo in comunicado.arquivos.all %}
+                                <div class="arquivo-existente-item">
+                                    <a href="{{ arquivo.arquivo.url }}" target="_blank">
+                                        <i class='bx bx-file'></i> {{ arquivo.titulo|default:arquivo.arquivo.name }}
+                                    </a>
+                                    <button type="button" class="btn-deletar-arquivo" data-arquivo-id="{{ arquivo.id }}">
+                                        <i class='bx bx-trash'></i>
+                                    </button>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Adicionar Novos Arquivos -->
+                        <div class="form-group">
+                            <label>Adicionar Novos Arquivos</label>
+                            <div id="arquivos-container">
+                                <div class="arquivo-item">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <input type="text" class="form-control" placeholder="Título do arquivo" name="titulos_arquivos[]">
+                                        </div>
+                                        <div class="col-md-8">
+                                            <input type="file" class="form-control" name="arquivos[]">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn-adicionar-arquivo" id="btn-adicionar-arquivo">
+                                <i class='bx bx-plus'></i> Adicionar Arquivo
+                            </button>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn-salvar">
+                                <i class='bx bx-save'></i> Salvar Alterações
+                            </button>
+                            <a href="{% url 'comunicados:listar' %}" class="btn-cancelar">
+                                <i class='bx bx-x'></i> Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block addcss_extra %}
+<link rel="stylesheet" href="{% static 'comunicados/css/gerenciar.css' %}">
+{% endblock %}
+
+{% block addjs_extra %}
+<script src="{% static 'comunicados/js/gerenciar.js' %}"></script>
+<script>
+    const COMUNICADO_ID = {{ comunicado.id }};
+    const API_URLS = {
+        editar: "{% url 'comunicados:api_editar' comunicado.id %}",
+        deletarArquivo: "{% url 'comunicados:api_deletar_arquivo' 0 %}"
+    };
+</script>
+{% endblock %}
+

@@ -1,0 +1,35 @@
+.nav-tabs {
+    border-bottom: 2px solid #dee2e6;
+}
+
+.nav-tabs .nav-link {
+    color: #495057;
+    border: none;
+    border-bottom: 2px solid transparent;
+}
+
+.nav-tabs .nav-link:hover {
+    border-color: #dee2e6;
+}
+
+.nav-tabs .nav-link.active {
+    color: #D4AF37;
+    border-bottom-color: #D4AF37;
+    font-weight: bold;
+}
+
+#funcionariosIds {
+    min-height: 200px;
+}
+
+#tabelaJustificativas {
+    margin-top: 20px;
+}
+
+#tabelaJustificativas thead {
+    background-color: #f8f9fa;
+}
+
+#tabelaJustificativas th {
+    font-weight: bold;
+}

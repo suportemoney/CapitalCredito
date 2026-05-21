@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Calc Bonificações - CapitalCredito{% endblock %}
+
+{% block header_title %}Calc Bonificações{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="section-header">
+        <h5>Cálculo por Mês</h5>
+    </div>
+    <div class="section-body">
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="row g-2 align-items-end">
+                    <div class="col-md-2">
+                        <label class="form-label">Mês</label>
+                        <select class="form-select" id="calc-mes">
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Funcionário</label>
+                        <select class="form-select" id="calc-funcionario">
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Regra</label>
+                        <select class="form-select" id="calc-regra">
+                            <option value="">Todas</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Valor base (mín)</label>
+                        <input type="number" class="form-control" id="calc-valor-base-min" placeholder="0" step="0.01" min="0">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Valor base (máx)</label>
+                        <input type="number" class="form-control" id="calc-valor-base-max" placeholder="" step="0.01" min="0">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Bonificação (mín)</label>
+                        <input type="number" class="form-control" id="calc-bonificacao-min" placeholder="0" step="0.01" min="0">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Bonificação (máx)</label>
+                        <input type="number" class="form-control" id="calc-bonificacao-max" placeholder="" step="0.01" min="0">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Valor final (mín)</label>
+                        <input type="number" class="form-control" id="calc-valor-final-min" placeholder="1" value="1" step="0.01" min="0">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Valor final (máx)</label>
+                        <input type="number" class="form-control" id="calc-valor-final-max" placeholder="" step="0.01" min="0">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header"><h6 class="mb-0">Resultado (ordenado por valor final, maior ao menor)</h6></div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Funcionário</th>
+                                <th>Regra</th>
+                                <th>Valor Base</th>
+                                <th>Percentual</th>
+                                <th>Gatilho valor</th>
+                                <th>Bonificação</th>
+                                <th>Valor Final</th>
+                                {% if has_pago_cms %}<th>Ações</th>{% endif %}
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-calc-mes"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block addcss_extra %}
+<link rel="stylesheet" href="{% static 'bonificacoes/css/calc_bonificacoes.css' %}">
+{% endblock %}
+
+{% block addjs_extra %}
+<script>window.CALC_BONIFICACOES_BASE = "{% url 'bonificacoes:index' %}";</script>
+<script>window.HAS_PAGO_CMS = {{ has_pago_cms|yesno:"true,false" }}; window.FINANCEIRO_GERAL_CRIAR_JA_PAGA_URL = "{{ criar_ja_paga_url|escapejs }}";</script>
+<script src="{% static 'bonificacoes/js/calc_bonificacoes.js' %}"></script>
+{% endblock %}

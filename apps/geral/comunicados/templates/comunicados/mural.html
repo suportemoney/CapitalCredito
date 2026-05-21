@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load permissoes_tags %}
+
+{% block title %}Mural de Comunicados - CapitalCredito{% endblock %}
+
+{% block header_title %}Mural de Comunicados{% endblock %}
+
+{% block pre_content %}
+{% if user|has_access:'SS2' %}
+<div class="header-actions">
+    <a href="{% url 'comunicados:listar' %}" class="btn-gerenciar">
+        <i class='bx bx-cog'></i> Gerenciar
+    </a>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            {% if comunicados %}
+                <div class="comunicados-grid">
+                    {% for comunicado in comunicados %}
+                        <div class="comunicado-card {% if comunicado.fixo %}comunicado-fixo{% endif %} comunicado-{{ comunicado.prioridade|lower }}" data-comunicado-id="{{ comunicado.id }}">
+                            {% if comunicado.fixo %}
+                                <div class="comunicado-badge-fixo">
+                                    <i class='bx bx-pin'></i> Fixo
+                                </div>
+                            {% endif %}
+                            
+                            <div class="comunicado-header">
+                                <div class="comunicado-titulo-wrapper">
+                                    {% if comunicado.categoria %}
+                                        <span class="comunicado-categoria" style="background-color: {{ comunicado.categoria.cor }};">
+                                            <i class='bx {{ comunicado.categoria.icone }}'></i>
+                                            {{ comunicado.categoria.nome }}
+                                        </span>
+                                    {% endif %}
+                                    <h4 class="comunicado-titulo">{{ comunicado.titulo }}</h4>
+                                </div>
+                                <div class="comunicado-meta">
+                                    <span class="comunicado-tipo">{{ comunicado.get_tipo_display }}</span>
+                                    <span class="comunicado-prioridade prioridade-{{ comunicado.prioridade|lower }}">
+                                        {{ comunicado.get_prioridade_display }}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            {% if comunicado.banner %}
+                                <div class="comunicado-banner">
+                                    <img src="{{ comunicado.banner.url }}" alt="{{ comunicado.titulo }}">
+                                </div>
+                            {% endif %}
+                            
+                            <div class="comunicado-body">
+                                <div class="comunicado-conteudo">
+                                    {{ comunicado.conteudo|linebreaks }}
+                                </div>
+                                
+                                {% if comunicado.data_evento %}
+                                    <div class="comunicado-data-evento">
+                                        <i class='bx bx-calendar'></i>
+                                        <strong>Data do Evento:</strong> {{ comunicado.data_evento|date:"d/m/Y H:i" }}
+                                    </div>
+                                {% endif %}
+                                
+                                {% if comunicado.arquivos.all %}
+                                    <div class="comunicado-arquivos">
+                                        <strong><i class='bx bx-paperclip'></i> Anexos:</strong>
+                                        <ul>
+                                            {% for arquivo in comunicado.arquivos.all %}
+                                                {% if arquivo.status %}
+                                                    <li>
+                                                        <a href="{{ arquivo.arquivo.url }}" target="_blank">
+                                                            <i class='bx bx-file'></i>
+                                                            {{ arquivo.titulo|default:arquivo.arquivo.name }}
+                                                        </a>
+                                                    </li>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="comunicado-footer">
+                                <div class="comunicado-info">
+                                    <span class="comunicado-autor">
+                                        <i class='bx bx-user'></i>
+                                        {{ comunicado.criado_por.username }}
+                                    </span>
+                                    <span class="comunicado-data">
+                                        <i class='bx bx-time'></i>
+                                        {{ comunicado.data_criacao|date:"d/m/Y H:i" }}
+                                    </span>
+                                </div>
+                                {% if not comunicado.visualizado %}
+                                    <span class="comunicado-novo">
+                                        <i class='bx bx-bell'></i> Novo
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="card">
+                    <div class="card-body text-center">
+                        <i class='bx bx-info-circle' style="font-size: 48px; color: #FFD700; margin-bottom: 20px;"></i>
+                        <h4>Nenhum comunicado disponível</h4>
+                        <p>Não há comunicados no momento.</p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block addcss_extra %}
+<link rel="stylesheet" href="{% static 'comunicados/css/mural.css' %}">
+{% endblock %}
+
+{% block addjs_extra %}
+<script src="{% static 'comunicados/js/mural.js' %}"></script>
+{% endblock %}
+

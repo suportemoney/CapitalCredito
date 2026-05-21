@@ -1,0 +1,190 @@
+/* Container do Kanban com scroll horizontal */
+#crm-kanban-container {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 10px;
+}
+
+/* Scrollbar personalizada para o container horizontal */
+#crm-kanban-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+#crm-kanban-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+#crm-kanban-container::-webkit-scrollbar-thumb {
+    background: #D4AF37;
+    border-radius: 4px;
+}
+
+#crm-kanban-container::-webkit-scrollbar-thumb:hover {
+    background: #b8941f;
+}
+
+#crm-columns {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 15px;
+    min-width: fit-content;
+    padding: 10px 0;
+}
+
+.crm-column-wrapper {
+    flex-shrink: 0;
+}
+
+.crm-column {
+    min-width: 300px;
+    max-width: 300px;
+    width: 300px;
+    min-height: 500px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    height: 80vh;
+}
+
+.crm-column .card-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    padding: 1rem;
+}
+
+.crm-cards-container {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    min-height: 0;
+}
+
+.crm-card {
+    transition: all 0.2s ease;
+    border: 1px solid #ddd;
+    position: relative;
+    margin-bottom: 0.5rem;
+}
+
+.crm-card.ui-draggable-dragging {
+    opacity: 0.8;
+    z-index: 10000;
+    transform: rotate(2deg);
+}
+
+.crm-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.crm-card.ui-draggable-dragging {
+    opacity: 0.8;
+    z-index: 10000;
+}
+
+.crm-cards-container.droppable-valid {
+    background-color: #e8f5e9;
+    border: 2px dashed #4caf50;
+    transition: all 0.2s ease;
+}
+
+.crm-cards-container.droppable-invalid {
+    background-color: #ffebee;
+    border: 2px dashed #f44336;
+    transition: all 0.2s ease;
+}
+
+.crm-cards-container.ui-droppable-hover {
+    background-color: #f0f0f0;
+    border: 2px dashed #D4AF37;
+}
+
+.card-header {
+    font-weight: 600;
+}
+
+.card-header small {
+    opacity: 0.9;
+}
+
+/* Todos os modais do CRM precisam de z-index alto */
+.modal {
+    z-index: 10000002 !important;
+}
+
+.modal.show {
+    z-index: 10000002 !important;
+}
+
+.modal-dialog {
+    z-index: 10000002 !important;
+}
+
+.modal-content {
+    z-index: 10000002 !important;
+}
+
+/* Modal Ficha Cliente específico */
+#modalFichaCliente {
+    z-index: 10000002 !important;
+}
+
+#modalFichaCliente .modal-dialog {
+    z-index: 10000002 !important;
+}
+
+#modalFichaCliente .modal-content {
+    z-index: 10000002 !important;
+}
+
+/* Modal Nova Tabulação */
+#modalNovaTabulacao {
+    z-index: 10000002 !important;
+}
+
+#modalNovaTabulacao .modal-dialog {
+    z-index: 10000002 !important;
+}
+
+#modalNovaTabulacao .modal-content {
+    z-index: 10000002 !important;
+}
+
+/* Modais secundários (Calculadoras, Simulador) também precisam de z-index alto */
+#modalCalculadorasCRM,
+#modalSimuladorCRM {
+    z-index: 10000003 !important;
+}
+
+#modalDadosReversao {
+    z-index: 10000002 !important;
+}
+
+#modalDadosChecagem {
+    z-index: 10000002 !important;
+}
+
+#modalCalculadorasCRM .modal-dialog,
+#modalSimuladorCRM .modal-dialog {
+    z-index: 10000003 !important;
+}
+
+#modalCalculadorasCRM .modal-content,
+#modalSimuladorCRM .modal-content {
+    z-index: 10000003 !important;
+}
+
+/* Backdrop do modal também precisa de z-index alto */
+.modal-backdrop {
+    z-index: 10000001 !important;
+}
+
+.modal-backdrop.show {
+    z-index: 10000001 !important;
+}
+

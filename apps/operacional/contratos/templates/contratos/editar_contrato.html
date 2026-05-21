@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Editar Contrato - CapitalCredito{% endblock %}
+
+{% block header_title %}Editar Contrato{% endblock %}
+
+{% block addcss_extra %}
+<link rel="stylesheet" href="{% static 'contratos/css/novo_contrato.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid"
+     data-contrato-id="{{ contrato_id }}"
+     data-url-contrato="{% url 'contratos:api_contrato' contrato_id %}"
+     data-url-campos="{% url 'contratos:api_schema_campos' %}"
+     data-url-atualizar="{% url 'contratos:api_atualizar_contrato' contrato_id %}"
+     id="editar-container">
+    
+    <div class="section-header">
+        <h2><i class="bx bx-edit me-2"></i>Completar Dados do Contrato #{{ contrato_id }}</h2>
+    </div>
+    
+    <!-- Alert de Pendências -->
+    <div id="alert-pendencias" class="alert alert-warning mb-4" style="display: none;">
+        <strong><i class="bx bx-error me-2"></i>Pendências Informadas pelo Operacional:</strong>
+        <p class="mb-0" id="texto-pendencias"></p>
+    </div>
+    
+    <div class="section-body">
+        {% csrf_token %}
+        <form id="form-editar-contrato">
+            <!-- Info do Produto (fixo - não pode alterar) -->
+            <div class="card mb-4">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="bx bx-building me-2"></i>Produto do Contrato</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Banco</label>
+                            <p id="info-banco" class="mb-0">Carregando...</p>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Convênio</label>
+                            <p id="info-convenio" class="mb-0">Carregando...</p>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Operação</label>
+                            <p id="info-operacao" class="mb-0">Carregando...</p>
+                        </div>
+                    </div>
+                    <input type="hidden" id="banco_id">
+                    <input type="hidden" id="convenio_operacao_id">
+                </div>
+            </div>
+            
+            <!-- Stepper/Barra de Progresso -->
+            <div id="stepper-container" style="display: none;" class="mb-4">
+                <div class="card">
+                    <div class="card-body py-3">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="text-muted small">Progresso do Formulário</span>
+                            <span class="badge bg-primary" id="badge-pagina">Etapa 1 de 1</span>
+                        </div>
+                        <div class="progress" style="height: 25px;">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                 role="progressbar" 
+                                 style="width: 0%;" 
+                                 id="progress-bar"
+                                 aria-valuenow="0" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100">
+                                Etapa 1 de 1
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Campos do Formulário (renderizados por página) -->
+            <div id="campos-formulario" style="display: none;">
+                <!-- Campos serão renderizados dinamicamente via JavaScript por página -->
+            </div>
+            
+            <!-- Botões de Ação -->
+            <div class="row mt-4" id="botoes-container">
+                <div class="col-12 d-flex justify-content-between">
+                    <button type="button" class="btn btn-secondary" onclick="voltarParaCRM()">
+                        <i class="bx bx-arrow-back me-2"></i>Voltar
+                    </button>
+                    <div>
+                        <button type="button" class="btn btn-primary" id="btn-avancar" style="display: none;">
+                            Próximo <i class="bx bx-right-arrow-alt ms-2"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block addjs_extra %}
+<script src="{% static 'contratos/js/editar_contrato.js' %}"></script>
+{% endblock %}

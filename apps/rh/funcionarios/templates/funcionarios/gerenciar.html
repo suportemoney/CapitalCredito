@@ -1,0 +1,509 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load permissoes_tags %}
+
+{% block title %}Gerenciar Funcionários - CapitalCredito{% endblock %}
+
+{% block header_title %}Gerenciar Funcionários{% endblock %}
+
+{% block pre_content %}
+<div class="header-actions">
+    <a href="{% url 'funcionarios:novo' %}" class="btn-gerenciar">
+        <i class='bx bx-plus'></i> Novo Funcionário
+    </a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Filtros</h5>
+                </div>
+                <div class="card-body">
+                    <form id="formFiltros">
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Status</label>
+                                <select class="form-select" name="status" id="filtroStatus">
+                                    <option value="ativo" selected>Ativo</option>
+                                    <option value="inativo">Inativo</option>
+                                    <option value="todos">Todos</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Empresa</label>
+                                <select class="form-select" name="empresa" id="filtroEmpresa">
+                                    <option value="">Todas</option>
+                                    {% for empresa in empresas %}
+                                    <option value="{{ empresa.id }}">{{ empresa.nome }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Departamento</label>
+                                <select class="form-select" name="departamento" id="filtroDepartamento">
+                                    <option value="">Todos</option>
+                                    {% for departamento in departamentos %}
+                                    <option value="{{ departamento.id }}">{{ departamento.nome }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Setor</label>
+                                <select class="form-select" name="setor" id="filtroSetor">
+                                    <option value="">Todos</option>
+                                    {% for setor in setores %}
+                                    <option value="{{ setor.id }}">{{ setor.nome }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Loja</label>
+                                <select class="form-select" name="loja" id="filtroLoja">
+                                    <option value="">Todas</option>
+                                    {% for loja in lojas %}
+                                    <option value="{{ loja.id }}">{{ loja.nome }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Equipe</label>
+                                <select class="form-select" name="equipe" id="filtroEquipe">
+                                    <option value="">Todas</option>
+                                    {% for equipe in equipes %}
+                                    <option value="{{ equipe.id }}">{{ equipe.nome }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Cargo</label>
+                                <select class="form-select" name="cargo" id="filtroCargo">
+                                    <option value="">Todos</option>
+                                    {% for cargo in cargos %}
+                                    <option value="{{ cargo.id }}">{{ cargo.nome }} ({{ cargo.nivel_hierarquico.nome }})</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Buscar</label>
+                                <input type="text" class="form-control" name="busca" id="filtroBusca" placeholder="Nome, apelido ou CPF">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <button type="button" class="btn btn-primary" onclick="aplicarFiltros()">
+                                    <i class='bx bx-search'></i> Filtrar
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick="limparFiltros()">
+                                    <i class='bx bx-refresh'></i> Limpar
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Lista de Funcionários</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Apelido</th>
+                                    <th>Nome Completo</th>
+                                    <th>CPF</th>
+                                    <th>Data Nascimento</th>
+                                    <th>Empresa</th>
+                                    <th>Departamento</th>
+                                    <th>Setor</th>
+                                    <th>Loja</th>
+                                    <th>Equipe</th>
+                                    <th>Cargo</th>
+                                    <th>Horário</th>
+                                    <th>Status</th>
+                                    <th>Data Criação</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="funcionarios-tbody">
+                                <tr>
+                                    <td colspan="14" class="text-center">Carregando...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Flutuante para Visualizar/Editar Funcionário -->
+<div id="modalFuncionario" class="modal-funcionario">
+    <div class="modal-funcionario-content">
+        <div class="modal-funcionario-header">
+            <h4 id="modalFuncionarioTitle">Editar Funcionário</h4>
+            <button type="button" class="modal-funcionario-close" onclick="fecharModalFuncionario()">
+                <i class='bx bx-x'></i>
+            </button>
+        </div>
+        <div class="modal-funcionario-body">
+            <form id="formEditarFuncionario" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" id="funcionario_id" name="funcionario_id">
+                
+                <!-- Dados Básicos -->
+                <div class="section-header">Dados Básicos</div>
+                <div class="section-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Foto</label>
+                            <div class="foto-preview-container">
+                                <img id="fotoPreview" src="" alt="Foto" style="display: none; max-width: 150px; max-height: 150px; border-radius: 8px; margin-bottom: 10px;">
+                                <input type="file" class="form-control" id="foto" name="foto" accept="image/*" onchange="previewFoto(this)">
+                                <button type="button" class="btn btn-sm btn-danger mt-2" id="btnRemoverFoto" onclick="removerFoto()" style="display: none;">
+                                    <i class='bx bx-trash'></i> Remover Foto
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Apelido</label>
+                                    <input type="text" class="form-control" id="apelido" name="apelido" maxlength="100">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Nome Completo <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="nome_completo" name="nome_completo" required maxlength="255">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">CPF <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="cpf" name="cpf" required data-mask="000.000.000-00">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">RG</label>
+                                    <input type="text" class="form-control" id="rg" name="rg" maxlength="20">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Data de Nascimento</label>
+                                    <input type="date" class="form-control" id="data_nascimento" name="data_nascimento">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Status</label>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="status" name="status" checked>
+                                        <label class="form-check-label" for="status">Ativo</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dados Pessoais -->
+                <div class="section-header">Dados Pessoais</div>
+                <div class="section-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Gênero</label>
+                            <select class="form-select" id="genero" name="genero">
+                                <option value="">Selecione...</option>
+                                {% for genero in generos %}
+                                <option value="{{ genero.id }}">{{ genero.nome }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Estado Civil</label>
+                            <select class="form-select" id="estado_civil" name="estado_civil">
+                                <option value="">Selecione...</option>
+                                <option value="SOLTEIRO">Solteiro(a)</option>
+                                <option value="CASADO">Casado(a)</option>
+                                <option value="DIVORCIADO">Divorciado(a)</option>
+                                <option value="VIUVO">Viúvo(a)</option>
+                                <option value="UNIAO_ESTAVEL">União Estável</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Nacionalidade</label>
+                            <input type="text" class="form-control" id="nacionalidade" name="nacionalidade" maxlength="100">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Naturalidade</label>
+                            <input type="text" class="form-control" id="naturalidade" name="naturalidade" maxlength="100">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contato -->
+                <div class="section-header">Contato</div>
+                <div class="section-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">E-mail Pessoal</label>
+                            <input type="email" class="form-control" id="email_pessoa" name="email_pessoa" maxlength="255">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Celular Principal</label>
+                            <input type="text" class="form-control" id="celular_1" name="celular_1" maxlength="20" data-mask="(00) 00000-0000">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Celular Secundário</label>
+                            <input type="text" class="form-control" id="celular_2" name="celular_2" maxlength="20" data-mask="(00) 00000-0000">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Chave PIX</label>
+                            <input type="text" class="form-control" id="chave_pix" name="chave_pix" maxlength="255" placeholder="CPF, E-mail, Telefone ou Chave Aleatória">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Localização -->
+                <div class="section-header">Localização</div>
+                <div class="section-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">CEP</label>
+                            <input type="text" class="form-control" id="cep" name="cep" maxlength="9" data-mask="00000-000">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Endereço</label>
+                            <input type="text" class="form-control" id="endereco" name="endereco" maxlength="255">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Número</label>
+                            <input type="text" class="form-control" id="numero" name="numero" maxlength="20">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Complemento</label>
+                            <input type="text" class="form-control" id="complemento" name="complemento" maxlength="100">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Bairro</label>
+                            <input type="text" class="form-control" id="bairro" name="bairro" maxlength="100">
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <label class="form-label">Cidade</label>
+                            <input type="text" class="form-control" id="cidade" name="cidade" maxlength="100">
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <label class="form-label">UF</label>
+                            <input type="text" class="form-control" id="estado" name="estado" maxlength="2" style="text-transform: uppercase;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dados Profissionais -->
+                <div class="section-header">Dados Profissionais</div>
+                <div class="section-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">PIS</label>
+                            <input type="text" class="form-control" id="pis" name="pis" maxlength="20">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Matrícula</label>
+                            <input type="text" class="form-control" id="matricula" name="matricula" maxlength="50">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Tipo de Contrato</label>
+                            <select class="form-select" id="tipo_contrato" name="tipo_contrato">
+                                <option value="">Selecione...</option>
+                                {% for tipo in tipos_contrato %}
+                                <option value="{{ tipo.id }}">{{ tipo.nome }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Empresa <span class="text-danger">*</span></label>
+                            <select class="form-select" id="empresa" name="empresa" required>
+                                <option value="">Selecione...</option>
+                                {% for empresa in empresas %}
+                                <option value="{{ empresa.id }}">{{ empresa.nome }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Departamento <span class="text-danger">*</span></label>
+                            <select class="form-select" id="departamento" name="departamento" required>
+                                <option value="">Selecione...</option>
+                                {% for departamento in departamentos %}
+                                <option value="{{ departamento.id }}">{{ departamento.nome }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Setor <span class="text-danger">*</span></label>
+                            <select class="form-select" id="setor" name="setor" required>
+                                <option value="">Selecione...</option>
+                                {% for setor in setores %}
+                                <option value="{{ setor.id }}">{{ setor.nome }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Cargo <span class="text-danger">*</span></label>
+                            <select class="form-select" id="cargo" name="cargo" required>
+                                <option value="">Selecione...</option>
+                                {% for cargo in cargos %}
+                                <option value="{{ cargo.id }}">{{ cargo.nome }} ({{ cargo.nivel_hierarquico.nome }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Loja(s)</label>
+                            <select class="form-select" id="lojas" name="lojas[]" multiple>
+                                {% for loja in lojas %}
+                                <option value="{{ loja.id }}">{{ loja.nome }}</option>
+                                {% endfor %}
+                            </select>
+                            <small class="form-text text-muted">Mantenha Ctrl pressionado para selecionar múltiplas lojas</small>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Equipe</label>
+                            <select class="form-select" id="equipe" name="equipe">
+                                <option value="">Selecione...</option>
+                                {% for equipe in equipes %}
+                                <option value="{{ equipe.id }}">{{ equipe.nome }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Horário de Trabalho</label>
+                            <select class="form-select" id="horario" name="horario">
+                                <option value="">Selecione...</option>
+                                {% for horario in horarios %}
+                                <option value="{{ horario.id }}">{{ horario.nome }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Data de Admissão</label>
+                            <input type="date" class="form-control" id="data_admissao" name="data_admissao">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Data de Demissão</label>
+                            <input type="date" class="form-control" id="data_demissao" name="data_demissao">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controle de Acesso -->
+                <div class="section-header">Controle de Acesso</div>
+                <div class="section-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Grupo de Permissões</label>
+                            <select class="form-select" id="grupo_permissões" name="grupo_permissões">
+                                <option value="">Selecione (opcional)...</option>
+                                {% for grupo in grupos %}
+                                <option value="{{ grupo.id }}">{{ grupo.titulo }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Documentos -->
+                <div class="section-header">Documentos</div>
+                <div class="section-body">
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6>Adicionar Novo Documento</h6>
+                            <form id="formAdicionarDocumento" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Título <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="documento_titulo" name="documento_titulo" required maxlength="100" placeholder="Título será preenchido automaticamente">
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">Arquivo <span class="text-danger">*</span></label>
+                                        <input type="file" class="form-control" id="documento_arquivo" name="documento_arquivo" required onchange="popularTituloArquivo(this)">
+                                    </div>
+                                    <div class="col-md-2 mb-3 d-flex align-items-end">
+                                        <button type="button" class="btn btn-primary w-100" onclick="adicionarDocumento()">
+                                            <i class='bx bx-plus'></i> Adicionar
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <h6>Documentos Existentes</h6>
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="tabelaDocumentos">
+                                    <thead>
+                                        <tr>
+                                            <th>Título</th>
+                                            <th>Arquivo</th>
+                                            <th>Data de Criação</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="documentos-tbody">
+                                        <tr>
+                                            <td colspan="4" class="text-center">Nenhum documento cadastrado</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-funcionario-footer">
+            <button type="button" class="btn btn-secondary" onclick="fecharModalFuncionario()">Cancelar</button>
+            <button type="button" class="btn btn-primary" onclick="salvarFuncionario()">
+                <i class='bx bx-save'></i> Salvar Alterações
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block addcss_extra %}
+<link rel="stylesheet" href="{% static 'funcionarios/css/gerenciar.css' %}">
+{% endblock %}
+
+{% block addjs_extra %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+<script src="{% static 'funcionarios/js/gerenciar.js' %}"></script>
+<script>
+$(document).ready(function() {
+    $('#cpf').mask('000.000.000-00');
+    $('#rg').mask('000000000000000');
+    $('#celular_1, #celular_2').mask('(00) 00000-0000');
+    $('#cep').mask('00000-000');
+});
+</script>
+{% endblock %}
+

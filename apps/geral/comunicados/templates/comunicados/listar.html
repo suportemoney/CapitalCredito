@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Gerenciar Comunicados - CapitalCredito{% endblock %}
+
+{% block header_title %}Gerenciar Comunicados{% endblock %}
+
+{% block pre_content %}
+<div class="header-actions">
+    <a href="{% url 'comunicados:criar' %}" class="btn-criar">
+        <i class='bx bx-plus'></i> Novo Comunicado
+    </a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Filtros -->
+            <div class="card">
+                <div class="card-body">
+                    <form method="GET" action="{% url 'comunicados:listar' %}" class="filtros-form">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label>Status</label>
+                                <select name="status" class="form-control">
+                                    <option value="">Todos</option>
+                                    <option value="ativo" {% if status_filter == 'ativo' %}selected{% endif %}>Ativo</option>
+                                    <option value="inativo" {% if status_filter == 'inativo' %}selected{% endif %}>Inativo</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label>Tipo</label>
+                                <select name="tipo" class="form-control">
+                                    <option value="">Todos</option>
+                                    {% for tipo, nome in TIPO_CHOICES %}
+                                    <option value="{{ tipo }}" {% if tipo_filter == tipo %}selected{% endif %}>{{ nome }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label>Categoria</label>
+                                <select name="categoria" class="form-control">
+                                    <option value="">Todas</option>
+                                    {% for categoria in categorias %}
+                                    <option value="{{ categoria.id }}" {% if categoria_filter == categoria.id|stringformat:"s" %}selected{% endif %}>{{ categoria.nome }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label>&nbsp;</label>
+                                <button type="submit" class="btn-filtrar">
+                                    <i class='bx bx-filter'></i> Filtrar
+                                </button>
+                                <a href="{% url 'comunicados:listar' %}" class="btn-limpar">
+                                    <i class='bx bx-x'></i> Limpar
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Tabela de Comunicados -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table-comunicados">
+                            <thead>
+                                <tr>
+                                    <th>Título</th>
+                                    <th>Tipo</th>
+                                    <th>Categoria</th>
+                                    <th>Prioridade</th>
+                                    <th>Status</th>
+                                    <th>Fixo</th>
+                                    <th>Criado por</th>
+                                    <th>Data</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for comunicado in comunicados %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ comunicado.titulo }}</strong>
+                                    </td>
+                                    <td>
+                                        <span class="badge-tipo">{{ comunicado.get_tipo_display }}</span>
+                                    </td>
+                                    <td>
+                                        {% if comunicado.categoria %}
+                                        <span class="badge-categoria" style="background-color: {{ comunicado.categoria.cor }};">
+                                            {{ comunicado.categoria.nome }}
+                                        </span>
+                                        {% else %}
+                                        <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge-prioridade prioridade-{{ comunicado.prioridade|lower }}">
+                                            {{ comunicado.get_prioridade_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if comunicado.status %}
+                                        <span class="badge-status badge-active">Ativo</span>
+                                        {% else %}
+                                        <span class="badge-status badge-inactive">Inativo</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if comunicado.fixo %}
+                                        <i class='bx bx-pin' style="color: #FFD700; font-size: 20px;"></i>
+                                        {% else %}
+                                        <i class='bx bx-minus' style="color: #ccc;"></i>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ comunicado.criado_por.username }}</td>
+                                    <td>{{ comunicado.data_criacao|date:"d/m/Y H:i" }}</td>
+                                    <td>
+                                        <div class="acoes-buttons">
+                                            <a href="{% url 'comunicados:editar' comunicado.id %}" class="btn-editar" title="Editar">
+                                                <i class='bx bx-edit'></i>
+                                            </a>
+                                            <button class="btn-toggle-status" data-comunicado-id="{{ comunicado.id }}" title="Alternar Status">
+                                                <i class='bx {% if comunicado.status %}bx-toggle-right{% else %}bx-toggle-left{% endif %}'></i>
+                                            </button>
+                                            <button class="btn-deletar" data-comunicado-id="{{ comunicado.id }}" data-comunicado-titulo="{{ comunicado.titulo }}" title="Deletar">
+                                                <i class='bx bx-trash'></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="9" class="text-center">
+                                        <p>Nenhum comunicado encontrado.</p>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block addcss_extra %}
+<link rel="stylesheet" href="{% static 'comunicados/css/gerenciar.css' %}">
+{% endblock %}
+
+{% block addjs_extra %}
+<script src="{% static 'comunicados/js/gerenciar.js' %}"></script>
+{% endblock %}
+

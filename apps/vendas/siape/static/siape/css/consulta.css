@@ -1,0 +1,126 @@
+.card {
+    border: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.card-header {
+    background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%);
+    color: #D4AF37;
+    border-bottom: 2px solid #D4AF37;
+    padding: 15px 20px;
+}
+
+.card-header h5, .card-header h6 {
+    margin: 0;
+    font-weight: 600;
+}
+
+.card-body {
+    padding: 25px;
+}
+
+.table {
+    margin-top: 0;
+}
+
+.table thead {
+    background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%);
+    color: #D4AF37;
+}
+
+.table thead th {
+    border-bottom: 2px solid #D4AF37;
+    font-weight: 600;
+    padding: 12px;
+}
+
+.table tbody tr {
+    transition: all 0.2s ease;
+}
+
+.table tbody tr:hover {
+    background-color: #f8f9fa;
+    transform: scale(1.01);
+}
+
+.table tbody td {
+    padding: 12px;
+    vertical-align: middle;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #D4AF37 0%, #b8941f 100%);
+    border: none;
+    color: #1a1a1a;
+    font-weight: 600;
+    padding: 10px 25px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #b8941f 0%, #9a7d1a 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(212, 175, 55, 0.3);
+}
+
+.btn-secondary {
+    background: #6c757d;
+    border: none;
+    color: white;
+    font-weight: 600;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+    color: white;
+}
+
+.form-label {
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.form-control,
+.form-select {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px 12px;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #D4AF37;
+    box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.25);
+    outline: none;
+}
+
+.card-header.bg-primary {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
+}
+
+.card-header.bg-info {
+    background: linear-gradient(135deg, #17a2b8 0%, #117a8b 100%) !important;
+}
+
+.card-header.bg-success {
+    background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%) !important;
+}
+
+.card-header.bg-primary,
+.card-header.bg-info,
+.card-header.bg-success {
+    color: white !important;
+    border-bottom: none;
+}
+
+.card-header.bg-primary h6,
+.card-header.bg-info h6,
+.card-header.bg-success h6 {
+    color: white;
+    font-weight: 600;
+}
+

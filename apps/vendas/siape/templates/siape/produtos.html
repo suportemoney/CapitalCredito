@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Produtos - SIAPE - CapitalCredito{% endblock %}
+
+{% block header_title %}Produtos SIAPE{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Produtos Cadastrados</h5>
+                        <button class="btn btn-primary btn-sm" onclick="abrirModalCriarProduto()">
+                            <i class='bx bx-plus'></i> Novo Produto
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nome</th>
+                                    <th>Descrição</th>
+                                    <th>Status</th>
+                                    <th>Data Criação</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="produtos-tbody">
+                                <tr>
+                                    <td colspan="6" class="text-center">Carregando...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Criar/Editar Produto -->
+<div class="modal fade" id="modalProduto" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalProdutoTitle">Novo Produto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formProduto">
+                    {% csrf_token %}
+                    <input type="hidden" id="produto_id" name="produto_id">
+                    <div class="mb-3">
+                        <label class="form-label">Nome <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="produto_nome" name="nome" required maxlength="255">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Descrição</label>
+                        <textarea class="form-control" id="produto_descricao" name="descricao" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Status</label>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="produto_status" name="status" checked>
+                            <label class="form-check-label" for="produto_status">Ativo</label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="salvarProduto()">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block addcss_extra %}
+<link rel="stylesheet" href="{% static 'siape/css/produtos.css' %}">
+{% endblock %}
+
+{% block addjs_extra %}
+<script src="{% static 'siape/js/produtos.js' %}"></script>
+{% endblock %}
+

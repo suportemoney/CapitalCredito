@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Metas SIAPE - CapitalCredito{% endblock %}
+
+{% block header_title %}Metas SIAPE{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Metas Cadastradas</h5>
+                        <button class="btn btn-primary btn-sm" onclick="abrirModalCriarMeta()">
+                            <i class='bx bx-plus'></i> Nova Meta
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Título</th>
+                                    <th>Valor Meta (R$)</th>
+                                    <th>Data Início</th>
+                                    <th>Data Final</th>
+                                    <th>Status</th>
+                                    <th>Data Criação</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="metas-tbody">
+                                <tr>
+                                    <td colspan="8" class="text-center">Carregando...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Criar/Editar Meta -->
+<div class="modal fade" id="modalMeta" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalMetaTitle">Nova Meta</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formMeta">
+                    {% csrf_token %}
+                    <input type="hidden" id="meta_id" name="meta_id">
+                    <div class="mb-3">
+                        <label class="form-label">Título <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="meta_titulo" name="titulo" required maxlength="255">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Valor da Meta (R$) <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" id="meta_valor" name="valor_meta" step="0.01" min="0" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Data de Início <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="meta_data_inicio" name="data_inicio" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Data Final <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="meta_data_final" name="data_final" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Status</label>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="meta_status" name="status" checked>
+                            <label class="form-check-label" for="meta_status">Ativa</label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="salvarMeta()">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block addcss_extra %}
+<link rel="stylesheet" href="{% static 'siape/css/metas.css' %}">
+{% endblock %}
+
+{% block addjs_extra %}
+<script src="{% static 'siape/js/metas.js' %}"></script>
+{% endblock %}
+

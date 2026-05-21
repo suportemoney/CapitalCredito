@@ -1,0 +1,340 @@
+.card {
+    border: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.card-header {
+    background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%);
+    color: #D4AF37;
+    border-bottom: 2px solid #D4AF37;
+    padding: 15px 20px;
+}
+
+.card-header h5 {
+    margin: 0;
+    font-weight: 600;
+}
+
+.card-body {
+    padding: 25px;
+}
+
+.form-label {
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.form-control,
+.form-select {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px 12px;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #D4AF37;
+    box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.25);
+    outline: none;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #D4AF37 0%, #b8941f 100%);
+    border: none;
+    color: #1a1a1a;
+    font-weight: 600;
+    padding: 10px 25px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    margin-right: 10px;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #b8941f 0%, #9a7d1a 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(212, 175, 55, 0.3);
+}
+
+.btn-secondary {
+    background: #6c757d;
+    border: none;
+    color: white;
+    font-weight: 600;
+    padding: 10px 25px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+    transform: translateY(-2px);
+}
+
+.table {
+    margin-top: 0;
+}
+
+.table thead {
+    background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%);
+    color: #D4AF37;
+}
+
+.table thead th {
+    border-bottom: 2px solid #D4AF37;
+    font-weight: 600;
+    padding: 12px;
+}
+
+.table tbody tr {
+    transition: all 0.2s ease;
+}
+
+.table tbody tr:hover {
+    background-color: #f8f9fa;
+    transform: scale(1.01);
+}
+
+.table tbody td {
+    padding: 12px;
+    vertical-align: middle;
+}
+
+.badge {
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.btn-sm {
+    padding: 5px 10px;
+    margin: 0 2px;
+}
+
+.btn-info {
+    background: #17a2b8;
+    border: none;
+    color: white;
+}
+
+.btn-info:hover {
+    background: #138496;
+    color: white;
+}
+
+.btn-warning {
+    background: #ffc107;
+    border: none;
+    color: #1a1a1a;
+}
+
+.btn-warning:hover {
+    background: #e0a800;
+    color: #1a1a1a;
+}
+
+.table-responsive {
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+/* Modal Flutuante */
+.modal-funcionario {
+    display: none;
+    position: fixed;
+    z-index: 10000001;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    overflow-y: auto;
+    padding: 20px;
+}
+
+.modal-funcionario-content {
+    background-color: #fff;
+    margin: 20px auto;
+    max-width: 1200px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-funcionario-header {
+    background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%);
+    color: #D4AF37;
+    padding: 20px 25px;
+    border-radius: 8px 8px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #D4AF37;
+}
+
+.modal-funcionario-header h4 {
+    margin: 0;
+    font-weight: 600;
+    font-size: 1.5rem;
+}
+
+.modal-funcionario-close {
+    background: transparent;
+    border: none;
+    color: #D4AF37;
+    font-size: 28px;
+    cursor: pointer;
+    padding: 0;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.modal-funcionario-close:hover {
+    background-color: rgba(212, 175, 55, 0.2);
+    transform: rotate(90deg);
+}
+
+.modal-funcionario-body {
+    padding: 30px;
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+}
+
+.modal-funcionario-footer {
+    padding: 20px 25px;
+    background-color: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+    border-radius: 0 0 8px 8px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.section-header {
+    background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%);
+    color: #D4AF37;
+    padding: 12px 20px;
+    margin: 20px 0 15px 0;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    border-left: 4px solid #D4AF37;
+}
+
+.section-body {
+    padding: 0 10px 20px 10px;
+}
+
+.foto-preview-container {
+    text-align: center;
+}
+
+.foto-preview-container img {
+    border: 2px solid #D4AF37;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+#lojas {
+    min-height: 120px;
+}
+
+/* Scrollbar personalizado para o modal */
+.modal-funcionario-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-funcionario-body::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.modal-funcionario-body::-webkit-scrollbar-thumb {
+    background: #D4AF37;
+    border-radius: 4px;
+}
+
+.modal-funcionario-body::-webkit-scrollbar-thumb:hover {
+    background: #b8941f;
+}
+
+/* Estilos para seção de Documentos */
+#tabelaDocumentos {
+    margin-top: 15px;
+}
+
+#tabelaDocumentos thead {
+    background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%);
+    color: #D4AF37;
+}
+
+#tabelaDocumentos thead th {
+    border-bottom: 2px solid #D4AF37;
+    font-weight: 600;
+    padding: 12px;
+}
+
+#tabelaDocumentos tbody tr {
+    transition: all 0.2s ease;
+}
+
+#tabelaDocumentos tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+#tabelaDocumentos tbody td {
+    padding: 12px;
+    vertical-align: middle;
+}
+
+#formAdicionarDocumento {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+#formAdicionarDocumento h6 {
+    color: #2c2c2c;
+    font-weight: 600;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #D4AF37;
+    padding-bottom: 8px;
+}
+
+.section-body h6 {
+    color: #2c2c2c;
+    font-weight: 600;
+    margin-top: 10px;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #D4AF37;
+    padding-bottom: 8px;
+}
+
+.btn-danger {
+    background: #dc3545;
+    border: none;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #c82333;
+    color: white;
+}

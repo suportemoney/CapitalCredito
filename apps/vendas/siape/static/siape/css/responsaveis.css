@@ -1,0 +1,8 @@
+#responsavel_usuarios {
+    min-height: 200px;
+}
+
+#responsavel_usuarios option {
+    padding: 5px;
+}
+

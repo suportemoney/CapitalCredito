@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Ranking SIAPE - CapitalCredito{% endblock %}
+
+{% block header_title %}Ranking SIAPE{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Cards de Meta -->
+    <div class="row mb-4" id="cards-meta" style="display: none;">
+        <div class="col-md-6">
+            <div class="card card-meta">
+                <div class="card-body text-center">
+                    <h6 class="card-title">Percentual Meta Alcançado</h6>
+                    <h2 class="mb-0 card-meta-valor" id="valor-percentual-meta">R$ 0,00</h2>
+                    <p class="mb-0 mt-2 card-meta-percentual" id="percentual-meta">0%</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card card-meta">
+                <div class="card-body text-center">
+                    <h6 class="card-title">Valor Total Meta</h6>
+                    <h2 class="mb-0 card-meta-valor" id="valor-total-meta">R$ 0,00</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Podium -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Pódio - Top 5</h5>
+                </div>
+                <div class="card-body">
+                    <div class="podium-container" id="podium-container">
+                        <div class="podium-placeholder text-center">
+                            <p class="text-muted">Carregando ranking...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block addcss_extra %}
+<link rel="stylesheet" href="{% static 'siape/css/ranking.css' %}">
+{% endblock %}
+
+{% block addjs_extra %}
+<script src="{% static 'siape/js/ranking.js' %}"></script>
+{% endblock %}
+

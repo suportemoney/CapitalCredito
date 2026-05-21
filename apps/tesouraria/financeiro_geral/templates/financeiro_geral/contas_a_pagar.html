@@ -1,0 +1,386 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Contas a Pagar - CapitalCredito{% endblock %}
+
+{% block header_title %}Contas a Pagar{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="section-header">
+        <h5>Listagem</h5>
+    </div>
+    <div class="section-body">
+        <ul class="nav nav-tabs" id="tabsContasPagar" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-conta" type="button" role="tab" data-tipo="CONTA">Contas (empresa)</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-salario" type="button" role="tab" data-tipo="SALARIO">Salários</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-beneficio" type="button" role="tab" data-tipo="BENEFICIO">Benefícios</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-bonificacao" type="button" role="tab" data-tipo="BONIFICACAO">Bonificações a pagar</button>
+            </li>
+        </ul>
+        <div class="tab-content mt-3" id="tabsContasPagarContent">
+            <div class="tab-pane fade show active" id="tab-conta" role="tabpanel">
+                <div class="filtros-contas-pagar mb-3" data-tipo="CONTA">
+                    <div class="section-header"><h6 class="mb-0">Filtros</h6></div>
+                    <div class="section-body py-2">
+                        <div class="row g-2 align-items-end flex-wrap">
+                            <div class="col-auto"><label class="form-label mb-0 small">Descrição</label><input type="text" class="form-control form-control-sm filtro-descricao" placeholder="Buscar..."></div>
+                            <div class="col-auto"><label class="form-label mb-0 small">Categoria</label><select class="form-select form-select-sm filtro-categoria"><option value="">Todas</option>{% for c in categorias %}<option value="{{ c.id }}">{{ c.nome }}</option>{% endfor %}</select></div>
+                            <div class="col-auto"><label class="form-label mb-0 small">Subcategoria</label><select class="form-select form-select-sm filtro-subcategoria"><option value="">Todas</option></select></div>
+                            <div class="col-auto"><label class="form-label mb-0 small">Valor mín</label><input type="text" class="form-control form-control-sm filtro-valor-min" placeholder="0,00"></div>
+                            <div class="col-auto"><label class="form-label mb-0 small">Valor máx</label><input type="text" class="form-control form-control-sm filtro-valor-max" placeholder="0,00"></div>
+                            <div class="col-auto"><label class="form-label mb-0 small">Venc. de</label><input type="date" class="form-control form-control-sm filtro-venc-de"></div>
+                            <div class="col-auto"><label class="form-label mb-0 small">Venc. até</label><input type="date" class="form-control form-control-sm filtro-venc-ate"></div>
+                            <div class="col-auto"><label class="form-label mb-0 small">Status</label><select class="form-select form-select-sm filtro-status"><option value="">Todos</option><option value="pendente">Pendente</option><option value="pago">Pago</option></select></div>
+                            <div class="col-auto"><button type="button" class="btn btn-sm btn-outline-primary btn-aplicar-filtros">Filtrar</button></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span></span>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="abrirModalNovaContaPorTab('CONTA')">
+                        <i class='bx bx-plus'></i> Adicionar conta
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Descrição</th>
+                                <th>Categoria</th>
+                                <th>Subcategoria</th>
+                                <th>Valor</th>
+                                <th>Vencimento</th>
+                                <th>Status</th>
+                                <th>Comprovante</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-conta"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="tab-salario" role="tabpanel">
+                <div class="filtros-contas-pagar mb-3" data-tipo="SALARIO">
+                    <div class="section-header"><h6 class="mb-0">Filtros</h6></div>
+                    <div class="section-body py-2">
+                        <div class="row g-2 align-items-end flex-wrap">
+                            <div class="col-auto"><label class="form-label mb-0 small">Descrição</label><input type="text" class="form-control form-control-sm filtro-descricao" placeholder="Buscar..."></div>
+                            <div class="col-auto"><label class="form-label mb-0 small">Funcionário</label><select class="form-select form-select-sm filtro-funcionario"><option value="">Todos</option>{% for f in funcionarios %}<option value="{{ f.id }}">{{ f.nome_completo }}</option>{% endfor %}</select></div>
+                            <div class="col-auto"><label class="form-label mb-0 small">Valor mín</label><input type="text" class="form-control form-control-sm filtro-valor-min" placeholder="0,00"></div>
+                            <div class="col-auto"><label class="form-label mb-0 small">Valor máx</label><input type="text" class="form-control form-control-sm filtro-valor-max" placeholder="0,00"></div>
+                            <div class="col-auto"><label class="form-label mb-0 small">Venc. de</label><input type="date" class="form-control form-control-sm filtro-venc-de"></div>
+                            <div class="col-auto"><label class="form-label mb-0 small">Venc. até</label><input type="date" class="form-control form-control-sm filtro-venc-ate"></div>
+                            <div class="col-auto"><label class="form-label mb-0 small">Status</label><select class="form-select form-select-sm filtro-status"><option value="">Todos</option><option value="pendente">Pendente</option><option value="pago">Pago</option></select></div>
+                            <div class="col-auto"><button type="button" class="btn btn-sm btn-outline-primary btn-aplicar-filtros">Filtrar</button></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span></span>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="abrirModalNovaContaPorTab('SALARIO')">
+                        <i class='bx bx-plus'></i> Adicionar salário
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Descrição</th>
+                                <th>Funcionário</th>
+                                <th>Valor</th>
+                                <th>Vencimento</th>
+                                <th>Status</th>
+                                <th>Comprovante</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-salario"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="tab-beneficio" role="tabpanel">
+                <div class="filtros-contas-pagar mb-3" data-tipo="BENEFICIO">
+                    <div class="section-header"><h6 class="mb-0">Filtros</h6></div>
+                    <div class="section-body py-2">
+                        <div class="row g-2 align-items-end flex-wrap">
+                            <div class="col-auto"><label class="form-label mb-0 small">Descrição</label><input type="text" class="form-control form-control-sm filtro-descricao" placeholder="Buscar..."></div>
+                            <div class="col-auto"><label class="form-label mb-0 small">Funcionário</label><select class="form-select form-select-sm filtro-funcionario"><option value="">Todos</option>{% for f in funcionarios %}<option value="{{ f.id }}">{{ f.nome_completo }}</option>{% endfor %}</select></div>
+                            <div class="col-auto"><label class="form-label mb-0 small">Tipo benefício</label><select class="form-select form-select-sm filtro-tipo-beneficio"><option value="">Todos</option>{% for t in tipos_beneficio %}<option value="{{ t.id }}">{{ t.nome }}</option>{% endfor %}</select></div>
+                            <div class="col-auto"><label class="form-label mb-0 small">Valor mín</label><input type="text" class="form-control form-control-sm filtro-valor-min" placeholder="0,00"></div>
+                            <div class="col-auto"><label class="form-label mb-0 small">Valor máx</label><input type="text" class="form-control form-control-sm filtro-valor-max" placeholder="0,00"></div>
+                            <div class="col-auto"><label class="form-label mb-0 small">Venc. de</label><input type="date" class="form-control form-control-sm filtro-venc-de"></div>
+                            <div class="col-auto"><label class="form-label mb-0 small">Venc. até</label><input type="date" class="form-control form-control-sm filtro-venc-ate"></div>
+                            <div class="col-auto"><label class="form-label mb-0 small">Status</label><select class="form-select form-select-sm filtro-status"><option value="">Todos</option><option value="pendente">Pendente</option><option value="pago">Pago</option></select></div>
+                            <div class="col-auto"><button type="button" class="btn btn-sm btn-outline-primary btn-aplicar-filtros">Filtrar</button></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span></span>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="abrirModalNovaContaPorTab('BENEFICIO')">
+                        <i class='bx bx-plus'></i> Adicionar benefício
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Descrição</th>
+                                <th>Funcionário</th>
+                                <th>Tipo</th>
+                                <th>Valor</th>
+                                <th>Vencimento</th>
+                                <th>Status</th>
+                                <th>Comprovante</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-beneficio"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="tab-bonificacao" role="tabpanel">
+                <div class="filtros-bonificacoes mb-3">
+                    <div class="section-header"><h6 class="mb-0">Filtros</h6></div>
+                    <div class="section-body py-2">
+                        <div class="row g-2 align-items-end flex-wrap">
+                            <div class="col-auto"><label class="form-label mb-0 small">Funcionário</label><select class="form-select form-select-sm filtro-bonif-funcionario"><option value="">Todos</option>{% for f in funcionarios %}<option value="{{ f.id }}">{{ f.nome_completo }}</option>{% endfor %}</select></div>
+                            <div class="col-auto"><label class="form-label mb-0 small">Mês referente</label><input type="text" class="form-control form-control-sm filtro-bonif-mes" placeholder="Ex: 03/2025"></div>
+                            <div class="col-auto"><label class="form-label mb-0 small">Data pag. de</label><input type="date" class="form-control form-control-sm filtro-bonif-data-de"></div>
+                            <div class="col-auto"><label class="form-label mb-0 small">Data pag. até</label><input type="date" class="form-control form-control-sm filtro-bonif-data-ate"></div>
+                            <div class="col-auto"><label class="form-label mb-0 small">Valor mín</label><input type="text" class="form-control form-control-sm filtro-bonif-valor-min" placeholder="0,00"></div>
+                            <div class="col-auto"><label class="form-label mb-0 small">Valor máx</label><input type="text" class="form-control form-control-sm filtro-bonif-valor-max" placeholder="0,00"></div>
+                            <div class="col-auto"><label class="form-label mb-0 small">Status</label><select class="form-select form-select-sm filtro-bonif-status"><option value="true">Ativo</option><option value="false">Inativo</option><option value="todos">Todos</option></select></div>
+                            <div class="col-auto"><button type="button" class="btn btn-sm btn-outline-primary btn-aplicar-filtros-bonif">Filtrar</button></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span></span>
+                    <button type="button" class="btn btn-primary btn-sm" id="btnAdicionarBonificacao">
+                        <i class='bx bx-plus'></i> Adicionar bonificação
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Funcionário</th>
+                                <th>Valor bonificação</th>
+                                <th>Mês referente</th>
+                                <th>Data pagamento</th>
+                                <th>Status pagamento</th>
+                                <th>Chave PIX</th>
+                                <th>Recibo/Comprovante</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-bonificacao"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal confirmar pagamento (z-index flutuante) -->
+<div class="modal fade" id="modalConfirmarPago" tabindex="-1" aria-hidden="true" style="z-index: 100001;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar pagamento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="modalPagoDados"></div>
+                <div class="mb-3">
+                    <label class="form-label">Data do pagamento</label>
+                    <input type="date" class="form-control" id="modalPagoData">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Comprovante de pagamento</label>
+                    <input type="file" class="form-control" id="modalPagoComprovante" accept="image/*,.pdf">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnConfirmarPago">Confirmar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal nova conta a pagar / editar -->
+<div class="modal fade" id="modalNovaConta" tabindex="-1" aria-hidden="true" style="z-index: 100001;">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalNovaContaTitulo">Adicionar conta a pagar</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="nova-conta-tipo" value="CONTA">
+                <input type="hidden" id="editar-conta-id" value="">
+                <div class="mb-3" id="nova-conta-row-tipo">
+                    <label class="form-label">Tipo</label>
+                    <select class="form-select" id="nova-conta-tipo-select">
+                        <option value="CONTA">Conta (empresa)</option>
+                        <option value="SALARIO">Salário</option>
+                        <option value="BENEFICIO">Benefício</option>
+                    </select>
+                </div>
+                <div id="nova-conta-campos-conta">
+                    <div class="mb-3">
+                        <label class="form-label">Categoria</label>
+                        <select class="form-select" id="nova-categoria">
+                            <option value="">Selecione...</option>
+                            {% for c in categorias %}
+                            <option value="{{ c.id }}">{{ c.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Subcategoria</label>
+                        <select class="form-select" id="nova-subcategoria">
+                            <option value="">Selecione...</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="nova-conta-campos-funcionario" style="display:none;">
+                    <div class="mb-3">
+                        <label class="form-label">Funcionário</label>
+                        <select class="form-select" id="nova-funcionario">
+                            <option value="">Selecione...</option>
+                            {% for f in funcionarios %}
+                            <option value="{{ f.id }}">{{ f.nome_completo }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3" id="nova-conta-campos-tipo-beneficio" style="display:none;">
+                        <label class="form-label">Tipo de benefício</label>
+                        <select class="form-select" id="nova-tipo-beneficio">
+                            <option value="">Selecione...</option>
+                            {% for t in tipos_beneficio %}
+                            <option value="{{ t.id }}">{{ t.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Descrição</label>
+                    <input type="text" class="form-control" id="nova-descricao" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Valor (R$)</label>
+                    <input type="text" class="form-control" id="nova-valor" placeholder="0,00" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Data de vencimento</label>
+                    <input type="date" class="form-control" id="nova-data-vencimento" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Observação</label>
+                    <textarea class="form-control" id="nova-observacao" rows="2"></textarea>
+                </div>
+                <div class="mb-3" id="editar-comprovante-row" style="display:none;">
+                    <label class="form-label">Comprovante de pagamento (superuser)</label>
+                    <input type="file" class="form-control" id="editar-comprovante" accept="image/*,.pdf">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnSalvarNovaConta">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal criar/editar bonificação a pagar (z-index flutuante) -->
+<div class="modal fade" id="modalBonificacaoForm" tabindex="-1" aria-hidden="true" style="z-index: 100001;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalBonificacaoFormTitulo">Adicionar bonificação a pagar</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="bonif-editar-id" value="">
+                <div class="mb-3">
+                    <label class="form-label">Funcionário <span class="text-danger">*</span></label>
+                    <select class="form-select" id="bonif-funcionario">
+                        <option value="">Selecione...</option>
+                        {% for f in funcionarios %}
+                        <option value="{{ f.id }}" data-chave-pix="{{ f.chave_pix|default:'' }}">{{ f.nome_completo }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Chave PIX <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="bonif-chave-pix" placeholder="CPF, E-mail, Telefone ou Chave Aleatória">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Valor bonificação (R$) <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="bonif-valor" placeholder="0,00">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Mês referente <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="bonif-mes-referente" placeholder="Ex: 03/2025 ou Março/2025">
+                </div>
+                <div class="mb-3" id="bonif-row-opcionais">
+                    <label class="form-label">Data do pagamento</label>
+                    <input type="date" class="form-control" id="bonif-data-pagamento">
+                </div>
+                <div class="mb-3" id="bonif-row-comprovante">
+                    <label class="form-label">Recibo/Comprovante de pagamento</label>
+                    <input type="file" class="form-control" id="bonif-comprovante" accept="image/*,.pdf">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnSalvarBonificacao">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal pagar agora bonificação (z-index flutuante) -->
+<div class="modal fade" id="modalBonificacaoPagarAgora" tabindex="-1" aria-hidden="true" style="z-index: 100001;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Pagar agora - Bonificação</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="bonif-pagar-id" value="">
+                <div id="bonifPagarDados" class="mb-3"></div>
+                <div class="mb-3">
+                    <label class="form-label">Data do pagamento <span class="text-danger">*</span></label>
+                    <input type="date" class="form-control" id="bonif-pagar-data">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Recibo/Comprovante <span class="text-danger">*</span></label>
+                    <input type="file" class="form-control" id="bonif-pagar-comprovante" accept="image/*,.pdf">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnConfirmarBonifPagar">Confirmar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block addjs_extra %}
+<script>window.FINANCEIRO_GERAL_BASE = "{% url 'financeiro_geral:index' %}"; window.IS_SUPERUSER = {{ is_superuser|yesno:"true,false" }};</script>
+<script src="{% static 'financeiro_geral/js/contas_a_pagar.js' %}"></script>
+{% endblock %}

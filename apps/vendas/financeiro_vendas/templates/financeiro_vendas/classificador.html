@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Classificador - Financeiro Vendas - CapitalCredito{% endblock %}
+
+{% block header_title %}Classificador - Financeiro Vendas{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Classificadores Cadastrados</h5>
+                        <button class="btn btn-primary btn-sm" onclick="abrirModalCriarClassificador()">
+                            <i class='bx bx-plus'></i> Novo Classificador
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Título</th>
+                                    <th>Percentual (%)</th>
+                                    <th>Status</th>
+                                    <th>Data Criação</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="classificadores-tbody">
+                                <tr>
+                                    <td colspan="6" class="text-center">Carregando...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Criar/Editar Classificador -->
+<div class="modal fade" id="modalClassificador" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalClassificadorTitle">Novo Classificador</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formClassificador">
+                    {% csrf_token %}
+                    <input type="hidden" id="classificador_id" name="classificador_id">
+                    <div class="mb-3">
+                        <label class="form-label">Título <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="classificador_titulo" name="titulo" required maxlength="255">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Percentual (%) <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" id="classificador_percentual" name="percentual" step="0.01" min="0" max="100" required>
+                        <small class="form-text text-muted">Percentual de 0 a 100%</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Status</label>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="classificador_status" name="status" checked>
+                            <label class="form-check-label" for="classificador_status">Ativo</label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="salvarClassificador()">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block addcss_extra %}
+<link rel="stylesheet" href="{% static 'financeiro_vendas/css/classificador.css' %}">
+{% endblock %}
+
+{% block addjs_extra %}
+<script src="{% static 'financeiro_vendas/js/classificador.js' %}"></script>
+{% endblock %}
+

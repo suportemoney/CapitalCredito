@@ -1,0 +1,409 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load permissoes_tags %}
+
+{% block title %}Horário de Trabalho - CapitalCredito{% endblock %}
+
+{% block header_title %}Horário de Trabalho{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Configurar Horário de Trabalho</h5>
+                </div>
+                <div class="card-body">
+                    <form id="formHorarioTrabalho">
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Funcionários *</label>
+                                <div class="card">
+                                    <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+                                        <div class="row">
+                                            {% for funcionario in funcionarios %}
+                                            <div class="col-md-4 mb-2">
+                                                <div class="form-check">
+                                                    <input class="form-check-input funcionario-checkbox" type="checkbox" name="funcionarios_ids[]" id="funcionario_{{ funcionario.id }}" value="{{ funcionario.id }}">
+                                                    <label class="form-check-label" for="funcionario_{{ funcionario.id }}">
+                                                        {{ funcionario.nome_completo }}
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <small class="form-text text-muted">Selecione um ou mais funcionários para aplicar os horários.</small>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="abrirModalFimSemana()">
+                                    <i class='bx bx-calendar'></i> Configurar Trabalho em Fins de Semana
+                                </button>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12 mb-4">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-3">Configuração de Horários por Dia da Semana</h6>
+                                        <p class="text-muted small mb-1">Preencha os horários para os dias que o funcionário trabalha. Se não preencher, o funcionário não trabalha naquele dia.</p>
+                                        <p class="text-muted small mb-0"><strong>Nota:</strong> Entrada 1 e Saída 1 são obrigatórias. Entrada 2 e Saída 2 são opcionais (para jornadas com almoço). Se trabalhar menos de 8 horas, pode preencher apenas Entrada 1 e Saída 1.</p>
+                                    </div>
+                                    <div>
+                                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="copiarHorarios()" id="btnCopiarHorarios" style="display: none;">
+                                            <i class='bx bx-copy'></i> Copiar Horários
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="containerHorariosPorDia">
+                            <div class="dia-horario-card mb-3" data-dia="SEGUNDA">
+                                <div class="card">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="checkSegunda" onchange="toggleDiaHorario('SEGUNDA')">
+                                            <label class="form-check-label fw-bold" for="checkSegunda">Segunda-feira</label>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="copiarDiaParaOutros('SEGUNDA')" title="Copiar horários deste dia para outros dias ativos">
+                                            <i class='bx bx-copy'></i> Copiar
+                                        </button>
+                                    </div>
+                                    <div class="card-body" id="camposSegunda" style="display: none;">
+                                        <div class="row">
+                                            <div class="col-md-3 mb-3">
+                                                <label class="form-label">Entrada 1 *</label>
+                                                <input type="time" class="form-control" name="horarios[SEGUNDA][entrada1]" id="entrada1Segunda">
+                                            </div>
+                                            <div class="col-md-3 mb-3">
+                                                <label class="form-label">Saída 1 *</label>
+                                                <input type="time" class="form-control" name="horarios[SEGUNDA][saida1]" id="saida1Segunda">
+                                            </div>
+                                            <div class="col-md-3 mb-3">
+                                                <label class="form-label">Entrada 2 <span class="text-muted">(opcional)</span></label>
+                                                <input type="time" class="form-control" name="horarios[SEGUNDA][entrada2]" id="entrada2Segunda">
+                                            </div>
+                                            <div class="col-md-3 mb-3">
+                                                <label class="form-label">Saída 2 <span class="text-muted">(opcional)</span></label>
+                                                <input type="time" class="form-control" name="horarios[SEGUNDA][saida2]" id="saida2Segunda">
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" name="horarios[SEGUNDA][almoco_flexivel]" id="almocoFlexivelSegunda" value="true">
+                                                    <label class="form-check-label" for="almocoFlexivelSegunda">Almoço Flexível</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="dia-horario-card mb-3" data-dia="TERCA">
+                                <div class="card">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="checkTerca" onchange="toggleDiaHorario('TERCA')">
+                                            <label class="form-check-label fw-bold" for="checkTerca">Terça-feira</label>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="copiarDiaParaOutros('TERCA')" title="Copiar horários deste dia para outros dias ativos">
+                                            <i class='bx bx-copy'></i> Copiar
+                                        </button>
+                                    </div>
+                                    <div class="card-body" id="camposTerca" style="display: none;">
+                                        <div class="row">
+                                            <div class="col-md-3 mb-3">
+                                                <label class="form-label">Entrada 1 *</label>
+                                                <input type="time" class="form-control" name="horarios[TERCA][entrada1]" id="entrada1Terca">
+                                            </div>
+                                            <div class="col-md-3 mb-3">
+                                                <label class="form-label">Saída 1 *</label>
+                                                <input type="time" class="form-control" name="horarios[TERCA][saida1]" id="saida1Terca">
+                                            </div>
+                                            <div class="col-md-3 mb-3">
+                                                <label class="form-label">Entrada 2 <span class="text-muted">(opcional)</span></label>
+                                                <input type="time" class="form-control" name="horarios[TERCA][entrada2]" id="entrada2Terca">
+                                            </div>
+                                            <div class="col-md-3 mb-3">
+                                                <label class="form-label">Saída 2 <span class="text-muted">(opcional)</span></label>
+                                                <input type="time" class="form-control" name="horarios[TERCA][saida2]" id="saida2Terca">
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" name="horarios[TERCA][almoco_flexivel]" id="almocoFlexivelTerca" value="true">
+                                                    <label class="form-check-label" for="almocoFlexivelTerca">Almoço Flexível</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="dia-horario-card mb-3" data-dia="QUARTA">
+                                <div class="card">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="checkQuarta" onchange="toggleDiaHorario('QUARTA')">
+                                            <label class="form-check-label fw-bold" for="checkQuarta">Quarta-feira</label>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="copiarDiaParaOutros('QUARTA')" title="Copiar horários deste dia para outros dias ativos">
+                                            <i class='bx bx-copy'></i> Copiar
+                                        </button>
+                                    </div>
+                                    <div class="card-body" id="camposQuarta" style="display: none;">
+                                        <div class="row">
+                                            <div class="col-md-3 mb-3">
+                                                <label class="form-label">Entrada 1 *</label>
+                                                <input type="time" class="form-control" name="horarios[QUARTA][entrada1]" id="entrada1Quarta">
+                                            </div>
+                                            <div class="col-md-3 mb-3">
+                                                <label class="form-label">Saída 1 *</label>
+                                                <input type="time" class="form-control" name="horarios[QUARTA][saida1]" id="saida1Quarta">
+                                            </div>
+                                            <div class="col-md-3 mb-3">
+                                                <label class="form-label">Entrada 2 <span class="text-muted">(opcional)</span></label>
+                                                <input type="time" class="form-control" name="horarios[QUARTA][entrada2]" id="entrada2Quarta">
+                                            </div>
+                                            <div class="col-md-3 mb-3">
+                                                <label class="form-label">Saída 2 <span class="text-muted">(opcional)</span></label>
+                                                <input type="time" class="form-control" name="horarios[QUARTA][saida2]" id="saida2Quarta">
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" name="horarios[QUARTA][almoco_flexivel]" id="almocoFlexivelQuarta" value="true">
+                                                    <label class="form-check-label" for="almocoFlexivelQuarta">Almoço Flexível</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="dia-horario-card mb-3" data-dia="QUINTA">
+                                <div class="card">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="checkQuinta" onchange="toggleDiaHorario('QUINTA')">
+                                            <label class="form-check-label fw-bold" for="checkQuinta">Quinta-feira</label>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="copiarDiaParaOutros('QUINTA')" title="Copiar horários deste dia para outros dias ativos">
+                                            <i class='bx bx-copy'></i> Copiar
+                                        </button>
+                                    </div>
+                                    <div class="card-body" id="camposQuinta" style="display: none;">
+                                        <div class="row">
+                                            <div class="col-md-3 mb-3">
+                                                <label class="form-label">Entrada 1 *</label>
+                                                <input type="time" class="form-control" name="horarios[QUINTA][entrada1]" id="entrada1Quinta">
+                                            </div>
+                                            <div class="col-md-3 mb-3">
+                                                <label class="form-label">Saída 1 *</label>
+                                                <input type="time" class="form-control" name="horarios[QUINTA][saida1]" id="saida1Quinta">
+                                            </div>
+                                            <div class="col-md-3 mb-3">
+                                                <label class="form-label">Entrada 2 <span class="text-muted">(opcional)</span></label>
+                                                <input type="time" class="form-control" name="horarios[QUINTA][entrada2]" id="entrada2Quinta">
+                                            </div>
+                                            <div class="col-md-3 mb-3">
+                                                <label class="form-label">Saída 2 <span class="text-muted">(opcional)</span></label>
+                                                <input type="time" class="form-control" name="horarios[QUINTA][saida2]" id="saida2Quinta">
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" name="horarios[QUINTA][almoco_flexivel]" id="almocoFlexivelQuinta" value="true">
+                                                    <label class="form-check-label" for="almocoFlexivelQuinta">Almoço Flexível</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="dia-horario-card mb-3" data-dia="SEXTA">
+                                <div class="card">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="checkSexta" onchange="toggleDiaHorario('SEXTA')">
+                                            <label class="form-check-label fw-bold" for="checkSexta">Sexta-feira</label>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="copiarDiaParaOutros('SEXTA')" title="Copiar horários deste dia para outros dias ativos">
+                                            <i class='bx bx-copy'></i> Copiar
+                                        </button>
+                                    </div>
+                                    <div class="card-body" id="camposSexta" style="display: none;">
+                                        <div class="row">
+                                            <div class="col-md-3 mb-3">
+                                                <label class="form-label">Entrada 1 *</label>
+                                                <input type="time" class="form-control" name="horarios[SEXTA][entrada1]" id="entrada1Sexta">
+                                            </div>
+                                            <div class="col-md-3 mb-3">
+                                                <label class="form-label">Saída 1 *</label>
+                                                <input type="time" class="form-control" name="horarios[SEXTA][saida1]" id="saida1Sexta">
+                                            </div>
+                                            <div class="col-md-3 mb-3">
+                                                <label class="form-label">Entrada 2 <span class="text-muted">(opcional)</span></label>
+                                                <input type="time" class="form-control" name="horarios[SEXTA][entrada2]" id="entrada2Sexta">
+                                            </div>
+                                            <div class="col-md-3 mb-3">
+                                                <label class="form-label">Saída 2 <span class="text-muted">(opcional)</span></label>
+                                                <input type="time" class="form-control" name="horarios[SEXTA][saida2]" id="saida2Sexta">
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" name="horarios[SEXTA][almoco_flexivel]" id="almocoFlexivelSexta" value="true">
+                                                    <label class="form-check-label" for="almocoFlexivelSexta">Almoço Flexível</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="dia-horario-card mb-3" data-dia="SABADO">
+                                <div class="card">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="checkSabado" onchange="toggleDiaHorario('SABADO')">
+                                            <label class="form-check-label fw-bold" for="checkSabado">Sábado</label>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="copiarDiaParaOutros('SABADO')" title="Copiar horários deste dia para outros dias ativos">
+                                            <i class='bx bx-copy'></i> Copiar
+                                        </button>
+                                    </div>
+                                    <div class="card-body" id="camposSabado" style="display: none;">
+                                        <div class="row">
+                                            <div class="col-md-3 mb-3">
+                                                <label class="form-label">Entrada 1 *</label>
+                                                <input type="time" class="form-control" name="horarios[SABADO][entrada1]" id="entrada1Sabado">
+                                            </div>
+                                            <div class="col-md-3 mb-3">
+                                                <label class="form-label">Saída 1 *</label>
+                                                <input type="time" class="form-control" name="horarios[SABADO][saida1]" id="saida1Sabado">
+                                            </div>
+                                            <div class="col-md-3 mb-3">
+                                                <label class="form-label">Entrada 2 <span class="text-muted">(opcional)</span></label>
+                                                <input type="time" class="form-control" name="horarios[SABADO][entrada2]" id="entrada2Sabado">
+                                            </div>
+                                            <div class="col-md-3 mb-3">
+                                                <label class="form-label">Saída 2 <span class="text-muted">(opcional)</span></label>
+                                                <input type="time" class="form-control" name="horarios[SABADO][saida2]" id="saida2Sabado">
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" name="horarios[SABADO][almoco_flexivel]" id="almocoFlexivelSabado" value="true">
+                                                    <label class="form-check-label" for="almocoFlexivelSabado">Almoço Flexível</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="dia-horario-card mb-3" data-dia="DOMINGO">
+                                <div class="card">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="checkDomingo" onchange="toggleDiaHorario('DOMINGO')">
+                                            <label class="form-check-label fw-bold" for="checkDomingo">Domingo</label>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="copiarDiaParaOutros('DOMINGO')" title="Copiar horários deste dia para outros dias ativos">
+                                            <i class='bx bx-copy'></i> Copiar
+                                        </button>
+                                    </div>
+                                    <div class="card-body" id="camposDomingo" style="display: none;">
+                                        <div class="row">
+                                            <div class="col-md-3 mb-3">
+                                                <label class="form-label">Entrada 1 *</label>
+                                                <input type="time" class="form-control" name="horarios[DOMINGO][entrada1]" id="entrada1Domingo">
+                                            </div>
+                                            <div class="col-md-3 mb-3">
+                                                <label class="form-label">Saída 1 *</label>
+                                                <input type="time" class="form-control" name="horarios[DOMINGO][saida1]" id="saida1Domingo">
+                                            </div>
+                                            <div class="col-md-3 mb-3">
+                                                <label class="form-label">Entrada 2 <span class="text-muted">(opcional)</span></label>
+                                                <input type="time" class="form-control" name="horarios[DOMINGO][entrada2]" id="entrada2Domingo">
+                                            </div>
+                                            <div class="col-md-3 mb-3">
+                                                <label class="form-label">Saída 2 <span class="text-muted">(opcional)</span></label>
+                                                <input type="time" class="form-control" name="horarios[DOMINGO][saida2]" id="saida2Domingo">
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" name="horarios[DOMINGO][almoco_flexivel]" id="almocoFlexivelDomingo" value="true">
+                                                    <label class="form-check-label" for="almocoFlexivelDomingo">Almoço Flexível</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <button type="button" class="btn btn-primary" onclick="salvarConfiguracao()">
+                                    <i class='bx bx-save'></i> Salvar Configuração
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Trabalha em Fins de Semana -->
+<div class="modal fade" id="modalFimSemana" tabindex="-1" aria-labelledby="modalFimSemanaLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalFimSemanaLabel">Trabalha em Fins de Semana</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-3">Selecione os funcionários que trabalham em fins de semana:</p>
+                <div class="card">
+                    <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+                        <div class="row">
+                            {% for funcionario in funcionarios %}
+                            <div class="col-md-6 mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input fim-semana-checkbox" type="checkbox" id="fimSemana_{{ funcionario.id }}" value="{{ funcionario.id }}">
+                                    <label class="form-check-label" for="fimSemana_{{ funcionario.id }}">
+                                        {{ funcionario.nome_completo }}
+                                    </label>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-primary" onclick="salvarFimSemana()">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block addcss_extra %}
+<link rel="stylesheet" href="{% static 'ponto/css/horario_trabalho.css' %}">
+{% endblock %}
+
+{% block addjs_extra %}
+<script src="{% static 'ponto/js/horario_trabalho.js' %}"></script>
+{% endblock %}

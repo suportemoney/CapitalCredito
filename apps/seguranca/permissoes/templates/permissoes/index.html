@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Gerenciamento de Permissões - CapitalCredito{% endblock %}
+
+{% block header_title %}Gerenciamento de Permissões{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header-permissoes">
+                    <h4><i class='bx bx-shield'></i> Usuários e Permissões</h4>
+                    <div class="card-actions">
+                        <button class="btn-refresh" onclick="location.reload()" title="Atualizar">
+                            <i class='bx bx-refresh'></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table-permissoes">
+                            <thead>
+                                <tr>
+                                    <th>Usuário</th>
+                                    <th>Email</th>
+                                    <th>Total de Permissões</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in usuarios_com_permissoes %}
+                                <tr>
+                                    <td>
+                                        <div class="user-info">
+                                            <i class='bx bx-user'></i>
+                                            <strong>{{ item.usuario.username }}</strong>
+                                        </div>
+                                    </td>
+                                    <td>{{ item.usuario.email|default:"-" }}</td>
+                                    <td>
+                                        <span class="badge-permissoes">{{ item.total }}</span>
+                                    </td>
+                                    <td>
+                                        {% if item.usuario.is_active %}
+                                            <span class="badge-status badge-active">Ativo</span>
+                                        {% else %}
+                                            <span class="badge-status badge-inactive">Inativo</span>
+                                        {% endif %}
+                                        {% if item.usuario.is_superuser %}
+                                            <span class="badge-status badge-superuser">Superuser</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'permissoes:editar_usuario' item.usuario.id %}" class="btn-editar">
+                                            <i class='bx bx-edit'></i> Editar
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center">
+                                        <p>Nenhum usuário encontrado.</p>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block addcss_extra %}
+<link rel="stylesheet" href="{% static 'permissoes/css/gerenciamento.css' %}">
+{% endblock %}

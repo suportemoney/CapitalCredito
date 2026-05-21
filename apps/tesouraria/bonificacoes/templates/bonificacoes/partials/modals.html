@@ -1,0 +1,209 @@
+<div class="modal fade bonificacoes-modal-modern" id="modalRegra" tabindex="-1" aria-hidden="true" style="z-index: 100001;">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bonificacoes-modal-content">
+            <div class="modal-header bonificacoes-modal-header">
+                <h5 class="modal-title" id="modalRegraTitle">Nova Regra</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body bonificacoes-modal-body">
+                <input type="hidden" id="modal-regra-id">
+                <div class="mb-2">
+                    <label class="form-label">Nome</label>
+                    <input type="text" class="form-control" id="modal-regra-nome" placeholder="Nome da regra">
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Tipo de Regra</label>
+                    <select class="form-select" id="modal-regra-tipo">
+                        <option value="percentual">Percentual Simples</option>
+                        <option value="gatilho_percentual">Gatilho + Percentual</option>
+                        <option value="gatilho_valor_fixo">Gatilho + Valor Fixo</option>
+                    </select>
+                </div>
+                <div class="mb-2" id="container-percentual-padrao">
+                    <label class="form-label">Percentual Padrão (%)</label>
+                    <input type="number" class="form-control" id="modal-regra-percentual" step="0.01" min="0" max="100" placeholder="Ex: 5">
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Campo de Valor</label>
+                    <select class="form-select" id="modal-regra-campo">
+                        <option value="valor_af">Valor AF</option>
+                        <option value="valor_repasse">Valor Repasse</option>
+                    </select>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Ativo</label>
+                    <select class="form-select" id="modal-regra-ativo">
+                        <option value="true">Sim</option>
+                        <option value="false">Não</option>
+                    </select>
+                </div>
+                <div id="container-gatilhos" style="display:none;">
+                    <div class="section-header"><h6 class="mb-2">Gatilhos</h6></div>
+                    <div id="lista-gatilhos"></div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary mt-2" id="btnAdicionarGatilho">+ Adicionar Gatilho</button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnSalvarRegra">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade bonificacoes-modal-modern" id="modalGatilhos" tabindex="-1" aria-hidden="true" style="z-index: 100002;">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bonificacoes-modal-content">
+            <div class="modal-header bonificacoes-modal-header">
+                <h5 class="modal-title" id="modalGatilhosTitle"><i class="bx bx-plus-circle me-2"></i>Gerenciar Gatilhos</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body bonificacoes-modal-body">
+                <input type="hidden" id="modal-gatilhos-regra-id">
+                <p class="text-muted small mb-3" id="modalGatilhosRegraNome"></p>
+                <div id="lista-gatilhos-standalone" class="mb-3"></div>
+                <button type="button" class="btn btn-primary w-100 btn-add-gatilho-standalone"><i class="bx bx-plus-circle me-1"></i> Adicionar Gatilho</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade bonificacoes-modal-modern" id="modalGatilho" tabindex="-1" aria-hidden="true" style="z-index: 100003;">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content bonificacoes-modal-content">
+            <div class="modal-header bonificacoes-modal-header">
+                <h5 class="modal-title">Gatilho</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body bonificacoes-modal-body">
+                <input type="hidden" id="modal-gatilho-id">
+                <input type="hidden" id="modal-gatilho-regra-id">
+                <div class="mb-2">
+                    <label class="form-label">Valor Mínimo (R$)</label>
+                    <input type="number" class="form-control" id="modal-gatilho-valor-min" step="0.01" min="0" placeholder="0">
+                </div>
+                <div class="mb-2" id="container-gatilho-percentual">
+                    <label class="form-label">Percentual (%)</label>
+                    <input type="number" class="form-control" id="modal-gatilho-percentual" step="0.01" min="0" max="100" placeholder="0">
+                </div>
+                <div class="mb-2" id="container-gatilho-valor-fixo" style="display:none;">
+                    <label class="form-label">Valor Fixo (R$)</label>
+                    <input type="number" class="form-control" id="modal-gatilho-valor-fixo" step="0.01" min="0" placeholder="0">
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Ordem</label>
+                    <input type="number" class="form-control" id="modal-gatilho-ordem" value="0">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnSalvarGatilho">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade bonificacoes-modal-modern" id="modalVinculoLote" tabindex="-1" aria-hidden="true" style="z-index: 100004;">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+        <div class="modal-content bonificacoes-modal-content">
+            <div class="modal-header bonificacoes-modal-header">
+                <h5 class="modal-title"><i class="bx bx-list-check me-2"></i>Vínculo em Lote</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body bonificacoes-modal-body">
+                <p class="text-muted small mb-3">Selecione os funcionários e as regras. Serão criados vínculos para todas as combinações selecionadas.</p>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-2 d-flex justify-content-between align-items-center">
+                            <label class="form-label mb-0 fw-semibold">Funcionários</label>
+                            <div class="btn-group btn-group-sm">
+                                <button type="button" class="btn btn-outline-secondary btn-selecionar-todos-func">Todos</button>
+                                <button type="button" class="btn btn-outline-secondary btn-limpar-func">Nenhum</button>
+                            </div>
+                        </div>
+                        <div class="border rounded p-2" style="max-height: 220px; overflow-y: auto;" id="container-checkbox-funcionarios"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-2 d-flex justify-content-between align-items-center">
+                            <label class="form-label mb-0 fw-semibold">Regras</label>
+                            <div class="btn-group btn-group-sm">
+                                <button type="button" class="btn btn-outline-secondary btn-selecionar-todos-regras">Todas</button>
+                                <button type="button" class="btn btn-outline-secondary btn-limpar-regras">Nenhuma</button>
+                            </div>
+                        </div>
+                        <div class="border rounded p-2" style="max-height: 220px; overflow-y: auto;" id="container-checkbox-regras"></div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Data Início</label>
+                        <input type="date" class="form-control" id="vinculo-lote-data-inicio">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Data Fim</label>
+                        <input type="date" class="form-control" id="vinculo-lote-data-fim">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Prioridade</label>
+                        <input type="number" class="form-control" id="vinculo-lote-prioridade" value="0">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnSalvarVinculoLote"><i class="bx bx-check-double me-1"></i> Vincular Selecionados</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade bonificacoes-modal-modern" id="modalVinculo" tabindex="-1" aria-hidden="true" style="z-index: 100001;">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bonificacoes-modal-content">
+            <div class="modal-header bonificacoes-modal-header">
+                <h5 class="modal-title" id="modalVinculoTitle">Novo Vínculo</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body bonificacoes-modal-body">
+                <input type="hidden" id="modal-vinculo-id">
+                <div class="mb-2">
+                    <label class="form-label">Funcionário</label>
+                    <select class="form-select" id="modal-vinculo-funcionario">
+                        <option value="">Selecione...</option>
+                    </select>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Regra</label>
+                    <select class="form-select" id="modal-vinculo-regra">
+                        <option value="">Selecione...</option>
+                    </select>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-6">
+                        <label class="form-label">Data Início</label>
+                        <input type="date" class="form-control" id="modal-vinculo-data-inicio">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label">Data Fim</label>
+                        <input type="date" class="form-control" id="modal-vinculo-data-fim">
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Prioridade</label>
+                    <input type="number" class="form-control" id="modal-vinculo-prioridade" value="0">
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Ativo</label>
+                    <select class="form-select" id="modal-vinculo-ativo">
+                        <option value="true">Sim</option>
+                        <option value="false">Não</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnSalvarVinculo">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>

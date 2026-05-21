@@ -1,0 +1,112 @@
+.card {
+    border: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.card-header {
+    background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%);
+    color: #D4AF37;
+    border-bottom: 2px solid #D4AF37;
+    padding: 15px 20px;
+}
+
+.card-header h5 {
+    margin: 0;
+    font-weight: 600;
+}
+
+.card-body {
+    padding: 25px;
+}
+
+.table {
+    margin-top: 0;
+}
+
+.table thead {
+    background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%);
+    color: #D4AF37;
+}
+
+.table thead th {
+    border-bottom: 2px solid #D4AF37;
+    font-weight: 600;
+    padding: 12px;
+}
+
+.table tbody tr {
+    transition: all 0.2s ease;
+}
+
+.table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.table tbody td {
+    padding: 12px;
+    vertical-align: middle;
+}
+
+.senha-padrao {
+    background-color: #f8f9fa;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    color: #D4AF37;
+    font-weight: 600;
+}
+
+.btn-link {
+    color: #D4AF37;
+    text-decoration: none;
+    padding: 0;
+    margin-left: 8px;
+}
+
+.btn-link:hover {
+    color: #b8941f;
+}
+
+.form-check-input.status-toggle {
+    width: 3em;
+    height: 1.5em;
+    cursor: pointer;
+}
+
+.form-check-input.status-toggle:checked {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+.form-check-input.status-toggle:focus {
+    border-color: #D4AF37;
+    box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.25);
+}
+
+.form-check-label {
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+.badge {
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.text-muted {
+    color: #6c757d;
+    font-style: italic;
+}
+
+.table-responsive {
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+code {
+    font-size: 0.9rem;
+}
+

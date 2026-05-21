@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Acompanhamento CRM - CapitalCredito{% endblock %}
+
+{% block header_title %}Acompanhamento de Contratos (CRM){% endblock %}
+
+{% block addcss_extra %}
+<link rel="stylesheet" href="{% static 'contratos/css/acompanhamento_crm.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid"
+     data-url-kanban="{% url 'contratos:api_kanban' %}"
+     data-url-tabulacoes="{% url 'contratos:api_tabulacoes' %}"
+     data-url-mover="{% url 'contratos:api_mover_contrato' %}"
+     data-url-sse="{% url 'contratos:api_sse_contratos' %}"
+     id="crm-container">
+    
+    <!-- Header com filtros e status SSE -->
+    <div class="section-header d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h4 class="mb-0"><i class="bx bx-columns me-2"></i>Esteira de Contratos</h4>
+            <small class="text-muted">Arraste os cards para mover entre as tabulações</small>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+            <div id="sse-status" class="badge bg-secondary">
+                <i class="bx bx-circle me-1"></i> Conectando...
+            </div>
+            <button class="btn btn-outline-primary btn-sm" onclick="carregarKanban()">
+                <i class="bx bx-refresh"></i> Atualizar
+            </button>
+            <a href="{% url 'contratos:novo_contrato' %}" class="btn btn-primary btn-sm">
+                <i class="bx bx-plus me-1"></i> Novo Contrato
+            </a>
+        </div>
+    </div>
+    
+    <!-- Kanban Board -->
+    <div class="section-body">
+        <div id="kanban-container" class="kanban-container">
+            <!-- Colunas serão renderizadas dinamicamente via JavaScript -->
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Carregando...</span>
+                </div>
+                <p class="mt-2 text-muted">Carregando esteira de contratos...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Ver Contrato -->
+<div class="modal fade" id="modalVerContrato" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bx bx-file me-2"></i>Detalhes do Contrato</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modal-contrato-body">
+                <!-- Conteúdo dinâmico -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Link de Formalização (Consultor) -->
+<div class="modal fade" id="modalLinkFormalizacao" tabindex="-1" aria-hidden="true" style="z-index: 100002;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="bx bx-link me-2"></i>Link de Formalização</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="link-contrato-id">
+                
+                <div class="alert alert-info">
+                    <i class="bx bx-info-circle me-2"></i>
+                    <strong>Atenção:</strong> Envie este link para o cliente realizar a assinatura digital.
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Link para o Cliente:</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="input-link-formalizacao" readonly>
+                        <button class="btn btn-outline-primary" type="button" onclick="copiarLinkFormalizacao()">
+                            <i class="bx bx-copy"></i> Copiar
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <a href="#" id="link-abrir-formalizacao" target="_blank" class="btn btn-outline-secondary w-100">
+                        <i class="bx bx-link-external me-2"></i>Abrir Link em Nova Aba
+                    </a>
+                </div>
+                
+                <hr>
+                
+                <div class="text-center">
+                    <p class="text-muted mb-3">O cliente já assinou no link?</p>
+                    <button type="button" class="btn btn-success btn-lg" onclick="confirmarAssinatura()">
+                        <i class="bx bx-check-circle me-2"></i>Confirmar Assinatura do Cliente
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Upload de Vídeo (Consultor) -->
+<div class="modal fade" id="modalUploadVideo" tabindex="-1" aria-hidden="true" style="z-index: 100002;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title"><i class="bx bx-video me-2"></i>Enviar Vídeo do Cliente</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="video-contrato-id">
+                
+                <div class="alert alert-warning">
+                    <i class="bx bx-error me-2"></i>
+                    <strong>Importante:</strong> Envie um vídeo do cliente confirmando que concorda com a operação.
+                </div>
+                
+                <form id="formUploadVideo" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Vídeo do Cliente <span class="text-danger">*</span></label>
+                        <input type="file" class="form-control" id="input-video-cliente" name="video" 
+                               accept="video/mp4" required onchange="validarVideo()">
+                        <small class="text-muted">
+                            <i class="bx bx-info-circle"></i> Formato: .mp4 | Tamanho máximo: 25MB
+                        </small>
+                    </div>
+                    
+                    <div id="video-preview-container" style="display: none;" class="mb-3">
+                        <label class="form-label">Prévia do Vídeo:</label>
+                        <video id="video-preview" controls class="w-100" style="max-height: 300px;">
+                            Seu navegador não suporta vídeos HTML5.
+                        </video>
+                    </div>
+                    
+                    <div id="video-info" class="mb-3" style="display: none;">
+                        <div class="alert alert-secondary">
+                            <div class="d-flex justify-content-between">
+                                <span><i class="bx bx-film me-2"></i><span id="video-nome"></span></span>
+                                <span id="video-tamanho" class="badge bg-primary"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="video-erro" class="alert alert-danger" style="display: none;"></div>
+                    
+                    <div class="d-grid">
+                        <button type="button" class="btn btn-primary btn-lg" id="btn-enviar-video" onclick="enviarVideo()" disabled>
+                            <i class="bx bx-upload me-2"></i>Enviar Vídeo
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Ver Vídeo -->
+<div class="modal fade" id="modalVerVideo" tabindex="-1" aria-hidden="true" style="z-index: 100002;">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title"><i class="bx bx-play-circle me-2"></i>Vídeo do Cliente</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <video id="video-visualizar" controls class="w-100" style="max-height: 500px;">
+                    Seu navegador não suporta vídeos HTML5.
+                </video>
+            </div>
+            <div class="modal-footer">
+                <a href="#" id="link-download-video" class="btn btn-outline-primary" download>
+                    <i class="bx bx-download me-2"></i>Download
+                </a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block addjs_extra %}
+<script src="{% static 'contratos/js/acompanhamento_crm.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,243 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Bonificações - CapitalCredito{% endblock %}
+
+{% block header_title %}Bonificações{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="section-header">
+        <h5>Gerenciamento de Bonificações</h5>
+    </div>
+    <div class="section-body">
+        <ul class="nav nav-tabs" id="tabsBonificacoes" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-regras" type="button" role="tab">Regras</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-vinculos" type="button" role="tab">Vínculos</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-reducoes" type="button" role="tab">Reduções</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-calculos" type="button" role="tab">Cálculos</button>
+            </li>
+        </ul>
+        <div class="tab-content mt-3" id="tabsBonificacoesContent">
+            <div class="tab-pane fade show active" id="tab-regras" role="tabpanel">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span></span>
+                            <button type="button" class="btn btn-primary" id="btnNovaRegra"><i class='bx bx-plus'></i> Nova Regra</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Tipo</th>
+                                        <th>Campo Valor</th>
+                                        <th>Percentual/Gatilhos</th>
+                                        <th>Status</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabela-regras"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="tab-vinculos" role="tabpanel">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-3">
+                                <label class="form-label">Setor</label>
+                                <select class="form-select" id="filtro-vinculos-setor">
+                                    <option value="">Todos</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Empresa</label>
+                                <select class="form-select" id="filtro-vinculos-empresa">
+                                    <option value="">Todas</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 d-flex align-items-end">
+                                <button type="button" class="btn btn-outline-primary" id="btnFiltrarVinculos">Filtrar</button>
+                            </div>
+                            <div class="col-md-3 d-flex align-items-end justify-content-end gap-2">
+                                <button type="button" class="btn btn-outline-primary" id="btnVinculoLote"><i class='bx bx-list-check'></i> Vínculo em Lote</button>
+                                <button type="button" class="btn btn-primary" id="btnNovoVinculo"><i class='bx bx-plus'></i> Novo Vínculo</button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Funcionário</th>
+                                        <th>Regra</th>
+                                        <th>Setor</th>
+                                        <th>Prioridade</th>
+                                        <th>Vigência</th>
+                                        <th>Status</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabela-vinculos"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="tab-reducoes" role="tabpanel">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="section-header"><h6 class="mb-2">Regras de Redução</h6></div>
+                        <div class="d-flex gap-2 mb-3">
+                            <input type="text" class="form-control" id="nova-reducao-titulo" placeholder="Título (ex: Falta)">
+                            <input type="number" class="form-control" id="nova-reducao-percentual" placeholder="%" step="0.01" min="0" max="100" style="max-width:100px">
+                            <input type="number" class="form-control" id="nova-reducao-ordem" placeholder="Ordem" value="1" style="max-width:80px">
+                            <button type="button" class="btn btn-primary" id="btnNovaReducaoRegra">Adicionar</button>
+                        </div>
+                        <div class="table-responsive mb-4">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Ordem</th>
+                                        <th>Título</th>
+                                        <th>Percentual</th>
+                                        <th>Status</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabela-reducao-regras"></tbody>
+                            </table>
+                        </div>
+                        <div class="section-header"><h6 class="mb-2">Lançar Redução por Funcionário</h6></div>
+                        <div class="row mb-3">
+                            <div class="col-md-3">
+                                <label class="form-label">Funcionário</label>
+                                <select class="form-select" id="nova-reducao-funcionario">
+                                    <option value="">Selecione...</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Regra de Redução</label>
+                                <select class="form-select" id="nova-reducao-regra">
+                                    <option value="">Selecione...</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Data Evento</label>
+                                <input type="date" class="form-control" id="nova-reducao-data">
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end">
+                                <button type="button" class="btn btn-primary" id="btnNovaReducaoFuncionario">Lançar</button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Regra</th>
+                                        <th>Percentual</th>
+                                        <th>Data Evento</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabela-reducoes-funcionario"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="tab-calculos" role="tabpanel">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="section-header"><h6 class="mb-2">Filtros e Preview</h6></div>
+                        <div class="row mb-3">
+                            <div class="col-md-2">
+                                <label class="form-label">Período Início</label>
+                                <input type="date" class="form-control" id="calculo-periodo-inicio">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Período Fim</label>
+                                <input type="date" class="form-control" id="calculo-periodo-fim">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Funcionário</label>
+                                <select class="form-select" id="calculo-funcionario">
+                                    <option value="">Todos</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Setor</label>
+                                <select class="form-select" id="calculo-setor">
+                                    <option value="">Todos</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end">
+                                <button type="button" class="btn btn-outline-primary" id="btnPreviewCalculo">Preview</button>
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end gap-1">
+                                <button type="button" class="btn btn-success" id="btnCalcularLote">Calcular Lote</button>
+                            </div>
+                        </div>
+                        <div id="preview-calculo-container" class="mb-3" style="display:none;">
+                            <div class="section-header"><h6 class="mb-2">Preview do Cálculo</h6></div>
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Funcionário</th>
+                                            <th>Regra</th>
+                                            <th>Valor Base</th>
+                                            <th>Bonificação</th>
+                                            <th>Final (c/ reduções)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="preview-calculo-tbody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="section-header"><h6 class="mb-2">Cálculos Salvos</h6></div>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Funcionário</th>
+                                        <th>Regra</th>
+                                        <th>Período</th>
+                                        <th>Valor Base</th>
+                                        <th>Bonificação</th>
+                                        <th>Final</th>
+                                        <th>Data Cálculo</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabela-calculos"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% include 'bonificacoes/partials/modals.html' %}
+{% endblock %}
+
+{% block addcss_extra %}
+<link rel="stylesheet" href="{% static 'bonificacoes/css/bonificacoes.css' %}">
+{% endblock %}
+
+{% block addjs_extra %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>window.BONIFICACOES_BASE = "{% url 'bonificacoes:index' %}";</script>
+<script src="{% static 'bonificacoes/js/bonificacoes.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load permissoes_tags %}
+
+{% block title %}Funcionários - CapitalCredito{% endblock %}
+
+{% block header_title %}Funcionários{% endblock %}
+
+{% block pre_content %}
+{% if user|has_access:'SS5' %}
+<div class="header-actions">
+    <a href="{% url 'funcionarios:novo' %}" class="btn-gerenciar">
+        <i class='bx bx-plus'></i> Novo Funcionário
+    </a>
+    <a href="{% url 'funcionarios:gerenciar' %}" class="btn-gerenciar">
+        <i class='bx bx-cog'></i> Gerenciar
+    </a>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card funcionario-card" onclick="window.location.href='{% url 'funcionarios:novo' %}'">
+                <div class="card-body text-center">
+                    <i class='bx bx-user-plus' style="font-size: 48px; color: #D4AF37; margin-bottom: 15px;"></i>
+                    <h5>Novo Funcionário</h5>
+                    <p class="text-muted">Cadastrar novo funcionário no sistema</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card funcionario-card" onclick="window.location.href='{% url 'funcionarios:gerenciar' %}'">
+                <div class="card-body text-center">
+                    <i class='bx bx-list-ul' style="font-size: 48px; color: #D4AF37; margin-bottom: 15px;"></i>
+                    <h5>Gerenciar Funcionários</h5>
+                    <p class="text-muted">Listar, filtrar e gerenciar funcionários</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block addcss_extra %}
+<link rel="stylesheet" href="{% static 'funcionarios/css/index.css' %}">
+{% endblock %}
+

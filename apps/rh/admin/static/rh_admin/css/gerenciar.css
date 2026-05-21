@@ -1,0 +1,113 @@
+.card-header-tabs {
+    border-bottom: 2px solid #D4AF37;
+    background: #3d3d3d;
+    margin: 0;
+    padding: 0;
+}
+
+.card-header-tabs .nav-link {
+    color: #D4AF37;
+    border: none;
+    border-bottom: 3px solid transparent;
+    padding: 15px 20px;
+    transition: all 0.3s;
+}
+
+.card-header-tabs .nav-link:hover {
+    background: #4d4d4d;
+    border-bottom-color: #C9A961;
+    color: #C9A961;
+}
+
+.card-header-tabs .nav-link.active {
+    background: #2d2d2d;
+    border-bottom-color: #D4AF37;
+    color: #D4AF37;
+    font-weight: 600;
+}
+
+.card-header-tabs .nav-link i {
+    margin-right: 8px;
+    font-size: 18px;
+}
+
+.tab-content {
+    padding: 20px;
+}
+
+.table {
+    background: #fff;
+}
+
+.table thead {
+    background: #3d3d3d;
+    color: #D4AF37;
+}
+
+.table thead th {
+    border-bottom: 2px solid #D4AF37;
+    font-weight: 600;
+}
+
+.table tbody tr {
+    transition: background 0.2s;
+}
+
+.table tbody tr:hover {
+    background: #f8f9fa;
+}
+
+.badge {
+    padding: 5px 10px;
+    font-weight: 500;
+}
+
+.btn-sm {
+    padding: 5px 10px;
+    font-size: 14px;
+}
+
+.modal-content {
+    border: 2px solid #D4AF37;
+    border-radius: 8px;
+}
+
+.modal-header {
+    background: #3d3d3d;
+    color: #D4AF37;
+    border-bottom: 2px solid #D4AF37;
+}
+
+.modal-header .btn-close {
+    filter: invert(1);
+}
+
+.modal-title {
+    font-weight: 600;
+}
+
+.modal-footer {
+    border-top: 1px solid #e0e0e0;
+}
+
+.form-label {
+    font-weight: 500;
+    color: #3d3d3d;
+    margin-bottom: 5px;
+}
+
+.form-control:focus {
+    border-color: #D4AF37;
+    box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.25);
+}
+
+.form-check-input:checked {
+    background-color: #D4AF37;
+    border-color: #D4AF37;
+}
+
+.form-check-input:focus {
+    border-color: #D4AF37;
+    box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.25);
+}
+

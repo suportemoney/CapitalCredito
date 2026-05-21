@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load permissoes_tags %}
+
+{% block title %}Administrativo RH - CapitalCredito{% endblock %}
+
+{% block header_title %}Administrativo RH{% endblock %}
+
+{% block pre_content %}
+{% if user|has_access:'SS3' %}
+<div class="header-actions">
+    <a href="{% url 'rh_admin:gerenciar' %}" class="btn-gerenciar">
+        <i class='bx bx-cog'></i> Gerenciar
+    </a>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-3 mb-4">
+            <div class="card admin-card" onclick="window.location.href='{% url 'rh_admin:gerenciar' %}'">
+                <div class="card-body text-center">
+                    <i class='bx bx-building' style="font-size: 48px; color: #D4AF37; margin-bottom: 15px;"></i>
+                    <h5>Empresas</h5>
+                    <h2 class="count-number">{{ empresas_count }}</h2>
+                    <p class="text-muted">Cadastradas</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card admin-card" onclick="window.location.href='{% url 'rh_admin:gerenciar' %}'">
+                <div class="card-body text-center">
+                    <i class='bx bx-store' style="font-size: 48px; color: #D4AF37; margin-bottom: 15px;"></i>
+                    <h5>Lojas</h5>
+                    <h2 class="count-number">{{ lojas_count }}</h2>
+                    <p class="text-muted">Cadastradas</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card admin-card" onclick="window.location.href='{% url 'rh_admin:gerenciar' %}'">
+                <div class="card-body text-center">
+                    <i class='bx bx-group' style="font-size: 48px; color: #D4AF37; margin-bottom: 15px;"></i>
+                    <h5>Departamentos</h5>
+                    <h2 class="count-number">{{ departamentos_count }}</h2>
+                    <p class="text-muted">Cadastrados</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card admin-card" onclick="window.location.href='{% url 'rh_admin:gerenciar' %}'">
+                <div class="card-body text-center">
+                    <i class='bx bx-grid-alt' style="font-size: 48px; color: #D4AF37; margin-bottom: 15px;"></i>
+                    <h5>Setores</h5>
+                    <h2 class="count-number">{{ setores_count }}</h2>
+                    <p class="text-muted">Cadastrados</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card admin-card" onclick="window.location.href='{% url 'rh_admin:gerenciar' %}'">
+                <div class="card-body text-center">
+                    <i class='bx bx-briefcase' style="font-size: 48px; color: #D4AF37; margin-bottom: 15px;"></i>
+                    <h5>Cargos</h5>
+                    <h2 class="count-number">{{ cargos_count }}</h2>
+                    <p class="text-muted">Cadastrados</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card admin-card" onclick="window.location.href='{% url 'rh_admin:gerenciar' %}'">
+                <div class="card-body text-center">
+                    <i class='bx bx-user-voice' style="font-size: 48px; color: #D4AF37; margin-bottom: 15px;"></i>
+                    <h5>Equipes</h5>
+                    <h2 class="count-number">{{ equipes_count }}</h2>
+                    <p class="text-muted">Cadastradas</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card admin-card" onclick="window.location.href='{% url 'rh_admin:gerenciar' %}'">
+                <div class="card-body text-center">
+                    <i class='bx bx-layer' style="font-size: 48px; color: #D4AF37; margin-bottom: 15px;"></i>
+                    <h5>Níveis Hierárquicos</h5>
+                    <h2 class="count-number">{{ niveis_count }}</h2>
+                    <p class="text-muted">Cadastrados</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block addcss_extra %}
+<link rel="stylesheet" href="{% static 'rh_admin/css/index.css' %}">
+{% endblock %}
+

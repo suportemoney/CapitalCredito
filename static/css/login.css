@@ -1,0 +1,429 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #2d2d2d 0%, #3d3d3d 50%, #2d2d2d 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    position: relative;
+    overflow: hidden;
+    padding-left: 40px;
+}
+
+/* Container principal com logo e formulário */
+.login-container {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 80px;
+    width: 100%;
+    max-width: 1800px;
+    padding: 40px;
+    animation: fadeInUp 0.8s ease-out;
+}
+
+/* Partículas animadas de fundo */
+.particles {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 0;
+}
+
+/* Logo grande à esquerda */
+.logo-side {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 900px;
+    height: 900px;
+    max-width: 60vw;
+    max-height: 60vw;
+    min-width: 600px;
+    min-height: 600px;
+    animation: fadeInLeft 1s ease-out;
+    flex-shrink: 0;
+}
+
+.logo-side img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 0 30px rgba(212, 175, 55, 0.3));
+}
+
+@keyframes fadeInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: #D4AF37;
+    border-radius: 50%;
+    opacity: 0.3;
+    animation: float 15s infinite ease-in-out;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0) translateX(0);
+        opacity: 0.3;
+    }
+    50% {
+        transform: translateY(-100px) translateX(50px);
+        opacity: 0.6;
+    }
+}
+
+/* Wrapper do formulário */
+.login-wrapper {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 450px;
+    flex-shrink: 0;
+    margin-left: 0;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* Card de login */
+.login-card {
+    background: rgba(26, 26, 26, 0.95);
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5),
+                0 0 0 1px rgba(212, 175, 55, 0.2),
+                inset 0 0 60px rgba(212, 175, 55, 0.05);
+    padding: 0;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    position: relative;
+}
+
+.login-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #D4AF37, #C9A961, #D4AF37);
+    background-size: 200% 100%;
+    animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.card-header {
+    background: linear-gradient(135deg, #3d3d3d 0%, #4d4d4d 100%);
+    color: #D4AF37;
+    padding: 25px;
+    text-align: center;
+    border-bottom: 2px solid rgba(212, 175, 55, 0.2);
+}
+
+.card-header h4 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.card-header i {
+    font-size: 28px;
+    animation: lockPulse 2s infinite ease-in-out;
+}
+
+@keyframes lockPulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+}
+
+.card-body {
+    padding: 30px;
+}
+
+/* Mensagens de alerta */
+.alert {
+    border-radius: 10px;
+    border: none;
+    padding: 12px 15px;
+    margin-bottom: 20px;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.alert-danger {
+    background: rgba(255, 107, 107, 0.2);
+    color: #ff6b6b;
+    border-left: 3px solid #ff6b6b;
+}
+
+.alert-success {
+    background: rgba(76, 175, 80, 0.2);
+    color: #4caf50;
+    border-left: 3px solid #4caf50;
+}
+
+/* Form groups */
+.form-group {
+    margin-bottom: 25px;
+    position: relative;
+}
+
+.form-label {
+    color: #D4AF37;
+    font-weight: 600;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+}
+
+.form-label i {
+    font-size: 18px;
+}
+
+.input-wrapper {
+    position: relative;
+}
+
+.form-control {
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(212, 175, 55, 0.3);
+    border-radius: 12px;
+    color: #ffffff;
+    padding: 14px 45px 14px 15px;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.form-control::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.form-control:focus {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: #D4AF37;
+    box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.2),
+                0 0 20px rgba(212, 175, 55, 0.1);
+    outline: none;
+    color: #ffffff;
+}
+
+.input-icon {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #D4AF37;
+    font-size: 20px;
+    pointer-events: none;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus + .input-icon {
+    color: #C9A961;
+    transform: translateY(-50%) scale(1.2);
+}
+
+/* Botão de submit */
+.btn-submit {
+    width: 100%;
+    background: linear-gradient(135deg, #3d3d3d 0%, #4d4d4d 100%);
+    border: 2px solid #D4AF37;
+    color: #D4AF37;
+    font-weight: 700;
+    font-size: 16px;
+    padding: 14px;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-submit::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn-submit:hover::before {
+    left: 100%;
+}
+
+.btn-submit:hover {
+    background: linear-gradient(135deg, #4d4d4d 0%, #3d3d3d 100%);
+    border-color: #C9A961;
+    color: #C9A961;
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.3),
+                0 0 40px rgba(212, 175, 55, 0.1);
+    transform: translateY(-2px);
+}
+
+.btn-submit:active {
+    transform: translateY(0);
+}
+
+.btn-submit i {
+    font-size: 20px;
+}
+
+/* Toggle de senha */
+.password-toggle {
+    position: absolute;
+    right: 45px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #D4AF37;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 5px;
+    transition: all 0.3s ease;
+    z-index: 2;
+}
+
+.password-toggle:hover {
+    color: #C9A961;
+    transform: translateY(-50%) scale(1.2);
+}
+
+/* Responsivo */
+@media (max-width: 1600px) {
+    .logo-side {
+        width: 700px;
+        height: 700px;
+        min-width: 500px;
+        min-height: 500px;
+    }
+}
+
+@media (max-width: 1200px) {
+    .login-container {
+        flex-direction: column;
+        gap: 40px;
+        justify-content: center;
+    }
+
+    .logo-side {
+        width: 500px;
+        height: 500px;
+        min-width: 400px;
+        min-height: 400px;
+    }
+}
+
+@media (max-width: 576px) {
+    .login-container {
+        padding: 15px;
+        gap: 30px;
+    }
+
+    .login-wrapper {
+        max-width: 100%;
+    }
+
+    .card-body {
+        padding: 20px;
+    }
+
+    .logo-side {
+        width: 300px;
+        height: 300px;
+        min-width: 250px;
+        min-height: 250px;
+    }
+}
+
+/* Loading state */
+.btn-submit.loading {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.btn-submit.loading i {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+

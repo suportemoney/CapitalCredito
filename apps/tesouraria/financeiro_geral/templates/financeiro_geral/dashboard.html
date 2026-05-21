@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard Financeiro - CapitalCredito{% endblock %}
+
+{% block header_title %}Dashboard Financeiro Geral{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="section-header">
+        <h5>Resumo</h5>
+    </div>
+    <div class="section-body">
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0">A Pagar</h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-0 fs-4" id="total-a-pagar">R$ 0,00</p>
+                        <small class="text-muted">Total de contas não pagas</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0">A Receber</h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-0 fs-4" id="total-a-receber">R$ 0,00</p>
+                        <small class="text-muted">Total de contas não recebidas</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block addjs_extra %}
+<script>window.FINANCEIRO_GERAL_BASE = "{% url 'financeiro_geral:index' %}";</script>
+<script src="{% static 'financeiro_geral/js/dashboard.js' %}"></script>
+{% endblock %}

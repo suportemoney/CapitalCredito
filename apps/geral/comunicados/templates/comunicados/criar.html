@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Criar Comunicado - CapitalCredito{% endblock %}
+
+{% block header_title %}Criar Novo Comunicado{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <form id="form-criar-comunicado" method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="form-group">
+                                    <label for="titulo">Título *</label>
+                                    <input type="text" class="form-control" id="titulo" name="titulo" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="tipo">Tipo *</label>
+                                    <select class="form-control" id="tipo" name="tipo" required>
+                                        {% for tipo, nome in TIPO_CHOICES %}
+                                        <option value="{{ tipo }}" {% if tipo == 'GERAL' %}selected{% endif %}>{{ nome }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="categoria">Categoria</label>
+                                    <select class="form-control" id="categoria" name="categoria">
+                                        <option value="">Selecione uma categoria</option>
+                                        {% for categoria in categorias %}
+                                        <option value="{{ categoria.id }}">{{ categoria.nome }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="prioridade">Prioridade *</label>
+                                    <select class="form-control" id="prioridade" name="prioridade" required>
+                                        {% for prioridade, nome in PRIORIDADE_CHOICES %}
+                                        <option value="{{ prioridade }}" {% if prioridade == 'NORMAL' %}selected{% endif %}>{{ nome }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="data_evento">Data do Evento</label>
+                                    <input type="datetime-local" class="form-control" id="data_evento" name="data_evento">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="conteudo">Conteúdo *</label>
+                            <textarea class="form-control" id="conteudo" name="conteudo" rows="8" required></textarea>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="banner">Banner</label>
+                                    <input type="file" class="form-control" id="banner" name="banner" accept="image/png,image/jpeg,image/jpg,image/webp">
+                                    <small class="form-text text-muted">Formatos aceitos: PNG, JPG, JPEG, WEBP</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Opções</label>
+                                    <div class="checkbox-group">
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" name="fixo" id="fixo">
+                                            <span>Fixo no Topo</span>
+                                        </label>
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" name="status" id="status" checked value="on">
+                                            <span>Ativo</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Arquivos Anexos -->
+                        <div class="form-group">
+                            <label>Arquivos Anexos</label>
+                            <div id="arquivos-container">
+                                <div class="arquivo-item">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <input type="text" class="form-control" placeholder="Título do arquivo" name="titulos_arquivos[]">
+                                        </div>
+                                        <div class="col-md-8">
+                                            <input type="file" class="form-control" name="arquivos[]">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn-adicionar-arquivo" id="btn-adicionar-arquivo">
+                                <i class='bx bx-plus'></i> Adicionar Arquivo
+                            </button>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn-salvar">
+                                <i class='bx bx-save'></i> Salvar
+                            </button>
+                            <a href="{% url 'comunicados:listar' %}" class="btn-cancelar">
+                                <i class='bx bx-x'></i> Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block addcss_extra %}
+<link rel="stylesheet" href="{% static 'comunicados/css/gerenciar.css' %}">
+{% endblock %}
+
+{% block addjs_extra %}
+<script src="{% static 'comunicados/js/gerenciar.js' %}"></script>
+<script>
+    const API_URLS = {
+        criar: "{% url 'comunicados:api_criar' %}"
+    };
+</script>
+{% endblock %}
+

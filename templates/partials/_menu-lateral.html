@@ -1,0 +1,524 @@
+{% load static %}
+{% load permissoes_tags %}
+
+<nav id="sidebar" class="sidebar">
+  <div class="sidebar-logo">
+    <img src="{% static 'img/logo_1x1.png' %}" alt="CapitalCredito Logo" class="logo-img">
+    <span class="logo-text">CapitalCredito</span>
+  </div>
+  <div class="sidebar-toggle">
+    <i class='bx bx-menu-alt-right'></i>
+  </div>
+
+  {# Container de Categorias #}
+  <div class="menu-container">
+    <ul class="sidebar-menu">
+      {% if user.is_authenticated %}
+
+        {# GERAL - Categoria #}
+        {% if user|has_access:'CT1' %}
+        <li class="sidebar-category" data-category="geral">
+          <a href="javascript:void(0)" class="category-toggle">
+            <i class="bx bx-home"></i>
+            <span class="menu-label">Geral</span>
+            <i class="bx bx-chevron-right category-arrow"></i>
+          </a>
+          <ul class="subcategory-menu" data-submenu="geral" style="display: none;">
+            {# Comunicados - SubCategoria #}
+            {% if user|has_access:'SCT6' %}
+            <li class="subcategory-item" data-subcategory="comunicados">
+              <a href="javascript:void(0)" class="subcategory-toggle">
+                <i class="bx bx-message-square-detail"></i>
+                <span class="menu-label">Comunicados</span>
+                <i class="bx bx-chevron-down subcategory-arrow"></i>
+              </a>
+              <ul class="options-menu">
+                {# Mural - Opção/Template #}
+                {% if user|has_access:'SS14' %}
+                <li>
+                  <a href="{% url 'comunicados:mural' %}">
+                    <i class="bx bx-notepad"></i>
+                    <span class="menu-label">Mural</span>
+                  </a>
+                </li>
+                {% endif %}
+                {# Gerenciador - Opção/Template #}
+                {% if user|has_access:'SS15' %}
+                <li>
+                  <a href="{% url 'comunicados:listar' %}">
+                    <i class="bx bx-cog"></i>
+                    <span class="menu-label">Gerenciador</span>
+                  </a>
+                </li>
+                {% endif %}
+              </ul>
+            </li>
+            {% endif %}
+          </ul>
+        </li>
+        {% endif %}
+
+        {# RECURSOS HUMANOS - Categoria #}
+        {% if user|has_access:'CT2' %}
+        <li class="sidebar-category" data-category="rh">
+          <a href="javascript:void(0)" class="category-toggle">
+            <i class="bx bx-group"></i>
+            <span class="menu-label">Recursos Humanos</span>
+            <i class="bx bx-chevron-right category-arrow"></i>
+          </a>
+          <ul class="subcategory-menu" data-submenu="rh" style="display: none;">
+            {# Administrativo - SubCategoria #}
+            {% if user|has_access:'SCT7' %}
+            <li class="subcategory-item" data-subcategory="admin">
+              <a href="javascript:void(0)" class="subcategory-toggle">
+                <i class="bx bx-cog"></i>
+                <span class="menu-label">Administrativo</span>
+                <i class="bx bx-chevron-down subcategory-arrow"></i>
+              </a>
+              <ul class="options-menu">
+                {% if user|has_access:'SS16' %}
+                <li>
+                  <a href="{% url 'rh_admin:index' %}">
+                    <i class="bx bx-building"></i>
+                    <span class="menu-label">Gerenciamento Geral</span>
+                  </a>
+                </li>
+                {% endif %}
+              </ul>
+            </li>
+            {% endif %}
+
+            {# Funcionários - SubCategoria #}
+            {% if user|has_access:'SCT8' %}
+            <li class="subcategory-item" data-subcategory="funcionarios">
+              <a href="javascript:void(0)" class="subcategory-toggle">
+                <i class="bx bx-user"></i>
+                <span class="menu-label">Funcionários</span>
+                <i class="bx bx-chevron-down subcategory-arrow"></i>
+              </a>
+              <ul class="options-menu">
+                {% if user|has_access:'SS17' %}
+                <li>
+                  <a href="{% url 'funcionarios:novo' %}">
+                    <i class="bx bx-user-plus"></i>
+                    <span class="menu-label">Novo Funcionário</span>
+                  </a>
+                </li>
+                {% endif %}
+                {% if user|has_access:'SS18' %}
+                <li>
+                  <a href="{% url 'funcionarios:gerenciar' %}">
+                    <i class="bx bx-list-ul"></i>
+                    <span class="menu-label">Gerenciar</span>
+                  </a>
+                </li>
+                {% endif %}
+              </ul>
+            </li>
+            {% endif %}
+
+            {# Usuários - SubCategoria #}
+            {% if user|has_access:'SCT9' %}
+            <li class="subcategory-item" data-subcategory="usuarios">
+              <a href="javascript:void(0)" class="subcategory-toggle">
+                <i class="bx bx-user-circle"></i>
+                <span class="menu-label">Usuários</span>
+                <i class="bx bx-chevron-down subcategory-arrow"></i>
+              </a>
+              <ul class="options-menu">
+                {% if user|has_access:'SS19' %}
+                <li>
+                  <a href="{% url 'usuarios:gerenciar' %}">
+                    <i class="bx bx-list-ul"></i>
+                    <span class="menu-label">Gerenciar</span>
+                  </a>
+                </li>
+                {% endif %}
+              </ul>
+            </li>
+            {% endif %}
+
+            {# Presença - SubCategoria #}
+            {% if user|has_access:'SCT39' %}
+            <li class="subcategory-item" data-subcategory="presenca">
+              <a href="javascript:void(0)" class="subcategory-toggle">
+                <i class="bx bx-time"></i>
+                <span class="menu-label">Presença</span>
+                <i class="bx bx-chevron-down subcategory-arrow"></i>
+              </a>
+              <ul class="options-menu">
+                {% if user|has_access:'SS40' %}
+                <li>
+                  <a href="{% url 'ponto:index' %}">
+                    <i class="bx bx-log-in"></i>
+                    <span class="menu-label">Registrar Presença</span>
+                  </a>
+                </li>
+                {% endif %}
+                {% if user|has_access:'SS41' %}
+                <li>
+                  <a href="{% url 'ponto:justificativas' %}">
+                    <i class="bx bx-file"></i>
+                    <span class="menu-label">Justificativas</span>
+                  </a>
+                </li>
+                {% endif %}
+                {% if user|has_access:'SS42' %}
+                <li>
+                  <a href="{% url 'ponto:relatorio' %}">
+                    <i class="bx bx-bar-chart-alt-2"></i>
+                    <span class="menu-label">Relatório de Presença</span>
+                  </a>
+                </li>
+                {% endif %}
+                {% if user|has_access:'SS43' %}
+                <li>
+                  <a href="{% url 'ponto:horario_trabalho' %}">
+                    <i class="bx bx-calendar"></i>
+                    <span class="menu-label">Horário de Trabalho</span>
+                  </a>
+                </li>
+                {% endif %}
+              </ul>
+            </li>
+            {% endif %}
+          </ul>
+        </li>
+        {% endif %}
+
+        {# SEGURANÇA - Categoria #}
+        {% if user|has_access:'CT3' %}
+        <li class="sidebar-category" data-category="seguranca">
+          <a href="javascript:void(0)" class="category-toggle">
+            <i class="bx bx-shield"></i>
+            <span class="menu-label">Segurança</span>
+            <i class="bx bx-chevron-right category-arrow"></i>
+          </a>
+          <ul class="subcategory-menu" data-submenu="seguranca" style="display: none;">
+            {# Permissões - SubCategoria #}
+            {% if user|has_access:'SCT10' %}
+            <li class="subcategory-item" data-subcategory="permissoes">
+              <a href="javascript:void(0)" class="subcategory-toggle">
+                <i class="bx bx-lock"></i>
+                <span class="menu-label">Permissões</span>
+                <i class="bx bx-chevron-down subcategory-arrow"></i>
+              </a>
+              <ul class="options-menu">
+                {% if user|has_access:'SS20' %}
+                <li>
+                  <a href="{% url 'permissoes:gerenciar' %}">
+                    <i class="bx bx-cog"></i>
+                    <span class="menu-label">Gerenciar</span>
+                  </a>
+                </li>
+                {% endif %}
+              </ul>
+            </li>
+            {% endif %}
+          </ul>
+        </li>
+        {% endif %}
+
+        {# TESOURARIA - Categoria #}
+        {% if user|has_access:'CT4' %}
+        <li class="sidebar-category" data-category="tesouraria">
+          <a href="javascript:void(0)" class="category-toggle">
+            <i class="bx bx-wallet"></i>
+            <span class="menu-label">Tesouraria</span>
+            <i class="bx bx-chevron-right category-arrow"></i>
+          </a>
+          <ul class="subcategory-menu" data-submenu="tesouraria" style="display: none;">
+            {# Financeiro Geral - SubCategoria #}
+            {% if user|has_access:'SCT11' %}
+            <li class="subcategory-item" data-subcategory="financeiro-geral">
+              <a href="javascript:void(0)" class="subcategory-toggle">
+                <i class="bx bx-receipt"></i>
+                <span class="menu-label">Financeiro Geral</span>
+                <i class="bx bx-chevron-down subcategory-arrow"></i>
+              </a>
+              <ul class="options-menu">
+                {% if user|has_access:'SS21' %}
+                <li>
+                  <a href="{% url 'financeiro_geral:dashboard' %}">
+                    <i class="bx bx-bar-chart-alt-2"></i>
+                    <span class="menu-label">Dashboard</span>
+                  </a>
+                </li>
+                {% endif %}
+                {% if user|has_access:'SS22' %}
+                <li>
+                  <a href="{% url 'financeiro_geral:contas_a_pagar' %}">
+                    <i class="bx bx-list-ul"></i>
+                    <span class="menu-label">Contas a Pagar</span>
+                  </a>
+                </li>
+                {% endif %}
+                {% if user|has_access:'SS23' %}
+                <li>
+                  <a href="{% url 'financeiro_geral:gerenciar' %}">
+                    <i class="bx bx-cog"></i>
+                    <span class="menu-label">Gerenciamento Geral</span>
+                  </a>
+                </li>
+                {% endif %}
+              </ul>
+            </li>
+            {% endif %}
+            {# Bonificações - SubCategoria #}
+            {% if user|has_access:'SCT44' %}
+            <li class="subcategory-item" data-subcategory="bonificacoes">
+              <a href="javascript:void(0)" class="subcategory-toggle">
+                <i class="bx bx-gift"></i>
+                <span class="menu-label">Bonificações</span>
+                <i class="bx bx-chevron-down subcategory-arrow"></i>
+              </a>
+              <ul class="options-menu">
+                {% if user|has_access:'SS45' %}
+                <li>
+                  <a href="{% url 'bonificacoes:index' %}">
+                    <i class="bx bx-cog"></i>
+                    <span class="menu-label">Config Bonificações</span>
+                  </a>
+                </li>
+                {% endif %}
+                {% if user|has_access:'SS46' %}
+                <li>
+                  <a href="{% url 'bonificacoes:calc' %}">
+                    <i class="bx bx-calculator"></i>
+                    <span class="menu-label">Calc Bonificações</span>
+                  </a>
+                </li>
+                {% endif %}
+              </ul>
+            </li>
+            {% endif %}
+          </ul>
+        </li>
+        {% endif %}
+
+        {# VENDAS - Categoria #}
+        {% if user|has_access:'CT5' %}
+        <li class="sidebar-category" data-category="vendas">
+          <a href="javascript:void(0)" class="category-toggle">
+            <i class="bx bx-briefcase"></i>
+            <span class="menu-label">Vendas</span>
+            <i class="bx bx-chevron-right category-arrow"></i>
+          </a>
+          <ul class="subcategory-menu" data-submenu="vendas" style="display: none;">
+            {# SIAPE - SubCategoria #}
+            {% if user|has_access:'SCT12' %}
+            <li class="subcategory-item" data-subcategory="siape">
+              <a href="javascript:void(0)" class="subcategory-toggle">
+                <i class="bx bx-search-alt"></i>
+                <span class="menu-label">SIAPE</span>
+                <i class="bx bx-chevron-down subcategory-arrow"></i>
+              </a>
+              <ul class="options-menu">
+                {% if user|has_access:'SS24' %}
+                <li>
+                  <a href="{% url 'siape:ranking' %}">
+                    <i class="bx bx-trophy"></i>
+                    <span class="menu-label">Ranking</span>
+                  </a>
+                </li>
+                {% endif %}
+                {% if user|has_access:'SS25' %}
+                <li>
+                  <a href="{% url 'siape:consulta' %}">
+                    <i class="bx bx-search"></i>
+                    <span class="menu-label">Consulta Cliente</span>
+                  </a>
+                </li>
+                {% endif %}
+                {% if user|has_access:'SS25' %}
+                <li>
+                  <a href="{% url 'siape:campanhas' %}">
+                    <i class="bx bx-upload"></i>
+                    <span class="menu-label">Campanhas</span>
+                  </a>
+                </li>
+                {% endif %}
+                {% if user|has_access:'SS26' %}
+                <li>
+                  <a href="{% url 'siape:crm' %}">
+                    <i class="bx bx-user-check"></i>
+                    <span class="menu-label">CRM</span>
+                  </a>
+                </li>
+                {% endif %}
+                {% if user|has_access:'SS28' %}
+                <li>
+                  <a href="{% url 'siape:produtos' %}">
+                    <i class="bx bx-package"></i>
+                    <span class="menu-label">Produtos</span>
+                  </a>
+                </li>
+                {% endif %}
+                {% if user|has_access:'SS30' %}
+                <li>
+                  <a href="{% url 'siape:metas' %}">
+                    <i class="bx bx-target-lock"></i>
+                    <span class="menu-label">Metas SIAPE</span>
+                  </a>
+                </li>
+                {% endif %}
+                {% if user|has_access:'SS31' %}
+                <li>
+                  <a href="{% url 'siape:responsaveis' %}">
+                    <i class="bx bx-user-check"></i>
+                    <span class="menu-label">Responsáveis Rev/Chec</span>
+                  </a>
+                </li>
+                {% endif %}
+              </ul>
+            </li>
+            {% endif %}
+
+            {# Financeiro Vendas - SubCategoria #}
+            {% if user|has_access:'SCT13' %}
+            <li class="subcategory-item" data-subcategory="financeiro-vendas">
+              <a href="javascript:void(0)" class="subcategory-toggle">
+                <i class="bx bx-money"></i>
+                <span class="menu-label">Financeiro Vendas</span>
+                <i class="bx bx-chevron-down subcategory-arrow"></i>
+              </a>
+              <ul class="options-menu">
+                {% if user|has_access:'SS27' %}
+                <li>
+                  <a href="{% url 'financeiro_vendas:index' %}">
+                    <i class="bx bx-list-ul"></i>
+                    <span class="menu-label">Gerenciamento de Vendas</span>
+                  </a>
+                </li>
+                {% endif %}
+                {% if user|has_access:'SS29' %}
+                <li>
+                  <a href="{% url 'financeiro_vendas:classificador' %}">
+                    <i class="bx bx-category"></i>
+                    <span class="menu-label">Classificador</span>
+                  </a>
+                </li>
+                {% endif %}
+              </ul>
+            </li>
+            {% endif %}
+          </ul>
+        </li>
+        {% endif %}
+
+        {# OPERACIONAL - Categoria #}
+        {% if user|has_access:'CT32' %}
+        <li class="sidebar-category" data-category="operacional">
+          <a href="javascript:void(0)" class="category-toggle">
+            <i class="bx bx-cog"></i>
+            <span class="menu-label">Operacional</span>
+            <i class="bx bx-chevron-right category-arrow"></i>
+          </a>
+          <ul class="subcategory-menu" data-submenu="operacional" style="display: none;">
+            {# Contratos - SubCategoria #}
+            {% if user|has_access:'SCT33' %}
+            <li class="subcategory-item" data-subcategory="contratos">
+              <a href="javascript:void(0)" class="subcategory-toggle">
+                <i class="bx bx-file-blank"></i>
+                <span class="menu-label">Contratos</span>
+                <i class="bx bx-chevron-down subcategory-arrow"></i>
+              </a>
+              <ul class="options-menu">
+                {% if user|has_access:'SS34' %}
+                <li>
+                  <a href="{% url 'contratos:novo_contrato' %}">
+                    <i class="bx bx-plus-circle"></i>
+                    <span class="menu-label">Novo Contrato</span>
+                  </a>
+                </li>
+                {% endif %}
+                {% if user|has_access:'SS35' %}
+                <li>
+                  <a href="{% url 'contratos:acompanhamento_crm' %}">
+                    <i class="bx bx-bar-chart-alt-2"></i>
+                    <span class="menu-label">Acompanhamento CRM</span>
+                  </a>
+                </li>
+                {% endif %}
+                {% if user|has_access:'SS36' %}
+                <li>
+                  <a href="{% url 'contratos:acompanhamento_tabela' %}">
+                    <i class="bx bx-table"></i>
+                    <span class="menu-label">Acompanhamento Tabela</span>
+                  </a>
+                </li>
+                {% endif %}
+                {% if user|has_access:'SS37' %}
+                <li>
+                  <a href="{% url 'contratos:gerenciar_bancos' %}">
+                    <i class="bx bx-building"></i>
+                    <span class="menu-label">Gerenciar Bancos</span>
+                  </a>
+                </li>
+                {% endif %}
+                {% if user|has_access:'SS38' %}
+                <li>
+                  <a href="{% url 'contratos:administrativo' %}">
+                    <i class="bx bx-cog"></i>
+                    <span class="menu-label">Administrativo</span>
+                  </a>
+                </li>
+                {% endif %}
+              </ul>
+            </li>
+            {% endif %}
+          </ul>
+        </li>
+        {% endif %}
+
+      {% else %}
+        <li>
+          <a href="{% url 'usuarios:render_login' %}">
+            <i class="bx bx-log-in"></i>
+            <span class="menu-label">Login</span>
+          </a>
+        </li>
+      {% endif %}
+    </ul>
+  </div>
+
+  {# Container de Acesso Rápido #}
+  {% if user.is_authenticated %}
+  <div class="menu-container acesso-rapido-container">
+    <div class="acesso-rapido-header">
+      <span class="acesso-rapido-title">Acesso Rápido</span>
+    </div>
+    <ul class="acesso-rapido-menu">
+      {% if user|has_access:'SS25' %}
+      <li>
+        <a href="{% url 'siape:consulta' %}">
+          <i class="bx bx-search"></i>
+          <span class="menu-label">Consulta Cliente SIAPE</span>
+        </a>
+      </li>
+      {% endif %}
+      {% if user|has_access:'SS26' %}
+      <li>
+        <a href="{% url 'siape:crm' %}">
+          <i class="bx bx-user-check"></i>
+          <span class="menu-label">CRM SIAPE</span>
+        </a>
+      </li>
+      {% endif %}
+    </ul>
+  </div>
+  {% endif %}
+</nav>
+
+{# Submenu lateral à direita #}
+<div id="submenu-panel" class="submenu-panel">
+  <div class="submenu-header">
+    <span class="submenu-title"></span>
+    <button class="submenu-close" id="submenu-close">
+      <i class='bx bx-x'></i>
+    </button>
+  </div>
+  <div class="submenu-content" id="submenu-content">
+    {# Conteúdo será preenchido via JavaScript #}
+  </div>
+</div>

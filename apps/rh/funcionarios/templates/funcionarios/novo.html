@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load permissoes_tags %}
+
+{% block title %}Novo Funcionário - CapitalCredito{% endblock %}
+
+{% block header_title %}Novo Funcionário{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Dados Básicos do Funcionário</h5>
+                </div>
+                <div class="card-body">
+                    <form id="formNovoFuncionario">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Apelido *</label>
+                                <input type="text" class="form-control" name="apelido" required>
+                                <small class="form-text text-muted">Será usado como username no sistema</small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Nome Completo *</label>
+                                <input type="text" class="form-control" name="nome_completo" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">CPF *</label>
+                                <input type="text" class="form-control" name="cpf" id="cpf" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Data de Nascimento</label>
+                                <input type="date" class="form-control" name="data_nascimento">
+                            </div>
+                        </div>
+                        <hr>
+                        <h6 class="mb-3">Dados Profissionais</h6>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Empresa *</label>
+                                <select class="form-select" name="empresa" required>
+                                    <option value="">Selecione...</option>
+                                    {% for empresa in empresas %}
+                                    <option value="{{ empresa.id }}">{{ empresa.nome }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Departamento *</label>
+                                <select class="form-select" name="departamento" required>
+                                    <option value="">Selecione...</option>
+                                    {% for departamento in departamentos %}
+                                    <option value="{{ departamento.id }}">{{ departamento.nome }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Setor *</label>
+                                <select class="form-select" name="setor" required>
+                                    <option value="">Selecione...</option>
+                                    {% for setor in setores %}
+                                    <option value="{{ setor.id }}">{{ setor.nome }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Cargo *</label>
+                                <select class="form-select" name="cargo" required>
+                                    <option value="">Selecione...</option>
+                                    {% for cargo in cargos %}
+                                    <option value="{{ cargo.id }}">{{ cargo.nome }} ({{ cargo.nivel_hierarquico.nome }})</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Loja</label>
+                                <select class="form-select" name="loja">
+                                    <option value="">Selecione (opcional)...</option>
+                                    {% for loja in lojas %}
+                                    <option value="{{ loja.id }}">{{ loja.nome }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Equipe</label>
+                                <select class="form-select" name="equipe">
+                                    <option value="">Selecione (opcional)...</option>
+                                    {% for equipe in equipes %}
+                                    <option value="{{ equipe.id }}">{{ equipe.nome }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Horário de Trabalho</label>
+                                <select class="form-select" name="horario">
+                                    <option value="">Selecione (opcional)...</option>
+                                    {% for horario in horarios %}
+                                    <option value="{{ horario.id }}">{{ horario.nome }} ({{ horario.entrada }} - {{ horario.saida_almoco }} / {{ horario.volta_almoco }} - {{ horario.saida }})</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="section-header">Controle de Acesso</div>
+                        <div class="section-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Grupo de Permissões</label>
+                                    <select class="form-select" name="grupo_permissões">
+                                        <option value="">Selecione (opcional)...</option>
+                                        {% for grupo in grupos %}
+                                        <option value="{{ grupo.id }}">{{ grupo.titulo }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class='bx bx-save'></i> Cadastrar Funcionário
+                                </button>
+                                <a href="{% url 'funcionarios:gerenciar' %}" class="btn btn-secondary">
+                                    <i class='bx bx-x'></i> Cancelar
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block addcss_extra %}
+<link rel="stylesheet" href="{% static 'funcionarios/css/novo.css' %}">
+{% endblock %}
+
+{% block addjs_extra %}
+<script src="{% static 'funcionarios/js/novo.js' %}"></script>
+{% endblock %}
+

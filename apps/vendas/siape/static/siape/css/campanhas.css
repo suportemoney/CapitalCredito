@@ -1,0 +1,280 @@
+/**
+ * Campanhas SIAPE - Estilos
+ * Timeline de etapas e animações de progresso
+ */
+
+/* ========================================
+   TIMELINE DE ETAPAS
+   ======================================== */
+.etapas-timeline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: space-between;
+    padding: 10px 0;
+}
+
+.etapa-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 15px;
+    background: var(--bs-gray-100, #f8f9fa);
+    border-radius: 8px;
+    border-left: 4px solid var(--bs-secondary, #6c757d);
+    flex: 1 1 calc(33.333% - 10px);
+    min-width: 180px;
+    transition: all 0.3s ease;
+}
+
+.etapa-icone {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bs-secondary, #6c757d);
+    color: white;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+}
+
+.etapa-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.etapa-titulo {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--bs-dark, #212529);
+}
+
+.etapa-descricao {
+    font-size: 0.75rem;
+    color: var(--bs-gray-600, #6c757d);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.etapa-status {
+    flex-shrink: 0;
+}
+
+.etapa-status .badge {
+    font-size: 0.7rem;
+    padding: 4px 8px;
+}
+
+/* ========================================
+   ESTADOS DAS ETAPAS
+   ======================================== */
+
+/* Etapa em Processamento */
+.etapa-item.etapa-processando {
+    background: rgba(13, 110, 253, 0.1);
+    border-left-color: var(--bs-primary, #0d6efd);
+    animation: pulse-processando 1.5s infinite;
+}
+
+.etapa-item.etapa-processando .etapa-icone {
+    background: var(--bs-primary, #0d6efd);
+    animation: spin-icon 1s linear infinite;
+}
+
+/* Etapa Concluída */
+.etapa-item.etapa-concluida {
+    background: rgba(25, 135, 84, 0.1);
+    border-left-color: var(--bs-success, #198754);
+}
+
+.etapa-item.etapa-concluida .etapa-icone {
+    background: var(--bs-success, #198754);
+}
+
+/* Etapa com Erro */
+.etapa-item.etapa-erro {
+    background: rgba(220, 53, 69, 0.1);
+    border-left-color: var(--bs-danger, #dc3545);
+}
+
+.etapa-item.etapa-erro .etapa-icone {
+    background: var(--bs-danger, #dc3545);
+}
+
+/* ========================================
+   ANIMAÇÕES
+   ======================================== */
+@keyframes pulse-processando {
+    0% {
+        box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(13, 110, 253, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(13, 110, 253, 0);
+    }
+}
+
+@keyframes spin-icon {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ========================================
+   BARRA DE PROGRESSO CUSTOMIZADA
+   ======================================== */
+.progress {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    transition: width 0.3s ease;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+#detalhes-progresso {
+    font-size: 0.9rem;
+    padding: 8px 0;
+}
+
+#detalhes-progresso i {
+    margin-right: 5px;
+}
+
+/* ========================================
+   CARDS DE RESULTADO
+   ======================================== */
+#conteudo-resultado .card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#conteudo-resultado .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+#conteudo-resultado .card.border-success {
+    border-width: 2px;
+}
+
+#conteudo-resultado .card.border-danger {
+    border-width: 2px;
+}
+
+#conteudo-resultado .card.border-primary {
+    border-width: 2px;
+}
+
+#conteudo-resultado .card.border-info {
+    border-width: 2px;
+}
+
+/* ========================================
+   ALERTAS E LISTA DE ERROS
+   ======================================== */
+#conteudo-resultado .alert-warning ul {
+    list-style-type: disc;
+    padding-left: 20px;
+}
+
+#conteudo-resultado .alert-warning li {
+    padding: 2px 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+#conteudo-resultado .alert-warning li:last-child {
+    border-bottom: none;
+}
+
+/* ========================================
+   RESPONSIVIDADE
+   ======================================== */
+@media (max-width: 991px) {
+    .etapa-item {
+        flex: 1 1 calc(50% - 10px);
+    }
+}
+
+@media (max-width: 575px) {
+    .etapas-timeline {
+        flex-direction: column;
+    }
+    .etapa-item {
+        flex: 1 1 100%;
+    }
+    .etapa-descricao {
+        white-space: normal;
+    }
+}
+
+/* ========================================
+   TABELA DE CAMPANHAS
+   ======================================== */
+#campanhas-tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+#campanhas-tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+#campanhas-tbody .btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+}
+
+/* ========================================
+   BOTÕES
+   ======================================== */
+#btn-iniciar-importacao:disabled,
+#btn-download-modelo:disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
+}
+
+/* ========================================
+   LOADER/SPINNER
+   ======================================== */
+.bx-spin {
+    animation: spin-icon 1s linear infinite;
+}
+
+/* ========================================
+   ÁREA DE PROGRESSO HEADER
+   ======================================== */
+#area-etapas .card-header h5 {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#area-etapas .card-header h5 i {
+    font-size: 1.3rem;
+}
+
+/* ========================================
+   ÁREA DE RESULTADO HEADER
+   ======================================== */
+#area-resultado .card-header h5 {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#area-resultado .card-header h5 i {
+    font-size: 1.3rem;
+}

@@ -1,0 +1,518 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Consulta Cliente - SIAPE - CapitalCredito{% endblock %}
+
+{% block header_title %}Consulta Cliente - SIAPE{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Buscar Cliente</h5>
+                </div>
+                <div class="card-body">
+                    <form id="formBuscarCliente" class="row g-3">
+                        {% if user.is_superuser %}
+                        <div class="col-md-4">
+                            <label class="form-label">Campanha</label>
+                            <select class="form-select" id="filtroCampanha" name="campanha_id">
+                                <option value="">Todas as campanhas ativas</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                        {% else %}
+                        <div class="col-md-4" style="display: none;">
+                            <label class="form-label">Campanha</label>
+                            <select class="form-select" id="filtroCampanha" name="campanha_id">
+                                <option value="" selected>Todas as campanhas ativas</option>
+                            </select>
+                        </div>
+                        <div class="col-md-8">
+                        {% endif %}
+                            <label class="form-label">CPF</label>
+                            <input type="text" class="form-control" id="buscaCliente" name="busca" placeholder="Digite o CPF do cliente (apenas números)" maxlength="11" required>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">&nbsp;</label>
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class='bx bx-search'></i> Buscar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4" id="area-resultados" style="display: none;">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div id="detalhes-cliente-container" style="display: none;">
+                        
+                        <div id="dados-pessoais-card" class="card mb-3">
+                            <div class="card-header">
+                                <h6>Dados Pessoais</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row mb-3">
+                                    <div class="col-md-3">
+                                        <strong>Nome:</strong> <span id="dp-nome"></span>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <strong>CPF:</strong> <span id="dp-cpf"></span>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <strong>UF:</strong> <span id="dp-uf"></span>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <strong>Situação Funcional:</strong> <span id="dp-situacao"></span>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <strong>Celular:</strong> <span id="dp-celular">-</span>
+                                    </div>
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col-12">
+                                        <button type="button" class="btn btn-primary btn-sm me-2" onclick="abrirModalContato()" id="btn-adicionar-contato">
+                                            <i class='bx bx-phone'></i> Adicionar Contato
+                                        </button>
+                                        <button type="button" class="btn btn-success btn-sm me-2" onclick="abrirModalEsteira()" id="btn-adicionar-esteira">
+                                            <i class='bx bx-plus-circle'></i> Adicionar à Esteira
+                                        </button>
+                                        <button type="button" class="btn btn-info btn-sm me-2" onclick="abrirModalCalculadoras()">
+                                            <i class='bx bx-calculator'></i> Calculadoras
+                                        </button>
+                                        <button type="button" class="btn btn-warning btn-sm" onclick="abrirModalSimulador()">
+                                            <i class='bx bx-money'></i> Simulador
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="matriculas-container">
+                            <div class="card mb-3">
+                                <div class="card-header">
+                                    <h6>Matrículas</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Matrícula</th>
+                                                    <th>Matrícula Instituidor</th>
+                                                    <th>Órgão</th>
+                                                    <th>UPAG</th>
+                                                    <th>Qtd Contratos</th>
+                                                    <th>Base Cálculo</th>
+                                                    <th>RJUR</th>
+                                                    <th>Campanha</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="matriculas-tbody">
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="detalhes-matricula-container" style="display: none;">
+                            <button type="button" class="btn btn-secondary mb-3" onclick="voltarParaMatriculas()">
+                                <i class='bx bx-arrow-back'></i> Voltar para Matrículas
+                            </button>
+                            
+                            <div class="card mb-3">
+                                <div class="card-header">
+                                    <h6 id="matricula-selecionada-titulo">Matrícula: <span id="matricula-numero"></span></h6>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header bg-primary text-white">
+                                            <h6>Margem 5%</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <p><strong>Bruta:</strong> R$ <span id="margem-5-bruta">0,00</span></p>
+                                            <p><strong>Util:</strong> R$ <span id="margem-5-util">0,00</span></p>
+                                            <p><strong>Saldo:</strong> R$ <span id="margem-5-saldo">0,00</span></p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header bg-info text-white">
+                                            <h6>Margem Benefício 5%</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <p><strong>Bruta:</strong> R$ <span id="margem-5b-bruta">0,00</span></p>
+                                            <p><strong>Util:</strong> R$ <span id="margem-5b-util">0,00</span></p>
+                                            <p><strong>Saldo:</strong> R$ <span id="margem-5b-saldo">0,00</span></p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header bg-success text-white">
+                                            <h6>Margem 35%</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <p><strong>Bruta:</strong> R$ <span id="margem-35-bruta">0,00</span></p>
+                                            <p><strong>Util:</strong> R$ <span id="margem-35-util">0,00</span></p>
+                                            <p><strong>Saldo:</strong> R$ <span id="margem-35-saldo">0,00</span></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6>Contratos</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Contrato</th>
+                                                    <th>Tipo Contrato</th>
+                                                    <th>Banco</th>
+                                                    <th>Valor Parcela</th>
+                                                    <th>Parcelas Restantes</th>
+                                                    <th>Campanha</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="contratos-tbody">
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Adicionar à Esteira -->
+<div class="modal fade" id="modalEsteira" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Adicionar à Esteira</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formEsteira">
+                    <input type="hidden" id="esteira-cpf" value="">
+                    <div class="mb-3">
+                        <label class="form-label">Data de Contato</label>
+                        <input type="date" class="form-control" id="esteira-data" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Hora de Contato</label>
+                        <input type="time" class="form-control" id="esteira-hora" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="salvarEsteira()">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Calculadoras -->
+<div class="modal fade" id="modalCalculadoras" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Calculadoras</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <ul class="nav nav-tabs" id="calculadorasTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="saldo-devedor-tab" data-bs-toggle="tab" data-bs-target="#saldo-devedor" type="button">
+                            Saldo Devedor
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="coeficiente-tab" data-bs-toggle="tab" data-bs-target="#coeficiente" type="button">
+                            Coeficiente
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="cartao-beneficio-tab" data-bs-toggle="tab" data-bs-target="#cartao-beneficio" type="button">
+                            Cartão Benefício
+                        </button>
+                    </li>
+                </ul>
+                <div class="tab-content mt-3" id="calculadorasTabsContent">
+                    <!-- Saldo Devedor -->
+                    <div class="tab-pane fade show active" id="saldo-devedor" role="tabpanel">
+                        <div class="mb-3">
+                            <label class="form-label">Valor da Parcela (R$)</label>
+                            <input type="number" class="form-control" id="calc-parcela" step="0.01" min="0" placeholder="0.00">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Prazo Restante (meses)</label>
+                            <input type="number" class="form-control" id="calc-prazo" min="1" max="96" placeholder="0">
+                            <small class="form-text text-muted">O percentual de desconto será calculado automaticamente conforme o prazo</small>
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="calcularSaldoDevedor()">
+                            <i class='bx bx-calculator'></i> Calcular
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="limparCalculadoraSaldo()">
+                            <i class='bx bx-eraser'></i> Limpar
+                        </button>
+                        <div class="mt-3">
+                            <hr>
+                            <div class="d-flex justify-content-between">
+                                <p><strong>Saldo Total:</strong></p>
+                                <p>R$ <span id="calc-saldo-total">0.00</span></p>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <p><strong>Desconto (<span id="calc-percentual">0</span>%):</strong></p>
+                                <p>R$ <span id="calc-desconto-valor">0.00</span></p>
+                            </div>
+                            <div class="d-flex justify-content-between resultado-final">
+                                <p><strong>Saldo Final:</strong></p>
+                                <p>R$ <span id="calc-saldo-final">0.00</span></p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Coeficiente -->
+                    <div class="tab-pane fade" id="coeficiente" role="tabpanel">
+                        <div class="mb-3">
+                            <label class="form-label">Parcela (R$)</label>
+                            <input type="number" class="form-control" id="coef-parcela" step="0.01" min="0" placeholder="0.00">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Coeficiente</label>
+                            <input type="number" class="form-control" id="coef-coeficiente" step="0.01" min="0" placeholder="0.00">
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="calcularCoeficiente()">
+                            <i class='bx bx-calculator'></i> Calcular
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="limparCalculadoraCoef()">
+                            <i class='bx bx-eraser'></i> Limpar
+                        </button>
+                        <div class="mt-3">
+                            <hr>
+                            <p><strong>Saldo Liberado:</strong> R$ <span id="resultado-coeficiente">0.00</span></p>
+                        </div>
+                    </div>
+                    <!-- Cartão Benefício -->
+                    <div class="tab-pane fade" id="cartao-beneficio" role="tabpanel">
+                        <div class="mb-3">
+                            <label class="form-label">Margem Líquida (R$)</label>
+                            <input type="number" class="form-control" id="beneficio-margem" step="0.01" min="0" placeholder="0.00">
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="calcularBeneficio()">
+                            <i class='bx bx-calculator'></i> Calcular
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="limparCalculadoraBeneficio()">
+                            <i class='bx bx-eraser'></i> Limpar
+                        </button>
+                        <div class="mt-3">
+                            <hr>
+                            <p><strong>Parcela do Cartão:</strong> R$ <span id="beneficio-parcela">0.00</span></p>
+                            <p><strong>Limite do Cartão:</strong> R$ <span id="beneficio-limite">0.00</span></p>
+                            <p><strong>Saque Disponível:</strong> R$ <span id="beneficio-saque">0.00</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Adicionar Contato -->
+<div class="modal fade" id="modalContato" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Adicionar Contato</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formContato">
+                    <input type="hidden" id="contato-cliente-id" value="">
+                    <div class="mb-3">
+                        <label class="form-label">Celular <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="contato-celular" placeholder="(00) 00000-0000" maxlength="15" required>
+                        <small class="form-text text-muted">Digite apenas números ou com formatação</small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="salvarContato()">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Simulador -->
+<div class="modal fade" id="modalSimulador" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(90deg, #28a745 0%, #20c997 100%);">
+                <h5 class="modal-title text-white">
+                    <i class='bx bx-calendar' style="color: #ffc107;"></i> Simulação
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="simulacao-margens-container" style="display: none;">
+                    <h6 class="mb-3">Margens Disponíveis</h6>
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header bg-primary text-white">
+                                    <h6>Margem 5%</h6>
+                                </div>
+                                <div class="card-body">
+                                    <p><strong>Saldo:</strong> R$ <span id="simulacao-margem-5-saldo">0,00</span></p>
+                                    <div class="form-check mt-2">
+                                        <input class="form-check-input" type="checkbox" id="simulacao_checkbox_saldo_5" style="cursor: pointer;">
+                                        <label class="form-check-label" for="simulacao_checkbox_saldo_5" style="cursor: pointer;">
+                                            Incluir na Simulação
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header bg-info text-white">
+                                    <h6>Margem Benefício 5%</h6>
+                                </div>
+                                <div class="card-body">
+                                    <p><strong>Saldo:</strong> R$ <span id="simulacao-margem-5b-saldo">0,00</span></p>
+                                    <div class="form-check mt-2">
+                                        <input class="form-check-input" type="checkbox" id="simulacao_checkbox_saldo_5b" style="cursor: pointer;">
+                                        <label class="form-check-label" for="simulacao_checkbox_saldo_5b" style="cursor: pointer;">
+                                            Incluir na Simulação
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header bg-success text-white">
+                                    <h6>Margem 35%</h6>
+                                </div>
+                                <div class="card-body">
+                                    <p><strong>Saldo:</strong> R$ <span id="simulacao-margem-35-saldo">0,00</span></p>
+                                    <div class="form-check mt-2">
+                                        <input class="form-check-input" type="checkbox" id="simulacao_checkbox_saldo_35" style="cursor: pointer;">
+                                        <label class="form-check-label" for="simulacao_checkbox_saldo_35" style="cursor: pointer;">
+                                            Incluir na Simulação
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="simulacao-contratos-container" style="display: none;" class="mb-3">
+                    <h6 class="mb-3">Contratos Disponíveis</h6>
+                    <div class="table-responsive" style="max-height: 200px; overflow-y: auto;">
+                        <table class="table table-sm table-hover">
+                            <thead class="table-light sticky-top">
+                                <tr>
+                                    <th style="width: 50px;">
+                                        <input type="checkbox" class="form-check-input" id="simulacao-selecionar-todos" title="Selecionar todos" style="cursor: pointer;">
+                                    </th>
+                                    <th>Contrato</th>
+                                    <th>Banco</th>
+                                    <th>Parcela (R$)</th>
+                                    <th>Parcelas</th>
+                                    <th>Saldo Devedor (R$)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="simulacao-contratos-tbody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label">COEF (%)</label>
+                        <input type="text" class="form-control" id="simulacao_coef" placeholder="0.00" inputmode="decimal">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">
+                            <i class='bx bx-show' style="color: #ffc107;"></i> Parcela (R$)
+                        </label>
+                        <input type="text" class="form-control" id="simulacao_parcela" placeholder="0.00" inputmode="decimal">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">
+                            <i class='bx bx-calendar' style="color: #ffc107;"></i> AF (R$)
+                        </label>
+                        <input type="text" class="form-control" id="simulacao_af" placeholder="0.00" readonly>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            <i class='bx bx-calendar' style="color: #ffc107;"></i> Saldo Devedor Total (R$)
+                        </label>
+                        <input type="text" class="form-control" id="simulacao_saldo_devedor" placeholder="0.00" inputmode="decimal">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            <i class='bx bx-money' style="color: #ffc107;"></i> Troco (R$)
+                        </label>
+                        <input type="text" class="form-control" id="simulacao_troco" placeholder="0.00" readonly>
+                    </div>
+                </div>
+                <div class="mt-3" id="simulacao-resultado" style="display: none;">
+                    <hr>
+                    <div class="alert" id="simulacao-mensagem"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="limparSimulador()">
+                    <i class='bx bx-eraser'></i> Limpar
+                </button>
+                <button type="button" class="btn btn-primary" onclick="calcularSimulacao()">
+                    <i class='bx bx-calculator'></i> Calcular
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block addcss_extra %}
+<link rel="stylesheet" href="{% static 'siape/css/consulta.css' %}">
+{% endblock %}
+
+{% block addjs_extra %}
+<script src="{% static 'siape/js/consulta.js' %}"></script>
+<script>
+    const isSuperUser = {% if user.is_superuser %}true{% else %}false{% endif %};
+</script>
+{% endblock %}
+

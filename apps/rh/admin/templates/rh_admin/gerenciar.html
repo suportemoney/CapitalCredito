@@ -1,0 +1,407 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load permissoes_tags %}
+
+{% block title %}Gerenciar Administrativo RH - CapitalCredito{% endblock %}
+
+{% block header_title %}Gerenciar Administrativo RH{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <ul class="nav nav-tabs card-header-tabs" id="adminTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="empresas-tab" data-bs-toggle="tab" data-bs-target="#empresas" type="button" role="tab">
+                                <i class='bx bx-building'></i> Empresas
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="lojas-tab" data-bs-toggle="tab" data-bs-target="#lojas" type="button" role="tab">
+                                <i class='bx bx-store'></i> Lojas
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="departamentos-tab" data-bs-toggle="tab" data-bs-target="#departamentos" type="button" role="tab">
+                                <i class='bx bx-group'></i> Departamentos
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="setores-tab" data-bs-toggle="tab" data-bs-target="#setores" type="button" role="tab">
+                                <i class='bx bx-grid-alt'></i> Setores
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="cargos-tab" data-bs-toggle="tab" data-bs-target="#cargos" type="button" role="tab">
+                                <i class='bx bx-briefcase'></i> Cargos
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="equipes-tab" data-bs-toggle="tab" data-bs-target="#equipes" type="button" role="tab">
+                                <i class='bx bx-user-voice'></i> Equipes
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="niveis-tab" data-bs-toggle="tab" data-bs-target="#niveis" type="button" role="tab">
+                                <i class='bx bx-layer'></i> Níveis Hierárquicos
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <div class="tab-content" id="adminTabsContent">
+                        <!-- TAB EMPRESAS -->
+                        <div class="tab-pane fade show active" id="empresas" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5>Empresas</h5>
+                                <button class="btn btn-primary btn-sm" onclick="abrirModalCriar('empresa')">
+                                    <i class='bx bx-plus'></i> Nova Empresa
+                                </button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Nome</th>
+                                            <th>CNPJ</th>
+                                            <th>Parceira</th>
+                                            <th>Status</th>
+                                            <th>Data Criação</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="empresas-tbody">
+                                        {% for empresa in empresas %}
+                                        <tr>
+                                            <td>{{ empresa.nome }}</td>
+                                            <td>{{ empresa.cnpj|default:"-" }}</td>
+                                            <td>{% if empresa.flg_parceira %}<span class="badge bg-warning">Sim</span>{% else %}<span class="badge bg-secondary">Não</span>{% endif %}</td>
+                                            <td>{% if empresa.status %}<span class="badge bg-success">Ativo</span>{% else %}<span class="badge bg-danger">Inativo</span>{% endif %}</td>
+                                            <td>{{ empresa.data_criacao|date:"d/m/Y H:i" }}</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-warning" onclick="abrirModalEditar('empresa', {{ empresa.id }})">
+                                                    <i class='bx bx-edit'></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-danger" onclick="deletarItem('empresa', {{ empresa.id }}, '{{ empresa.nome }}')">
+                                                    <i class='bx bx-trash'></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="6" class="text-center">Nenhuma empresa cadastrada</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- TAB LOJAS -->
+                        <div class="tab-pane fade" id="lojas" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5>Lojas</h5>
+                                <button class="btn btn-primary btn-sm" onclick="abrirModalCriar('loja')">
+                                    <i class='bx bx-plus'></i> Nova Loja
+                                </button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Nome</th>
+                                            <th>Logo</th>
+                                            <th>Tipo</th>
+                                            <th>Endereço</th>
+                                            <th>Status</th>
+                                            <th>Data Criação</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="lojas-tbody">
+                                        {% for loja in lojas %}
+                                        <tr>
+                                            <td>{{ loja.nome }}</td>
+                                            <td>{% if loja.logo %}<img src="{{ loja.logo.url }}" alt="{{ loja.nome }}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">{% else %}-{% endif %}</td>
+                                            <td>
+                                                {% if loja.flg_sede %}<span class="badge bg-primary">Sede</span>{% endif %}
+                                                {% if loja.flg_filial %}<span class="badge bg-info">Filial</span>{% endif %}
+                                                {% if loja.flg_franquia %}<span class="badge bg-warning">Franquia</span>{% endif %}
+                                            </td>
+                                            <td>{{ loja.endereco|default:"-" }}</td>
+                                            <td>{% if loja.status %}<span class="badge bg-success">Ativo</span>{% else %}<span class="badge bg-danger">Inativo</span>{% endif %}</td>
+                                            <td>{{ loja.data_criacao|date:"d/m/Y H:i" }}</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-warning" onclick="abrirModalEditar('loja', {{ loja.id }})">
+                                                    <i class='bx bx-edit'></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-danger" onclick="deletarItem('loja', {{ loja.id }}, '{{ loja.nome }}')">
+                                                    <i class='bx bx-trash'></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="7" class="text-center">Nenhuma loja cadastrada</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- TAB DEPARTAMENTOS -->
+                        <div class="tab-pane fade" id="departamentos" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5>Departamentos</h5>
+                                <button class="btn btn-primary btn-sm" onclick="abrirModalCriar('departamento')">
+                                    <i class='bx bx-plus'></i> Novo Departamento
+                                </button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Nome</th>
+                                            <th>Status</th>
+                                            <th>Data Criação</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="departamentos-tbody">
+                                        {% for departamento in departamentos %}
+                                        <tr>
+                                            <td>{{ departamento.nome }}</td>
+                                            <td>{% if departamento.status %}<span class="badge bg-success">Ativo</span>{% else %}<span class="badge bg-danger">Inativo</span>{% endif %}</td>
+                                            <td>{{ departamento.data_criacao|date:"d/m/Y H:i" }}</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-warning" onclick="abrirModalEditar('departamento', {{ departamento.id }})">
+                                                    <i class='bx bx-edit'></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-danger" onclick="deletarItem('departamento', {{ departamento.id }}, '{{ departamento.nome }}')">
+                                                    <i class='bx bx-trash'></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="4" class="text-center">Nenhum departamento cadastrado</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- TAB SETORES -->
+                        <div class="tab-pane fade" id="setores" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5>Setores</h5>
+                                <button class="btn btn-primary btn-sm" onclick="abrirModalCriar('setor')">
+                                    <i class='bx bx-plus'></i> Novo Setor
+                                </button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Nome</th>
+                                            <th>Status</th>
+                                            <th>Data Criação</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="setores-tbody">
+                                        {% for setor in setores %}
+                                        <tr>
+                                            <td>{{ setor.nome }}</td>
+                                            <td>{% if setor.status %}<span class="badge bg-success">Ativo</span>{% else %}<span class="badge bg-danger">Inativo</span>{% endif %}</td>
+                                            <td>{{ setor.data_criacao|date:"d/m/Y H:i" }}</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-warning" onclick="abrirModalEditar('setor', {{ setor.id }})">
+                                                    <i class='bx bx-edit'></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-danger" onclick="deletarItem('setor', {{ setor.id }}, '{{ setor.nome }}')">
+                                                    <i class='bx bx-trash'></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="4" class="text-center">Nenhum setor cadastrado</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- TAB CARGOS -->
+                        <div class="tab-pane fade" id="cargos" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5>Cargos</h5>
+                                <button class="btn btn-primary btn-sm" onclick="abrirModalCriar('cargo')">
+                                    <i class='bx bx-plus'></i> Novo Cargo
+                                </button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Nome</th>
+                                            <th>Nível Hierárquico</th>
+                                            <th>Status</th>
+                                            <th>Data Criação</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="cargos-tbody">
+                                        {% for cargo in cargos %}
+                                        <tr>
+                                            <td>{{ cargo.nome }}</td>
+                                            <td>{{ cargo.nivel_hierarquico.nome }} ({{ cargo.nivel_hierarquico.importancia }})</td>
+                                            <td>{% if cargo.status %}<span class="badge bg-success">Ativo</span>{% else %}<span class="badge bg-danger">Inativo</span>{% endif %}</td>
+                                            <td>{{ cargo.data_criacao|date:"d/m/Y H:i" }}</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-warning" onclick="abrirModalEditar('cargo', {{ cargo.id }})">
+                                                    <i class='bx bx-edit'></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-danger" onclick="deletarItem('cargo', {{ cargo.id }}, '{{ cargo.nome }}')">
+                                                    <i class='bx bx-trash'></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="5" class="text-center">Nenhum cargo cadastrado</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- TAB EQUIPES -->
+                        <div class="tab-pane fade" id="equipes" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5>Equipes</h5>
+                                <button class="btn btn-primary btn-sm" onclick="abrirModalCriar('equipe')">
+                                    <i class='bx bx-plus'></i> Nova Equipe
+                                </button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Nome</th>
+                                            <th>Status</th>
+                                            <th>Data Criação</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="equipes-tbody">
+                                        {% for equipe in equipes %}
+                                        <tr>
+                                            <td>{{ equipe.nome }}</td>
+                                            <td>{% if equipe.status %}<span class="badge bg-success">Ativo</span>{% else %}<span class="badge bg-danger">Inativo</span>{% endif %}</td>
+                                            <td>{{ equipe.data_criacao|date:"d/m/Y H:i" }}</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-warning" onclick="abrirModalEditar('equipe', {{ equipe.id }})">
+                                                    <i class='bx bx-edit'></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-danger" onclick="deletarItem('equipe', {{ equipe.id }}, '{{ equipe.nome }}')">
+                                                    <i class='bx bx-trash'></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="4" class="text-center">Nenhuma equipe cadastrada</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- TAB NÍVEIS HIERÁRQUICOS -->
+                        <div class="tab-pane fade" id="niveis" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5>Níveis Hierárquicos</h5>
+                                <button class="btn btn-primary btn-sm" onclick="abrirModalCriar('nivel')">
+                                    <i class='bx bx-plus'></i> Novo Nível
+                                </button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Nome</th>
+                                            <th>Importância</th>
+                                            <th>Status</th>
+                                            <th>Data Criação</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="niveis-tbody">
+                                        {% for nivel in niveis %}
+                                        <tr>
+                                            <td>{{ nivel.nome }}</td>
+                                            <td><span class="badge bg-primary">{{ nivel.importancia }}</span></td>
+                                            <td>{% if nivel.status %}<span class="badge bg-success">Ativo</span>{% else %}<span class="badge bg-danger">Inativo</span>{% endif %}</td>
+                                            <td>{{ nivel.data_criacao|date:"d/m/Y H:i" }}</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-warning" onclick="abrirModalEditar('nivel', {{ nivel.id }})">
+                                                    <i class='bx bx-edit'></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-danger" onclick="deletarItem('nivel', {{ nivel.id }}, '{{ nivel.nome }}')">
+                                                    <i class='bx bx-trash'></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="5" class="text-center">Nenhum nível hierárquico cadastrado</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Genérico -->
+<div class="modal fade" id="modalForm" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalFormTitle">Criar</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalFormBody">
+                <!-- Conteúdo será preenchido via JavaScript -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="salvarForm()">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block addcss_extra %}
+<link rel="stylesheet" href="{% static 'rh_admin/css/gerenciar.css' %}">
+{% endblock %}
+
+{% block addjs_extra %}
+<script src="{% static 'rh_admin/js/gerenciar.js' %}"></script>
+{% endblock %}
+

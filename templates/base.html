@@ -1,0 +1,136 @@
+{% load static %}
+{% load permissoes_tags %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CapitalCredito{% endblock %}</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'img/favicon.ico' %}">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <link rel="stylesheet" href="{% static 'css/partials/menu-lateral.css' %}">
+    
+    <!-- Boxicons -->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    {% block addcss_extra %}{% endblock %}
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- jQuery UI -->
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/ui-lightness/jquery-ui.css">
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+    
+    <!-- JavaScript -->
+    <script src="{% static 'js/ajax-csrf.js' %}"></script>
+</head>
+
+<body>
+    {% csrf_token %}
+    {% include 'partials/_menu-lateral.html' %}
+    
+    <main>
+        <header>
+            <div class="TituloPagina">
+                <p>{% block header_title %}CapitalCredito{% endblock %}</p>
+                {% block pre_content %}{% endblock %}
+            </div>
+            <div class="Logout">
+                {% if user.is_authenticated %}
+                    <div id="bonif-header-info" class="bonif-header-info" style="display:none;"></div>
+                    <div class="user-menu-container">
+                        <div class="user-profile-wrapper" onclick="toggleUserMenu()">
+                            <p class="user-name-display">
+                                {{ user.username }}
+                            </p>
+                            <div class="user-photo-wrapper">
+                                {% if user|has_access:'CX44' %}
+                                <span class="badge-notif-contas badge-notif-contas-header" style="display:none;">0</span>
+                                {% endif %}
+                                <div class="user-photo-container">
+                                    {% if user.funcionario_profile and user.funcionario_profile.foto %}
+                                        <img src="{{ user.funcionario_profile.foto.url }}" alt="Foto do usuário" class="user-photo" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'%3E%3Ccircle cx=\'50\' cy=\'50\' r=\'50\' fill=\'%23D4AF37\'/%3E%3Ctext x=\'50\' y=\'60\' font-size=\'40\' fill=\'%23fff\' text-anchor=\'middle\'%3E{{ user.username|first|upper }}%3C/text%3E%3C/svg%3E'">
+                                    {% else %}
+                                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%23D4AF37'/%3E%3Ctext x='50' y='60' font-size='40' fill='%23fff' text-anchor='middle'%3E{{ user.username|first|upper }}%3C/text%3E%3C/svg%3E" alt="Foto padrão" class="user-photo">
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div id="user-menu-popup" class="user-menu-popup">
+                            <div class="user-menu-popup__content">
+                                {% if user|has_access:'CX44' %}
+                                <a href="javascript:void(0)" class="user-menu-item" id="user-menu-notificacoes" data-bs-toggle="modal" data-bs-target="#modalNotificacoesContas">
+                                    <i class='bx bx-bell'></i>
+                                    <span>Notificações</span>
+                                    <span class="badge-notif-contas badge-notif-contas-menu" style="display:none;">0</span>
+                                </a>
+                                {% else %}
+                                <a href="#" class="user-menu-item user-menu-item--disabled">
+                                    <i class='bx bx-bell'></i>
+                                    <span>Notificações</span>
+                                    <span class="badge-dev">Em desenvolvimento</span>
+                                </a>
+                                {% endif %}
+                                <a href="#" class="user-menu-item user-menu-item--disabled">
+                                    <i class='bx bx-cog'></i>
+                                    <span>Configurações</span>
+                                    <span class="badge-dev">Em desenvolvimento</span>
+                                </a>
+                                <a href="{% url 'usuarios:render_logout' %}" class="user-menu-item user-menu-item--logout">
+                                    <i class='bx bx-log-out'></i>
+                                    <span>Sair</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <a href="{% url 'usuarios:render_login' %}">
+                        <i class='bx bx-log-in'></i>
+                    </a>
+                {% endif %}
+            </div>
+        </header>
+
+        {% block content %}{% endblock %}
+    </main>
+
+    {% if user.is_authenticated and user|has_access:'CX44' %}
+    <div class="modal fade" id="modalNotificacoesContas" tabindex="-1" aria-hidden="true" style="z-index: 100001;">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Notificações</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="notificacoes-contas-body">
+                    <p class="text-muted">Carregando...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if user.is_authenticated %}
+    <link rel="stylesheet" href="{% static 'financeiro_geral/css/notificacoes.css' %}">
+    <script>window.FINANCEIRO_GERAL_BASE = "{% url 'financeiro_geral:index' %}";</script>
+    <script src="{% static 'financeiro_geral/js/notificacoes.js' %}"></script>
+    {% endif %}
+
+    {% block addjs_extra %}{% endblock %}
+    
+    <!-- Bootstrap JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- User Menu JavaScript -->
+    <script src="{% static 'js/user-menu.js' %}"></script>
+    
+    <!-- Menu Lateral JavaScript -->
+    <script src="{% static 'js/menu-lateral.js' %}"></script>
+</body>
+</html>
+

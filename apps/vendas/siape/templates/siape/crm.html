@@ -1,0 +1,680 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}CRM Kanban - SIAPE - CapitalCredito{% endblock %}
+
+{% block header_title %}CRM Kanban - SIAPE{% endblock %}
+
+{% block pre_content %}
+{% if user.is_superuser %}
+<div class="header-actions">
+    <button type="button" class="btn-gerenciar" onclick="abrirModalNovaTabulacao()">
+        <i class='bx bx-plus'></i> Nova Tabulação
+    </button>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Filtros -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">Filtros</h6>
+                </div>
+                <div class="card-body">
+                    <form id="formFiltrosCRM" onsubmit="event.preventDefault(); aplicarFiltros();">
+                        <div class="row">
+                            <div class="col-md-3 mb-2">
+                                <label class="form-label">Nome do Cliente</label>
+                                <input type="text" class="form-control form-control-sm" id="filtro-nome" placeholder="Digite o nome...">
+                            </div>
+                            <div class="col-md-2 mb-2">
+                                <label class="form-label">CPF do Cliente</label>
+                                <input type="text" class="form-control form-control-sm" id="filtro-cpf" placeholder="000.000.000-00">
+                            </div>
+                            <div class="col-md-2 mb-2">
+                                <label class="form-label">Data Início</label>
+                                <input type="date" class="form-control form-control-sm" id="filtro-data-inicio">
+                            </div>
+                            <div class="col-md-2 mb-2">
+                                <label class="form-label">Data Fim</label>
+                                <input type="date" class="form-control form-control-sm" id="filtro-data-fim">
+                            </div>
+                            <div class="col-md-2 mb-2">
+                                <label class="form-label">Funcionário/Vendedor</label>
+                                <select class="form-select form-select-sm" id="filtro-funcionario">
+                                    <option value="">Todos</option>
+                                </select>
+                            </div>
+                            <div class="col-md-1 mb-2 d-flex align-items-end">
+                                <button type="button" class="btn btn-primary btn-sm w-100" onclick="aplicarFiltros()">
+                                    <i class='bx bx-search'></i> Filtrar
+                                </button>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="limparFiltros()">
+                                    <i class='bx bx-x'></i> Limpar Filtros
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Kanban -->
+    <div class="row">
+        <div class="col-12">
+            <div id="crm-kanban-container">
+                <div id="crm-columns">
+                    <!-- Colunas serão preenchidas via JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Nova Tabulação (Apenas Superuser) -->
+{% if user.is_superuser %}
+<div class="modal fade" id="modalNovaTabulacao" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Nova Tabulação</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formNovaTabulacao">
+                    <div class="mb-3">
+                        <label class="form-label">Nome</label>
+                        <input type="text" class="form-control" id="tabulacao-nome" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Ordem</label>
+                        <input type="number" class="form-control" id="tabulacao-ordem" min="1" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Cor (hexadecimal)</label>
+                        <input type="color" class="form-control form-control-color" id="tabulacao-cor" value="#6c757d">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="salvarNovaTabulacao()">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Modal Ficha Cliente -->
+<div class="modal fade" id="modalFichaCliente" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ficha do Cliente</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="ficha-cliente-content">
+                <div id="dados-pessoais-card" class="card mb-3">
+                    <div class="card-header">
+                        <h6>Dados Pessoais</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-3">
+                                <strong>Nome:</strong> <span id="dp-nome"></span>
+                            </div>
+                            <div class="col-md-3">
+                                <strong>CPF:</strong> <span id="dp-cpf"></span>
+                            </div>
+                            <div class="col-md-2">
+                                <strong>UF:</strong> <span id="dp-uf"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <strong>Situação Funcional:</strong> <span id="dp-situacao"></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <button type="button" class="btn btn-info btn-sm me-2" onclick="abrirModalCalculadorasCRM()">
+                                    <i class='bx bx-calculator'></i> Calculadoras
+                                </button>
+                                <button type="button" class="btn btn-warning btn-sm" onclick="abrirModalSimuladorCRM()">
+                                    <i class='bx bx-money'></i> Simulador
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dados de Reversão -->
+                <div id="dados-reversao-card" class="card mb-3" style="display: none;">
+                    <div class="card-header bg-warning text-dark">
+                        <h6><i class='bx bx-rotate-left'></i> Dados de Reversão</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-2">
+                            <div class="col-md-3">
+                                <strong>Data para Reversão:</strong> <span id="rev-data"></span>
+                            </div>
+                            <div class="col-md-3">
+                                <strong>Horário Disponível:</strong> <span id="rev-horario"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Responsável:</strong> <span id="rev-responsavel"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-2" id="rev-observacao-row" style="display: none;">
+                            <div class="col-12">
+                                <strong>Observação:</strong>
+                                <p id="rev-observacao" class="mb-0"></p>
+                            </div>
+                        </div>
+                        <div class="row" id="rev-arquivos-row" style="display: none;">
+                            <div class="col-12">
+                                <strong>Arquivos:</strong>
+                                <ul id="rev-arquivos-list" class="list-unstyled mb-0"></ul>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-12">
+                                <small class="text-muted">Criado em: <span id="rev-data-criacao"></span></small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dados de Checagem -->
+                <div id="dados-checagem-card" class="card mb-3" style="display: none;">
+                    <div class="card-header bg-info text-white">
+                        <h6><i class='bx bx-check-circle'></i> Dados de Checagem</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-2">
+                            <div class="col-md-3">
+                                <strong>Data para Checagem:</strong> <span id="chec-data"></span>
+                            </div>
+                            <div class="col-md-3">
+                                <strong>Horário Disponível:</strong> <span id="chec-horario"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Responsável:</strong> <span id="chec-responsavel"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-2" id="chec-observacao-row" style="display: none;">
+                            <div class="col-12">
+                                <strong>Observação:</strong>
+                                <p id="chec-observacao" class="mb-0"></p>
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-md-3">
+                                <strong>Banco:</strong> <span id="chec-banco">-</span>
+                            </div>
+                            <div class="col-md-3">
+                                <strong>Valor AF:</strong> <span id="chec-valor-af">-</span>
+                            </div>
+                            <div class="col-md-3">
+                                <strong>Valor Repasse:</strong> <span id="chec-valor-repasse">-</span>
+                            </div>
+                            <div class="col-md-3">
+                                <strong>Saldo Devedor:</strong> <span id="chec-saldo-devedor">-</span>
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-md-3">
+                                <strong>Parcela Atual:</strong> <span id="chec-parcela-atual">-</span>
+                            </div>
+                            <div class="col-md-3">
+                                <strong>Parcela Nova:</strong> <span id="chec-parcela-nova">-</span>
+                            </div>
+                            <div class="col-md-3">
+                                <strong>Valor Troco:</strong> <span id="chec-valor-troco">-</span>
+                            </div>
+                            <div class="col-md-3">
+                                <strong>Prazo Atual:</strong> <span id="chec-prazo-atual">-</span>
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-md-3">
+                                <strong>Prazo Acordado:</strong> <span id="chec-prazo-acordado">-</span>
+                            </div>
+                        </div>
+                        <div class="row" id="chec-arquivos-row" style="display: none;">
+                            <div class="col-12">
+                                <strong>Arquivos:</strong>
+                                <ul id="chec-arquivos-list" class="list-unstyled mb-0"></ul>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-12">
+                                <small class="text-muted">Criado em: <span id="chec-data-criacao"></span></small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="matriculas-container">
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h6>Matrículas</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Matrícula</th>
+                                            <th>Matrícula Instituidor</th>
+                                            <th>Órgão</th>
+                                            <th>UPAG</th>
+                                            <th>Qtd Contratos</th>
+                                            <th>Base Cálculo</th>
+                                            <th>RJUR</th>
+                                            <th>Campanha</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="matriculas-tbody-crm">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="detalhes-matricula-container-crm" style="display: none;">
+                    <button type="button" class="btn btn-secondary mb-3" onclick="voltarParaMatriculasCRM()">
+                        <i class='bx bx-arrow-back'></i> Voltar para Matrículas
+                    </button>
+                    
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h6 id="matricula-selecionada-titulo-crm">Matrícula: <span id="matricula-numero-crm"></span></h6>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header bg-primary text-white">
+                                    <h6>Margem 5%</h6>
+                                </div>
+                                <div class="card-body">
+                                    <p><strong>Bruta:</strong> R$ <span id="margem-5-bruta-crm">0,00</span></p>
+                                    <p><strong>Util:</strong> R$ <span id="margem-5-util-crm">0,00</span></p>
+                                    <p><strong>Saldo:</strong> R$ <span id="margem-5-saldo-crm">0,00</span></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header bg-info text-white">
+                                    <h6>Margem Benefício 5%</h6>
+                                </div>
+                                <div class="card-body">
+                                    <p><strong>Bruta:</strong> R$ <span id="margem-5b-bruta-crm">0,00</span></p>
+                                    <p><strong>Util:</strong> R$ <span id="margem-5b-util-crm">0,00</span></p>
+                                    <p><strong>Saldo:</strong> R$ <span id="margem-5b-saldo-crm">0,00</span></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header bg-success text-white">
+                                    <h6>Margem 35%</h6>
+                                </div>
+                                <div class="card-body">
+                                    <p><strong>Bruta:</strong> R$ <span id="margem-35-bruta-crm">0,00</span></p>
+                                    <p><strong>Util:</strong> R$ <span id="margem-35-util-crm">0,00</span></p>
+                                    <p><strong>Saldo:</strong> R$ <span id="margem-35-saldo-crm">0,00</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h6>Contratos</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Contrato</th>
+                                            <th>Tipo Contrato</th>
+                                            <th>Banco</th>
+                                            <th>Valor Parcela</th>
+                                            <th>Parcelas Restantes</th>
+                                            <th>Campanha</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="contratos-tbody-crm">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Calculadoras -->
+<div class="modal fade" id="modalCalculadorasCRM" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Calculadoras</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <ul class="nav nav-tabs" id="calculadorasTabsCRM" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="saldo-devedor-tab-crm" data-bs-toggle="tab" data-bs-target="#saldo-devedor-crm" type="button">
+                            Saldo Devedor
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="coeficiente-tab-crm" data-bs-toggle="tab" data-bs-target="#coeficiente-crm" type="button">
+                            Coeficiente
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="cartao-beneficio-tab-crm" data-bs-toggle="tab" data-bs-target="#cartao-beneficio-crm" type="button">
+                            Cartão Benefício
+                        </button>
+                    </li>
+                </ul>
+                <div class="tab-content mt-3" id="calculadorasTabsContentCRM">
+                    <!-- Saldo Devedor -->
+                    <div class="tab-pane fade show active" id="saldo-devedor-crm" role="tabpanel">
+                        <div class="mb-3">
+                            <label class="form-label">Valor da Parcela (R$)</label>
+                            <input type="number" class="form-control" id="calc-parcela-crm" step="0.01" min="0" placeholder="0.00">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Prazo Restante (meses)</label>
+                            <input type="number" class="form-control" id="calc-prazo-crm" min="1" max="96" placeholder="0">
+                            <small class="form-text text-muted">O percentual de desconto será calculado automaticamente conforme o prazo</small>
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="calcularSaldoDevedorCRM()">
+                            <i class='bx bx-calculator'></i> Calcular
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="limparCalculadoraSaldoCRM()">
+                            <i class='bx bx-eraser'></i> Limpar
+                        </button>
+                        <div class="mt-3">
+                            <hr>
+                            <div class="d-flex justify-content-between">
+                                <p><strong>Saldo Total:</strong></p>
+                                <p>R$ <span id="calc-saldo-total-crm">0.00</span></p>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <p><strong>Desconto (<span id="calc-percentual-crm">0</span>%):</strong></p>
+                                <p>R$ <span id="calc-desconto-valor-crm">0.00</span></p>
+                            </div>
+                            <div class="d-flex justify-content-between resultado-final">
+                                <p><strong>Saldo Final:</strong></p>
+                                <p>R$ <span id="calc-saldo-final-crm">0.00</span></p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Coeficiente -->
+                    <div class="tab-pane fade" id="coeficiente-crm" role="tabpanel">
+                        <div class="mb-3">
+                            <label class="form-label">Parcela (R$)</label>
+                            <input type="number" class="form-control" id="coef-parcela-crm" step="0.01" min="0" placeholder="0.00">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Coeficiente</label>
+                            <input type="number" class="form-control" id="coef-coeficiente-crm" step="0.01" min="0" placeholder="0.00">
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="calcularCoeficienteCRM()">
+                            <i class='bx bx-calculator'></i> Calcular
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="limparCalculadoraCoefCRM()">
+                            <i class='bx bx-eraser'></i> Limpar
+                        </button>
+                        <div class="mt-3">
+                            <hr>
+                            <p><strong>Saldo Liberado:</strong> R$ <span id="resultado-coeficiente-crm">0.00</span></p>
+                        </div>
+                    </div>
+                    <!-- Cartão Benefício -->
+                    <div class="tab-pane fade" id="cartao-beneficio-crm" role="tabpanel">
+                        <div class="mb-3">
+                            <label class="form-label">Margem Líquida (R$)</label>
+                            <input type="number" class="form-control" id="beneficio-margem-crm" step="0.01" min="0" placeholder="0.00">
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="calcularBeneficioCRM()">
+                            <i class='bx bx-calculator'></i> Calcular
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="limparCalculadoraBeneficioCRM()">
+                            <i class='bx bx-eraser'></i> Limpar
+                        </button>
+                        <div class="mt-3">
+                            <hr>
+                            <p><strong>Parcela do Cartão:</strong> R$ <span id="beneficio-parcela-crm">0.00</span></p>
+                            <p><strong>Limite do Cartão:</strong> R$ <span id="beneficio-limite-crm">0.00</span></p>
+                            <p><strong>Saque Disponível:</strong> R$ <span id="beneficio-saque-crm">0.00</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Dados Reversão -->
+<div class="modal fade" id="modalDadosReversao" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Dados de Reversão</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formDadosReversao">
+                    <input type="hidden" id="reversao-controle-id" value="">
+                    <input type="hidden" id="reversao-nova-tabulacao-id" value="">
+                    <div class="mb-3">
+                        <label class="form-label">Responsável por Reversão <span class="text-danger">*</span></label>
+                        <select class="form-select" id="reversao-responsavel" required>
+                            <option value="">Selecione...</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Data para Reversão <span class="text-danger">*</span></label>
+                        <select class="form-select" id="reversao-data" required>
+                            <option value="">Selecione o responsável primeiro</option>
+                        </select>
+                        <small class="text-muted" id="reversao-data-msg"></small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Horário Disponível <span class="text-danger">*</span></label>
+                        <select class="form-select" id="reversao-horario" required>
+                            <option value="">Selecione o responsável e a data primeiro</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Observação</label>
+                        <textarea class="form-control" id="reversao-observacao" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Arquivos</label>
+                        <input type="file" class="form-control" id="reversao-arquivos" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                        <small class="form-text text-muted">Você pode selecionar múltiplos arquivos</small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="salvarDadosReversao()">Salvar e Mover</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Dados Checagem -->
+<div class="modal fade" id="modalDadosChecagem" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Dados de Checagem</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formDadosChecagem">
+                    <input type="hidden" id="checagem-controle-id" value="">
+                    <input type="hidden" id="checagem-nova-tabulacao-id" value="">
+                    <div class="mb-3">
+                        <label class="form-label">Responsável por Checagem <span class="text-danger">*</span></label>
+                        <select class="form-select" id="checagem-responsavel" required>
+                            <option value="">Selecione...</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Data para Checagem <span class="text-danger">*</span></label>
+                        <select class="form-select" id="checagem-data" required>
+                            <option value="">Selecione o responsável primeiro</option>
+                        </select>
+                        <small class="text-muted" id="checagem-data-msg"></small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Horário Disponível <span class="text-danger">*</span></label>
+                        <select class="form-select" id="checagem-horario" required>
+                            <option value="">Selecione o responsável e a data primeiro</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Observação</label>
+                        <textarea class="form-control" id="checagem-observacao" rows="3"></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Nome do Banco</label>
+                            <input type="text" class="form-control" id="checagem-banco">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Valor AF (R$)</label>
+                            <input type="number" class="form-control" id="checagem-valor-af" step="0.01" min="0">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Valor Repasse (R$)</label>
+                            <input type="number" class="form-control" id="checagem-valor-repasse" step="0.01" min="0">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Saldo Devedor (R$)</label>
+                            <input type="number" class="form-control" id="checagem-saldo-devedor" step="0.01" min="0">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Valor Parcela Atual (R$)</label>
+                            <input type="number" class="form-control" id="checagem-parcela-atual" step="0.01" min="0">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Valor Parcela Nova Proposta (R$)</label>
+                            <input type="number" class="form-control" id="checagem-parcela-nova" step="0.01" min="0">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Valor Troco (R$)</label>
+                            <input type="number" class="form-control" id="checagem-troco" step="0.01">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Prazo Atual (meses)</label>
+                            <input type="number" class="form-control" id="checagem-prazo-atual" min="0">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Prazo Acordado (meses)</label>
+                            <input type="number" class="form-control" id="checagem-prazo-acordado" min="0">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Arquivos</label>
+                        <input type="file" class="form-control" id="checagem-arquivos" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                        <small class="form-text text-muted">Você pode selecionar múltiplos arquivos</small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="salvarDadosChecagem()">Salvar e Mover</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Simulador -->
+<div class="modal fade" id="modalSimuladorCRM" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Simulador - Compra de Dívida</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label">COEF (%)</label>
+                        <input type="number" class="form-control" id="sim-coef-crm" step="0.01" min="0" placeholder="0.00">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Parcela (R$)</label>
+                        <input type="number" class="form-control" id="sim-parcela-crm" step="0.01" min="0" placeholder="0.00">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">AF (R$)</label>
+                        <input type="number" class="form-control" id="sim-af-crm" step="0.01" min="0" placeholder="0.00" readonly>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Saldo Devedor Total (R$)</label>
+                        <input type="number" class="form-control" id="sim-saldo-devedor-crm" step="0.01" min="0" placeholder="0.00">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Troco (R$)</label>
+                        <input type="number" class="form-control" id="sim-troco-crm" step="0.01" placeholder="0.00" readonly>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Incluir Margem 35%</label>
+                    <input type="checkbox" class="form-check-input" id="sim-incluir-35-crm">
+                </div>
+                <button type="button" class="btn btn-primary" onclick="calcularSimulacaoCRM()">
+                    <i class='bx bx-calculator'></i> Calcular
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="limparSimuladorCRM()">
+                    <i class='bx bx-eraser'></i> Limpar
+                </button>
+                <div class="mt-3" id="simulacao-resultado-crm" style="display: none;">
+                    <hr>
+                    <div class="alert" id="simulacao-mensagem-crm"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block addcss_extra %}
+<link rel="stylesheet" href="{% static 'siape/css/crm.css' %}">
+{% endblock %}
+
+{% block addjs_extra %}
+<script src="{% static 'siape/js/crm.js' %}"></script>
+{% endblock %}
+

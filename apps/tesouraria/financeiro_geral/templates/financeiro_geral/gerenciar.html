@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Gerenciador Financeiro - CapitalCredito{% endblock %}
+
+{% block header_title %}Gerenciador Financeiro Geral{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="section-header">
+        <h5>Categorias e Tipos</h5>
+    </div>
+    <div class="section-body">
+        <ul class="nav nav-tabs" id="tabsGerenciador" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-categorias" type="button" role="tab">Categorias de Contas</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-subcategorias" type="button" role="tab">Subcategorias</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-tipos-beneficio" type="button" role="tab">Tipos de Benefício</button>
+            </li>
+        </ul>
+        <div class="tab-content mt-3" id="tabsGerenciadorContent">
+            <div class="tab-pane fade show active" id="tab-categorias" role="tabpanel">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex gap-2 mb-3">
+                            <input type="text" class="form-control" id="nova-categoria-nome" placeholder="Nome da categoria">
+                            <button type="button" class="btn btn-primary" id="btnCriarCategoria">Criar</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Status</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabela-categorias"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="tab-subcategorias" role="tabpanel">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Categoria</label>
+                                <select class="form-select" id="subcategoria-categoria">
+                                    <option value="">Selecione...</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Nome subcategoria</label>
+                                <input type="text" class="form-control" id="nova-subcategoria-nome" placeholder="Nome">
+                            </div>
+                            <div class="col-md-4 d-flex align-items-end">
+                                <button type="button" class="btn btn-primary" id="btnCriarSubcategoria">Criar</button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Categoria</th>
+                                        <th>Nome</th>
+                                        <th>Status</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabela-subcategorias"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="tab-tipos-beneficio" role="tabpanel">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex gap-2 mb-3">
+                            <input type="text" class="form-control" id="nova-tipo-beneficio-nome" placeholder="Nome (ex: Vale Transporte)">
+                            <button type="button" class="btn btn-primary" id="btnCriarTipoBeneficio">Criar</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Status</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabela-tipos-beneficio"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block addjs_extra %}
+<script>window.FINANCEIRO_GERAL_BASE = "{% url 'financeiro_geral:index' %}";</script>
+<script src="{% static 'financeiro_geral/js/gerenciar.js' %}"></script>
+{% endblock %}

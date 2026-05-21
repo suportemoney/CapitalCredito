@@ -1,0 +1,78 @@
+#tabelaRelatorio {
+    margin-top: 20px;
+}
+
+#tabelaRelatorio thead {
+    background-color: #f8f9fa;
+}
+
+#tabelaRelatorio th {
+    font-weight: bold;
+    text-align: center;
+}
+
+#tabelaRelatorio td {
+    text-align: center;
+    vertical-align: middle;
+    font-size: 13px;
+}
+
+#tabelaRelatorio th {
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.badge {
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-weight: normal;
+}
+
+.input-horario-editavel {
+    border: 1px solid #ced4da;
+    transition: all 0.2s;
+}
+
+.input-horario-editavel:hover {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.input-horario-editavel:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    outline: 0;
+}
+
+#modalJustificativa .modal-dialog {
+    z-index: 100001;
+}
+
+#modalJustificativa .modal-backdrop {
+    z-index: 100000;
+}
+
+@media print {
+    .card-header,
+    #formFiltrosRelatorio,
+    #btnImprimir,
+    .header-actions,
+    .sidebar,
+    .navbar {
+        display: none !important;
+    }
+    .container-fluid {
+        padding: 0 !important;
+    }
+    .card {
+        border: none !important;
+        box-shadow: none !important;
+    }
+    #tabelaRelatorio {
+        font-size: 12px;
+    }
+    #tabelaRelatorio th,
+    #tabelaRelatorio td {
+        padding: 5px !important;
+    }
+}

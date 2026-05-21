@@ -1,0 +1,110 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - CapitalCredito</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'img/favicon.ico' %}">
+    
+    <!-- Boxicons -->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Login CSS -->
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+</head>
+
+<body>
+    <!-- Partículas de fundo -->
+    <div class="particles" id="particles"></div>
+
+    <div class="login-container">
+        <!-- Logo grande à esquerda -->
+        <div class="logo-side">
+            <img src="{% static 'img/logo_1x1.png' %}" alt="CapitalCredito Logo">
+        </div>
+
+        <div class="login-wrapper">
+            <div class="login-card">
+            <div class="card-header">
+                <h4>
+                    <i class='bx bx-lock-alt'></i>
+                    <span>Login</span>
+                </h4>
+            </div>
+            <div class="card-body">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            <i class='bx {% if message.tags == "error" or message.tags == "danger" %}bx-error-circle{% else %}bx-check-circle{% endif %}'></i>
+                            {{ message }}
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="POST" action="{% url 'usuarios:render_login' %}" id="loginForm">
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label for="username" class="form-label">
+                            <i class='bx bx-user'></i>
+                            <span>Usuário</span>
+                        </label>
+                        <div class="input-wrapper">
+                            <input 
+                                type="text" 
+                                class="form-control" 
+                                id="username" 
+                                name="username" 
+                                placeholder="Digite seu usuário"
+                                required 
+                                autofocus
+                                autocomplete="username"
+                            >
+                            <i class='bx bx-user input-icon'></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password" class="form-label">
+                            <i class='bx bx-key'></i>
+                            <span>Senha</span>
+                        </label>
+                        <div class="input-wrapper">
+                            <input 
+                                type="password" 
+                                class="form-control" 
+                                id="password" 
+                                name="password" 
+                                placeholder="Digite sua senha"
+                                required
+                                autocomplete="current-password"
+                            >
+                            <button type="button" class="password-toggle" id="togglePassword" aria-label="Mostrar senha">
+                                <i class='bx bx-hide'></i>
+                            </button>
+                            <i class='bx bx-lock input-icon'></i>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-submit" id="submitBtn">
+                        <i class='bx bx-log-in'></i>
+                        <span>Entrar</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Login JavaScript -->
+    <script src="{% static 'js/login.js' %}"></script>
+</body>
+</html>

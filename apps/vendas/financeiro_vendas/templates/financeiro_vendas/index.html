@@ -1,0 +1,309 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Financeiro Vendas - CapitalCredito{% endblock %}
+
+{% block header_title %}Financeiro Vendas{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Filtros</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row align-items-end">
+                        <div class="col-md-4 mb-3 mb-md-0">
+                            <label class="form-label" for="filtroDataInicio">Data Início</label>
+                            <input type="date" class="form-control" id="filtroDataInicio" required>
+                        </div>
+                        <div class="col-md-4 mb-3 mb-md-0">
+                            <label class="form-label" for="filtroDataFim">Data Fim</label>
+                            <input type="date" class="form-control" id="filtroDataFim" required>
+                        </div>
+                        <div class="col-md-4 mb-3 mb-md-0">
+                            <button type="button" class="btn btn-primary w-100" onclick="aplicarFiltros()">
+                                <i class='bx bx-filter-alt'></i> Filtrar
+                            </button>
+                        </div>
+                    </div>
+                    <small class="text-muted">Período baseado na data de pagamento</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="card card-resumo">
+                <div class="card-header">
+                    <h5 class="mb-0">Resumo do Período</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3 mb-md-0">
+                            <div class="resumo-metrica">
+                                <small class="text-muted d-block">Total AF (R$)</small>
+                                <p class="mb-0 fs-4" id="resumo-total-af">R$ 0,00</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3 mb-md-0">
+                            <div class="resumo-metrica">
+                                <small class="text-muted d-block">Total Repasse (R$)</small>
+                                <p class="mb-0 fs-4" id="resumo-total-repasse">R$ 0,00</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="resumo-metrica">
+                                <small class="text-muted d-block">Contratos</small>
+                                <p class="mb-0 fs-4" id="resumo-total-contratos">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Gerenciador de Contratos</h5>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="abrirModalNovoContrato()">
+                            <i class='bx bx-plus'></i> Adicionar Contrato
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <ul class="nav nav-tabs" id="tabsContratos" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="a-pagar-tab" data-bs-toggle="tab" data-bs-target="#a-pagar" type="button" role="tab" onclick="carregarTabela('A_PAGAR')">
+                                A Pagar
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="pago-tab" data-bs-toggle="tab" data-bs-target="#pago" type="button" role="tab" onclick="carregarTabela('PAGO')">
+                                Pagos
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="nao-pago-tab" data-bs-toggle="tab" data-bs-target="#nao-pago" type="button" role="tab" onclick="carregarTabela('NAO_PAGO')">
+                                Não Pagos
+                            </button>
+                        </li>
+                    </ul>
+                    <div class="tab-content mt-3" id="tabsContratosContent">
+                        <!-- Tab A Pagar -->
+                        <div class="tab-pane fade show active" id="a-pagar" role="tabpanel">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Funcionário</th>
+                                            <th>Cliente</th>
+                                            <th>CPF</th>
+                                            <th>Produto</th>
+                                            <th>Banco</th>
+                                            <th>AF (R$)</th>
+                                            <th>Repasse (R$)</th>
+                                            <th>Ponta</th>
+                                            <th>Classificador</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tabela-a-pagar">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <!-- Tab Pagos -->
+                        <div class="tab-pane fade" id="pago" role="tabpanel">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Funcionário</th>
+                                            <th>Cliente</th>
+                                            <th>CPF</th>
+                                            <th>Produto</th>
+                                            <th>Banco</th>
+                                            <th>AF (R$)</th>
+                                            <th>Repasse (R$)</th>
+                                            <th>Ponta</th>
+                                            <th>Classificador</th>
+                                            <th>Data Pagamento</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tabela-pago">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <!-- Tab Não Pagos -->
+                        <div class="tab-pane fade" id="nao-pago" role="tabpanel">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Funcionário</th>
+                                            <th>Cliente</th>
+                                            <th>CPF</th>
+                                            <th>Produto</th>
+                                            <th>Banco</th>
+                                            <th>AF (R$)</th>
+                                            <th>Repasse (R$)</th>
+                                            <th>Ponta</th>
+                                            <th>Classificador</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tabela-nao-pago">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Novo Contrato -->
+<div class="modal fade" id="modalNovoContrato" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Adicionar Contrato</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formNovoContrato">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Vendedor</label>
+                            <select class="form-select" id="novo-user" required onchange="carregarSetorFuncionario(this.value)">
+                                <option value="">Selecione...</option>
+                                {% for usuario in usuarios %}
+                                <option value="{{ usuario.id }}">
+                                    {% if usuario.funcionario_profile %}
+                                        {{ usuario.funcionario_profile.nome_completo }} ({{ usuario.username }})
+                                    {% else %}
+                                        {{ usuario.username }}
+                                    {% endif %}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Setor</label>
+                            <select class="form-select" id="novo-setor" required>
+                                <option value="">Selecione...</option>
+                                {% for setor in setores %}
+                                <option value="{{ setor.id }}">{{ setor.nome }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">CPF do Cliente</label>
+                            <input type="text" class="form-control" id="novo-cpf" placeholder="000.000.000-00" required>
+                            <button type="button" class="btn btn-sm btn-outline-secondary mt-2" onclick="buscarClientePorCPF()">
+                                <i class='bx bx-search'></i> Buscar Cliente
+                            </button>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Nome do Cliente</label>
+                            <input type="text" class="form-control" id="novo-cliente-nome" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Produto</label>
+                            <select class="form-select" id="novo-produto" required>
+                                <option value="">Selecione...</option>
+                                {% for produto in produtos %}
+                                <option value="{{ produto.id }}">{{ produto.nome }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Banco</label>
+                            <input type="text" class="form-control" id="novo-banco" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Valor AF (R$)</label>
+                            <input type="number" class="form-control" id="novo-valor-af" step="0.01" min="0" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Valor Repasse (R$)</label>
+                            <input type="number" class="form-control" id="novo-valor-repasse" step="0.01" min="0" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Classificador</label>
+                            <select class="form-select" id="novo-classificador" required>
+                                <option value="">Selecione...</option>
+                                {% for classificador in classificadores %}
+                                <option value="{{ classificador.id }}">{{ classificador.titulo }} ({{ classificador.percentual }}%)</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Data do Contrato</label>
+                            <input type="date" class="form-control" id="novo-data-contrato" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Status</label>
+                            <select class="form-select" id="novo-status" required>
+                                <option value="A_PAGAR">A Pagar</option>
+                                <option value="PAGO">Pago</option>
+                                <option value="NAO_PAGO">Não Pago</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Data de Pagamento</label>
+                            <input type="date" class="form-control" id="novo-data-pagamento">
+                            <small class="form-text text-muted">Preencha apenas se status for "Pago"</small>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="novo-flg-ponta">
+                                <label class="form-check-label" for="novo-flg-ponta">
+                                    Ponta (marcar se NÃO for contrato novo/ponta)
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="salvarNovoContrato()">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block addcss_extra %}
+<link rel="stylesheet" href="{% static 'financeiro_vendas/css/index.css' %}">
+{% endblock %}
+
+{% block addjs_extra %}
+<script>
+    // Garantir que os dados estejam disponíveis globalmente usando JSON seguro
+    try {
+        window.produtos = {{ produtos_json|safe }};
+        window.classificadores = {{ classificadores_json|safe }};
+        
+        // Debug: verificar se os dados foram carregados
+        console.log('Produtos carregados:', window.produtos);
+        console.log('Classificadores carregados:', window.classificadores);
+    } catch (e) {
+        console.error('Erro ao carregar dados:', e);
+        window.produtos = [];
+        window.classificadores = [];
+    }
+</script>
+<script src="{% static 'financeiro_vendas/js/index.js' %}"></script>
+{% endblock %}

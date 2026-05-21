@@ -1,0 +1,46 @@
+/* Bonificações - CapitalCredito */
+#tabsBonificacoes .nav-link { font-weight: 500; }
+#tabsBonificacoes .nav-link.active { border-bottom: 2px solid var(--bs-primary, #0d6efd); }
+.bonificacoes-card .card-header { background: rgba(0,0,0,0.02); font-weight: 600; }
+#tabela-regras tbody tr:hover, #tabela-vinculos tbody tr:hover,
+#tabela-reducao-regras tbody tr:hover, #tabela-reducoes-funcionario tbody tr:hover,
+#tabela-calculos tbody tr:hover { background-color: rgba(13, 110, 253, 0.05); }
+#preview-calculo-container { border: 1px solid #dee2e6; border-radius: 0.375rem; padding: 1rem; }
+.modal#modalRegra .modal-dialog, .modal#modalVinculo .modal-dialog { max-width: 500px; }
+.modal#modalGatilho .modal-dialog { max-width: 360px; }
+.modal#modalGatilhos .modal-dialog { max-width: 420px; }
+
+/* Modais modernos - glassmorphism + gradiente */
+.bonificacoes-modal-modern .modal-content {
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+}
+.bonificacoes-modal-modern .bonificacoes-modal-header {
+    background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+    color: #fff;
+    border: none;
+    padding: 1rem 1.25rem;
+}
+.bonificacoes-modal-modern .bonificacoes-modal-header .modal-title {
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+.bonificacoes-modal-modern .bonificacoes-modal-body {
+    padding: 1.5rem 1.25rem;
+    background: #fff;
+}
+.bonificacoes-modal-modern .modal-footer {
+    border-top: 1px solid #dee2e6;
+    padding: 1rem 1.25rem;
+}
+.bonificacoes-gatilho-item {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.bonificacoes-gatilho-item:hover {
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+.btn-gatilhos-regra { font-size: 0.8rem; }

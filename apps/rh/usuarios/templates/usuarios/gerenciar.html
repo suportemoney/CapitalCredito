@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load permissoes_tags %}
+
+{% block title %}Gerenciar Usuários - CapitalCredito{% endblock %}
+
+{% block header_title %}Gerenciar Usuários{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Lista de Usuários Django</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Senha Padrão</th>
+                                    <th>Data de Criação</th>
+                                    <th>Funcionário Associado</th>
+                                    <th>Status</th>
+                                    <th>Email</th>
+                                    <th>Nome Completo</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usuarios-tbody">
+                                <tr>
+                                    <td colspan="7" class="text-center">Carregando...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block addcss_extra %}
+<link rel="stylesheet" href="{% static 'usuarios/css/gerenciar.css' %}">
+{% endblock %}
+
+{% block addjs_extra %}
+<script src="{% static 'usuarios/js/gerenciar.js' %}"></script>
+{% endblock %}
+

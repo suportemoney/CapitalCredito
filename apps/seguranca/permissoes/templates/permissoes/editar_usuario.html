@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Editar Permissões - {{ usuario.username }} - CapitalCredito{% endblock %}
+
+{% block header_title %}Editar Permissões: {{ usuario.username }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Informações do Usuário -->
+            <div class="card card-usuario-info">
+                <div class="card-body">
+                    <div class="usuario-header">
+                        <div class="usuario-avatar">
+                            <i class='bx bx-user-circle'></i>
+                        </div>
+                        <div class="usuario-details">
+                            <h4>{{ usuario.username }}</h4>
+                            <p>{{ usuario.email|default:"Sem email" }}</p>
+                            <div class="usuario-badges">
+                                {% if usuario.is_active %}
+                                    <span class="badge-status badge-active">Ativo</span>
+                                {% else %}
+                                    <span class="badge-status badge-inactive">Inativo</span>
+                                {% endif %}
+                                {% if usuario.is_superuser %}
+                                    <span class="badge-status badge-superuser">Superuser</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="usuario-stats">
+                            <div class="stat-item">
+                                <span class="stat-value" id="total-permissoes">{{ controle.acessos.count }}</span>
+                                <span class="stat-label">Permissões</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grupos de Permissões -->
+            {% if grupos %}
+            <div class="card">
+                <div class="card-header-permissoes">
+                    <h5><i class='bx bx-group'></i> Aplicar Grupos de Permissões</h5>
+                </div>
+                <div class="card-body">
+                    <div class="grupos-container">
+                        {% for grupo in grupos %}
+                        <div class="grupo-item">
+                            <div class="grupo-info">
+                                <h6>{{ grupo.titulo }}</h6>
+                                <p>{{ grupo.descricao|default:"Sem descrição" }}</p>
+                                <small>{{ grupo.acessos.count }} permissão(ões)</small>
+                            </div>
+                            <button class="btn-aplicar-grupo" data-grupo-id="{{ grupo.id }}" data-grupo-nome="{{ grupo.titulo }}">
+                                <i class='bx bx-check'></i> Aplicar
+                            </button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Gerenciamento de Permissões -->
+            <div class="card">
+                <div class="card-header-permissoes">
+                    <h5><i class='bx bx-list-check'></i> Gerenciar Permissões Individuais</h5>
+                </div>
+                <div class="card-body">
+                    <div class="permissoes-tabs">
+                        {% for item in acessos_por_tipo %}
+                        <button class="tab-btn" data-tab="{{ item.tipo }}">
+                            {{ item.nome }}
+                            <span class="tab-count" id="count-{{ item.tipo }}">0</span>
+                        </button>
+                        {% endfor %}
+                    </div>
+
+                    <div class="permissoes-content">
+                        {% for item in acessos_por_tipo %}
+                        <div class="tab-content" id="tab-{{ item.tipo }}" style="display: none;">
+                            <div class="permissoes-actions">
+                                <button class="btn-select-all" data-tipo="{{ item.tipo }}">
+                                    <i class='bx bx-check-square'></i> Selecionar Todos
+                                </button>
+                                <button class="btn-deselect-all" data-tipo="{{ item.tipo }}">
+                                    <i class='bx bx-square'></i> Desmarcar Todos
+                                </button>
+                            </div>
+                            <div class="permissoes-grid">
+                                {% for acesso_item in item.acessos %}
+                                <div class="permissao-item">
+                                    <label class="permissao-checkbox">
+                                        <input 
+                                            type="checkbox" 
+                                            class="checkbox-permissao" 
+                                            data-tipo="{{ item.tipo }}"
+                                            data-acesso-id="{{ acesso_item.acesso.id }}"
+                                            data-codigo="{{ acesso_item.codigo }}"
+                                            {% if acesso_item.tem_acesso %}checked{% endif %}
+                                        >
+                                        <span class="checkmark"></span>
+                                        <div class="permissao-info">
+                                            <strong>{{ acesso_item.acesso.nome }}</strong>
+                                            <small>{{ acesso_item.codigo }}</small>
+                                            {% if acesso_item.acesso.descricao %}
+                                            <p>{{ acesso_item.acesso.descricao }}</p>
+                                            {% endif %}
+                                        </div>
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="permissoes-footer">
+                        <button class="btn-salvar-permissoes" id="btn-salvar">
+                            <i class='bx bx-save'></i> Salvar Todas as Permissões
+                        </button>
+                        <a href="{% url 'permissoes:index' %}" class="btn-cancelar">
+                            <i class='bx bx-x'></i> Cancelar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div id="loading-overlay" class="loading-overlay" style="display: none;">
+    <div class="loading-spinner">
+        <i class='bx bx-loader-alt bx-spin'></i>
+        <p>Processando...</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block addcss_extra %}
+<link rel="stylesheet" href="{% static 'permissoes/css/gerenciamento.css' %}">
+{% endblock %}
+
+{% block addjs_extra %}
+<script src="{% static 'permissoes/js/gerenciamento.js' %}"></script>
+<script>
+    const USER_ID = {{ usuario.id }};
+    const API_URLS = {
+        adicionar: "{% url 'permissoes:api_adicionar_acessos' usuario.id %}",
+        remover: "{% url 'permissoes:api_remover_acessos' usuario.id %}",
+        aplicarGrupo: "{% url 'permissoes:api_aplicar_grupo' usuario.id %}",
+        salvar: "{% url 'permissoes:api_salvar_permissoes' usuario.id %}"
+    };
+</script>
+{% endblock %}
+
