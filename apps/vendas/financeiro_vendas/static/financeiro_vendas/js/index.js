@@ -1,71 +1,7 @@
 let statusAtual = 'A_PAGAR';
 
-function inicializarFiltroDatasMesAtual() {
-    const hoje = new Date();
-    const primeiroDiaMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-    const ultimoDiaMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
-    $('#filtroDataInicio').val(primeiroDiaMes.toISOString().split('T')[0]);
-    $('#filtroDataFim').val(ultimoDiaMes.toISOString().split('T')[0]);
-}
-
-function getFiltroDatas() {
-    const dataInicio = $('#filtroDataInicio').val();
-    const dataFim = $('#filtroDataFim').val();
-
-    if (!dataInicio) {
-        alert('Data início é obrigatória');
-        return null;
-    }
-    if (!dataFim) {
-        alert('Data fim é obrigatória');
-        return null;
-    }
-    if (dataFim < dataInicio) {
-        alert('Data fim não pode ser anterior à data início');
-        return null;
-    }
-
-    return { data_inicio: dataInicio, data_fim: dataFim };
-}
-
-function aplicarFiltros() {
-    const filtros = getFiltroDatas();
-    if (!filtros) {
-        return;
-    }
-    carregarResumo();
-    carregarTabela(statusAtual);
-}
-
-function carregarResumo() {
-    const filtros = getFiltroDatas();
-    if (!filtros) {
-        return;
-    }
-
-    $.ajax({
-        url: '/vendas/financeiro/api/contratos/resumo/',
-        method: 'GET',
-        data: filtros,
-        success: function(response) {
-            if (response.success) {
-                $('#resumo-total-af').text(formatarMoeda(response.data.total_af));
-                $('#resumo-total-repasse').text(formatarMoeda(response.data.total_repasse));
-                $('#resumo-total-contratos').text(response.data.total_contratos);
-            } else {
-                alert('Erro: ' + (response.message || 'Erro desconhecido'));
-            }
-        },
-        error: function(xhr) {
-            const response = xhr.responseJSON || {};
-            alert('Erro ao carregar resumo: ' + (response.message || 'Erro desconhecido'));
-        }
-    });
-}
-
 $(document).ready(function() {
-    inicializarFiltroDatasMesAtual();
-    aplicarFiltros();
+    carregarTabela('A_PAGAR');
     
     $('#novo-status').on('change', function() {
         if ($(this).val() === 'PAGO') {
@@ -81,16 +17,11 @@ $(document).ready(function() {
 
 function carregarTabela(status) {
     statusAtual = status;
-
-    const filtros = getFiltroDatas();
-    if (!filtros) {
-        return;
-    }
     
     $.ajax({
         url: '/vendas/financeiro/api/contratos/listar/',
         method: 'GET',
-        data: { status: status, ...filtros },
+        data: { status: status },
         success: function(response) {
             if (response.success) {
                 exibirTabela(status, response.data);
@@ -338,7 +269,7 @@ function salvarNovoContrato() {
                 } else if (modalElement) {
                     $(modalElement).modal('hide');
                 }
-                aplicarFiltros();
+                carregarTabela(statusAtual);
             } else {
                 alert('Erro: ' + response.message);
             }
@@ -366,16 +297,16 @@ function editarCampo(contratoId, campo, valor) {
         },
         success: function(response) {
             if (response.success) {
-                aplicarFiltros();
+                carregarTabela(statusAtual);
             } else {
                 alert('Erro: ' + response.message);
-                aplicarFiltros();
+                carregarTabela(statusAtual);
             }
         },
         error: function(xhr) {
             const response = xhr.responseJSON || {};
             alert('Erro ao editar campo: ' + (response.message || 'Erro desconhecido'));
-            aplicarFiltros();
+            carregarTabela(statusAtual);
         }
     });
 }
@@ -394,7 +325,7 @@ function inativarContrato(contratoId) {
         success: function(response) {
             if (response.success) {
                 alert(response.message);
-                aplicarFiltros();
+                carregarTabela(statusAtual);
             } else {
                 alert('Erro: ' + response.message);
             }

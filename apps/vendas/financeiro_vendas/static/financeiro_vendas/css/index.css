@@ -76,14 +76,3 @@
     background: #c82333;
 }
 
-.card-resumo .resumo-metrica p.fs-4 {
-    color: #1a1a1a;
-    font-weight: 600;
-}
-
-.card-resumo .resumo-metrica small {
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-}
-
