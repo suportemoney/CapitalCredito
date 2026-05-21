@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Sum, Count
 from datetime import datetime
 from apps.seguranca.permissoes.decorators import controle_acess
 from apps.vendas.financeiro_vendas.models import ContratoPagamento, Classificador
@@ -14,16 +14,89 @@ from apps.vendas.siape.models import Cliente, Produto
 from apps.rh.admin.models import Setor
 from apps.rh.funcionarios.models import Funcionario
 
+
+def _parse_intervalo_datas(request):
+    """Valida data_inicio e data_fim do GET; retorna tupla (date, date) ou JsonResponse de erro."""
+    data_inicio_str = request.GET.get('data_inicio', '').strip()
+    data_fim_str = request.GET.get('data_fim', '').strip()
+
+    if not data_inicio_str:
+        return JsonResponse({'success': False, 'message': 'Data início é obrigatória'}, status=400)
+    if not data_fim_str:
+        return JsonResponse({'success': False, 'message': 'Data fim é obrigatória'}, status=400)
+
+    try:
+        data_inicio = datetime.strptime(data_inicio_str, '%Y-%m-%d').date()
+        data_fim = datetime.strptime(data_fim_str, '%Y-%m-%d').date()
+    except ValueError:
+        return JsonResponse({'success': False, 'message': 'Formato de data inválido. Use AAAA-MM-DD'}, status=400)
+
+    if data_fim < data_inicio:
+        return JsonResponse({'success': False, 'message': 'Data fim não pode ser anterior à data início'}, status=400)
+
+    return data_inicio, data_fim
+
+
+def _filtrar_por_data_pagamento(queryset, data_inicio, data_fim):
+    """Filtra contratos com data_pagamento no intervalo informado."""
+    return queryset.filter(
+        data_pagamento__gte=data_inicio,
+        data_pagamento__lte=data_fim,
+    )
+
+
+@login_required
+@controle_acess('SS27')
+@require_http_methods(["GET"])
+def api_resumo_contratos(request):
+    """API GET para totais de AF, Repasse e quantidade de contratos no período (data_pagamento)."""
+    try:
+        intervalo = _parse_intervalo_datas(request)
+        if isinstance(intervalo, JsonResponse):
+            return intervalo
+        data_inicio, data_fim = intervalo
+
+        qs = _filtrar_por_data_pagamento(
+            ContratoPagamento.objects.filter(status_ativo=True),
+            data_inicio,
+            data_fim,
+        )
+        agg = qs.aggregate(
+            total_af=Sum('valor_af'),
+            total_repasse=Sum('valor_repasse'),
+            total_contratos=Count('id'),
+        )
+
+        return JsonResponse({
+            'success': True,
+            'data': {
+                'total_af': float(agg['total_af'] or 0),
+                'total_repasse': float(agg['total_repasse'] or 0),
+                'total_contratos': agg['total_contratos'] or 0,
+            }
+        })
+
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': f'Erro ao obter resumo: {str(e)}'}, status=500)
+
+
 @login_required
 @controle_acess('SS27')
 @require_http_methods(["GET"])
 def api_listar_contratos(request):
-    """API GET para listar contratos filtrados por status"""
+    """API GET para listar contratos filtrados por status e data de pagamento"""
     try:
+        intervalo = _parse_intervalo_datas(request)
+        if isinstance(intervalo, JsonResponse):
+            return intervalo
+        data_inicio, data_fim = intervalo
+
         status = request.GET.get('status', 'A_PAGAR')
-        
-        contratos = ContratoPagamento.objects.filter(
-            status_ativo=True
+
+        contratos = _filtrar_por_data_pagamento(
+            ContratoPagamento.objects.filter(status_ativo=True),
+            data_inicio,
+            data_fim,
         ).select_related(
             'user',
             'setor',

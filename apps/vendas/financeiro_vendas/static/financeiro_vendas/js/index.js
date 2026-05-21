@@ -1,7 +1,84 @@
 let statusAtual = 'A_PAGAR';
 
+function filtroDatasDisponivel() {
+    return $('#filtroDataInicio').length > 0 && $('#filtroDataFim').length > 0;
+}
+
+function inicializarFiltroDatasMesAtual() {
+    if (!filtroDatasDisponivel()) {
+        return;
+    }
+    const hoje = new Date();
+    const primeiroDiaMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+    const ultimoDiaMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
+    $('#filtroDataInicio').val(primeiroDiaMes.toISOString().split('T')[0]);
+    $('#filtroDataFim').val(ultimoDiaMes.toISOString().split('T')[0]);
+}
+
+function getFiltroDatas() {
+    if (!filtroDatasDisponivel()) {
+        return null;
+    }
+
+    const dataInicio = $('#filtroDataInicio').val();
+    const dataFim = $('#filtroDataFim').val();
+
+    if (!dataInicio) {
+        alert('Data início é obrigatória');
+        return null;
+    }
+    if (!dataFim) {
+        alert('Data fim é obrigatória');
+        return null;
+    }
+    if (dataFim < dataInicio) {
+        alert('Data fim não pode ser anterior à data início');
+        return null;
+    }
+
+    return { data_inicio: dataInicio, data_fim: dataFim };
+}
+
+function aplicarFiltros() {
+    const filtros = getFiltroDatas();
+    if (filtroDatasDisponivel() && !filtros) {
+        return;
+    }
+    if (filtros) {
+        carregarResumo();
+    }
+    carregarTabela(statusAtual);
+}
+
+function carregarResumo() {
+    const filtros = getFiltroDatas();
+    if (!filtros) {
+        return;
+    }
+
+    $.ajax({
+        url: '/vendas/financeiro/api/contratos/resumo/',
+        method: 'GET',
+        data: filtros,
+        success: function(response) {
+            if (response.success) {
+                $('#resumo-total-af').text(formatarMoeda(response.data.total_af));
+                $('#resumo-total-repasse').text(formatarMoeda(response.data.total_repasse));
+                $('#resumo-total-contratos').text(response.data.total_contratos);
+            } else {
+                alert('Erro: ' + (response.message || 'Erro desconhecido'));
+            }
+        },
+        error: function(xhr) {
+            const response = xhr.responseJSON || {};
+            alert('Erro ao carregar resumo: ' + (response.message || 'Erro desconhecido'));
+        }
+    });
+}
+
 $(document).ready(function() {
-    carregarTabela('A_PAGAR');
+    inicializarFiltroDatasMesAtual();
+    aplicarFiltros();
     
     $('#novo-status').on('change', function() {
         if ($(this).val() === 'PAGO') {
@@ -17,11 +94,22 @@ $(document).ready(function() {
 
 function carregarTabela(status) {
     statusAtual = status;
+
+    const filtros = getFiltroDatas();
+    if (filtroDatasDisponivel() && !filtros) {
+        return;
+    }
+
+    const params = { status: status };
+    if (filtros) {
+        params.data_inicio = filtros.data_inicio;
+        params.data_fim = filtros.data_fim;
+    }
     
     $.ajax({
         url: '/vendas/financeiro/api/contratos/listar/',
         method: 'GET',
-        data: { status: status },
+        data: params,
         success: function(response) {
             if (response.success) {
                 exibirTabela(status, response.data);
@@ -269,7 +357,7 @@ function salvarNovoContrato() {
                 } else if (modalElement) {
                     $(modalElement).modal('hide');
                 }
-                carregarTabela(statusAtual);
+                aplicarFiltros();
             } else {
                 alert('Erro: ' + response.message);
             }
@@ -297,16 +385,16 @@ function editarCampo(contratoId, campo, valor) {
         },
         success: function(response) {
             if (response.success) {
-                carregarTabela(statusAtual);
+                aplicarFiltros();
             } else {
                 alert('Erro: ' + response.message);
-                carregarTabela(statusAtual);
+                aplicarFiltros();
             }
         },
         error: function(xhr) {
             const response = xhr.responseJSON || {};
             alert('Erro ao editar campo: ' + (response.message || 'Erro desconhecido'));
-            carregarTabela(statusAtual);
+            aplicarFiltros();
         }
     });
 }
@@ -325,7 +413,7 @@ function inativarContrato(contratoId) {
         success: function(response) {
             if (response.success) {
                 alert(response.message);
-                carregarTabela(statusAtual);
+                aplicarFiltros();
             } else {
                 alert('Erro: ' + response.message);
             }

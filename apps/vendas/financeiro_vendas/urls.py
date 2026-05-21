@@ -10,6 +10,7 @@ urlpatterns = [
     path('classificador/', views.render_classificador, name='classificador'),
     
     # APIs Contratos
+    path('api/contratos/resumo/', apis_gerenciar.api_resumo_contratos, name='api_resumo_contratos'),
     path('api/contratos/listar/', apis_gerenciar.api_listar_contratos, name='api_listar_contratos'),
     path('api/contratos/criar/', apis_gerenciar.api_criar_contrato, name='api_criar_contrato'),
     path('api/contratos/editar-campo/<int:contrato_id>/', apis_gerenciar.api_editar_campo, name='api_editar_campo'),

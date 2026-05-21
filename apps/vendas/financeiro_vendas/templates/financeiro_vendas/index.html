@@ -7,6 +7,64 @@
 
 {% block content %}
 <div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Filtros</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row align-items-end">
+                        <div class="col-md-4 mb-3 mb-md-0">
+                            <label class="form-label" for="filtroDataInicio">Data Início</label>
+                            <input type="date" class="form-control" id="filtroDataInicio" required>
+                        </div>
+                        <div class="col-md-4 mb-3 mb-md-0">
+                            <label class="form-label" for="filtroDataFim">Data Fim</label>
+                            <input type="date" class="form-control" id="filtroDataFim" required>
+                        </div>
+                        <div class="col-md-4 mb-3 mb-md-0">
+                            <button type="button" class="btn btn-primary w-100" onclick="aplicarFiltros()">
+                                <i class='bx bx-filter-alt'></i> Filtrar
+                            </button>
+                        </div>
+                    </div>
+                    <small class="text-muted">Período baseado na data de pagamento</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="card card-resumo">
+                <div class="card-header">
+                    <h5 class="mb-0">Resumo do Período</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3 mb-md-0">
+                            <div class="resumo-metrica">
+                                <small class="text-muted d-block">Total AF (R$)</small>
+                                <p class="mb-0 fs-4" id="resumo-total-af">R$ 0,00</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3 mb-md-0">
+                            <div class="resumo-metrica">
+                                <small class="text-muted d-block">Total Repasse (R$)</small>
+                                <p class="mb-0 fs-4" id="resumo-total-repasse">R$ 0,00</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="resumo-metrica">
+                                <small class="text-muted d-block">Contratos</small>
+                                <p class="mb-0 fs-4" id="resumo-total-contratos">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="row">
         <div class="col-12">
             <div class="card">
