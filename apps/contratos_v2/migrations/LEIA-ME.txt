@@ -1,0 +1,16 @@
+App Django com label `contratos_v2` (tabelas contratos_v2_* no banco).
+Não colide com o legado `contratos_*` do operacional antigo.
+
+No servidor (após deploy), na ordem:
+
+  1. python manage.py migrate siape 0005
+  2. python manage.py makemigrations contratos_v2
+  3. python manage.py migrate contratos_v2
+  4. python manage.py migrate siape
+  5. python manage.py migrate
+
+O passo 2 gera 0001_initial.py a partir de apps/contratos_v2/models.py.
+A migração siape.0006 depende de contratos_v2.0001_initial.
+
+Se já existirem linhas em django_migrations para app `contratos` (legado), não apague;
+apenas aplique as novas migrações do label `contratos_v2`.

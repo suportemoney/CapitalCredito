@@ -59,8 +59,8 @@ INSTALLED_APPS = [
     # Apps Segurança
     'apps.seguranca.permissoes',
     
-    # Apps Operacional
-    'apps.operacional.contratos',
+    # Apps Contratos (esteira operacional v2)
+    'apps.contratos_v2.apps.ContratosConfig',  # label contratos_v2 (tabelas separadas do legado)
 ]
 
 MIDDLEWARE = [

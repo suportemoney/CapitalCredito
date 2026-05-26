@@ -1,0 +1,109 @@
+# -*- coding: utf-8 -*-
+"""APIs da consulta SIAPE integradas ao fluxo operacional (apps.contratos_v2)."""
+import json
+import re
+
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET
+
+from apps.contratos_v2.fluxo_constants import EstadoSolicitacaoProposta
+from apps.contratos_v2.models import PropostaDados, SolicitacaoPropostaCliente
+from apps.vendas.siape.models import CarteiraClientes, Cliente
+from apps.vendas.siape.services.carteira_operacional import get_or_create_carteira
+
+
+def _norm_cpf(cpf):
+    d = re.sub(r'\D', '', str(cpf or ''))
+    if not d:
+        return None
+    if len(d) < 11:
+        d = d.zfill(11)
+    return d[:11] if len(d) >= 11 else None
+
+
+@login_required
+@require_GET
+def api_carteira_por_cpf(request):
+    """Resolve ou cria carteira do vendedor para o CPF informado."""
+    cpf = _norm_cpf(request.GET.get('cpf'))
+    if not cpf:
+        return JsonResponse({'ok': False, 'message': 'CPF inválido.'}, status=400)
+    cliente = Cliente.objects.filter(cpf=cpf, status=True).first()
+    if not cliente:
+        return JsonResponse({'ok': False, 'message': 'Cliente não encontrado.'}, status=404)
+    carteira, criada = get_or_create_carteira(cliente, request.user)
+    return JsonResponse({
+        'ok': True,
+        'carteira_id': carteira.id,
+        'status_comercial': carteira.status_comercial or 'EM_NEGOCIACAO',
+        'tag_status_operacional': carteira.tag_status_operacional or '',
+        'criada': criada,
+    })
+
+
+@login_required
+@require_GET
+def api_get_simulacoes(request):
+    """Solicitações de simulação da carteira (card lateral na consulta)."""
+    try:
+        cid = int(request.GET.get('carteira_id') or 0)
+    except (TypeError, ValueError):
+        return JsonResponse({'status': 'sucesso', 'itens': []})
+    if not cid:
+        return JsonResponse({'status': 'sucesso', 'itens': []})
+    carteira = CarteiraClientes.objects.filter(
+        pk=cid, user_responsavel=request.user
+    ).first()
+    if not carteira:
+        return JsonResponse({'status': 'sucesso', 'itens': []})
+    qs = (
+        SolicitacaoPropostaCliente.objects.filter(carteira_clientes=carteira)
+        .select_related('cliente_dados_pessoais')
+        .order_by('-data_criacao')[:50]
+    )
+    itens = []
+    for sol in qs:
+        itens.append({
+            'id': sol.id,
+            'estado': sol.estado,
+            'data_criacao': sol.data_criacao.isoformat() if sol.data_criacao else '',
+            'cliente_nome': (
+                sol.cliente_dados_pessoais.nome_completo if sol.cliente_dados_pessoais_id else ''
+            ),
+        })
+    return JsonResponse({'status': 'sucesso', 'itens': itens})
+
+
+@login_required
+@require_GET
+def api_get_operacional(request):
+    """Propostas operacionais vinculadas à carteira."""
+    try:
+        cid = int(request.GET.get('carteira_id') or 0)
+    except (TypeError, ValueError):
+        return JsonResponse({'status': 'sucesso', 'itens': []})
+    if not cid:
+        return JsonResponse({'status': 'sucesso', 'itens': []})
+    carteira = CarteiraClientes.objects.filter(
+        pk=cid, user_responsavel=request.user
+    ).first()
+    if not carteira:
+        return JsonResponse({'status': 'sucesso', 'itens': []})
+    propostas = (
+        PropostaDados.objects.filter(carteiras_siape_propostas=carteira)
+        .select_related('banco', 'convenio', 'produto')
+        .order_by('-data_criacao')[:100]
+    )
+    itens = []
+    for pd in propostas:
+        itens.append({
+            'id': pd.id,
+            'codigo': pd.codigo or '',
+            'banco': pd.banco.titulo if pd.banco_id else '',
+            'produto': pd.produto.titulo if pd.produto_id else '',
+            'valor_af': str(pd.valor_af) if pd.valor_af is not None else '',
+            'aceita_pelo_cliente': bool(pd.aceita_pelo_cliente),
+            'data_criacao': pd.data_criacao.isoformat() if pd.data_criacao else '',
+        })
+    return JsonResponse({'status': 'sucesso', 'itens': itens})

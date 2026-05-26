@@ -154,6 +154,15 @@ function exibirDetalhesCliente(dados) {
     $('#detalhes-cliente-container').show();
     $('#matriculas-container').show();
     $('#detalhes-matricula-container').hide();
+
+    if (typeof window.initConsultaOperacional === 'function') {
+        window.initConsultaOperacional(
+            dados.carteira_id,
+            dados.status_comercial,
+            dp.cpf,
+            dp.nome
+        );
+    }
 }
 
 function selecionarMatricula(matriculaId) {

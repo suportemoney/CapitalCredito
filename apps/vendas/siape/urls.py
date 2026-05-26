@@ -7,6 +7,7 @@ from .apis import produtos as apis_produtos
 from .apis import metas as apis_metas
 from .apis import ranking as apis_ranking
 from .apis import responsaveis as apis_responsaveis
+from .apis import consulta_operacional as apis_consulta_operacional
 
 app_name = 'siape'
 
@@ -33,6 +34,9 @@ urlpatterns = [
     path('api/consulta/detalhes/<int:cliente_id>/', apis_consulta.api_detalhes_cliente, name='api_detalhes_cliente'),
     path('api/consulta/campanhas-ativas/', apis_consulta.api_listar_campanhas_ativas, name='api_campanhas_ativas'),
     path('api/consulta/adicionar-contato/<int:cliente_id>/', apis_consulta.api_adicionar_contato, name='api_adicionar_contato'),
+    path('api/consulta/carteira-por-cpf/', apis_consulta_operacional.api_carteira_por_cpf, name='api_carteira_por_cpf'),
+    path('api/consulta/simulacoes/', apis_consulta_operacional.api_get_simulacoes, name='api_get_simulacoes'),
+    path('api/consulta/operacional/', apis_consulta_operacional.api_get_operacional, name='api_get_operacional'),
     
     # APIs CRM
     path('api/crm/adicionar-esteira/', apis_crm.api_adicionar_esteira, name='api_adicionar_esteira'),

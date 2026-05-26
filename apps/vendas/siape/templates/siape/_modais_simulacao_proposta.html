@@ -1,0 +1,102 @@
+{# Modais Simulação e Proposta — fluxo operacional (sem INSS) #}
+<div class="modal fade" id="modalSolicitacaoSimulacao" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title"><i class='bx bx-calculator me-2'></i>Solicitação de Simulação</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="sim_carteira_id">
+        <input type="hidden" id="sim_cliente_dados_pessoais_id">
+        <div class="mb-3">
+          <label class="form-label">CPF</label>
+          <input type="text" class="form-control" id="sim_cpf" readonly>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Nome completo *</label>
+          <input type="text" class="form-control" id="sim_nome_completo">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Observação</label>
+          <textarea class="form-control" id="sim_observacao" rows="3"></textarea>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Anexos</label>
+          <input type="file" class="form-control" id="sim_arquivos" multiple>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="sim_btn_enviar">
+          <i class='bx bx-send'></i> Enviar simulação
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modalEnviarPropostas" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title"><i class='bx bx-send me-2'></i>Enviar Propostas</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="prop_carteira_id">
+        <input type="hidden" id="prop_cliente_dados_pessoais_id">
+        <div class="row g-2 mb-3">
+          <div class="col-md-4">
+            <label class="form-label">Banco *</label>
+            <select class="form-select" id="prop_banco_id"><option value="">Carregando...</option></select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Convênio *</label>
+            <select class="form-select" id="prop_convenio_id"><option value="">—</option></select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Produto *</label>
+            <select class="form-select" id="prop_produto_id"><option value="">—</option></select>
+          </div>
+        </div>
+        <div class="row g-2 mb-3">
+          <div class="col-md-3">
+            <label class="form-label">Valor AF</label>
+            <input type="text" class="form-control" id="prop_valor_af" placeholder="0,00">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Valor TC</label>
+            <input type="text" class="form-control" id="prop_valor_tc" placeholder="0,00">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Parcela</label>
+            <input type="text" class="form-control" id="prop_valor_parcela" placeholder="0,00">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Prazo</label>
+            <input type="number" class="form-control" id="prop_prazo" min="1">
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Tabela CMS</label>
+          <select class="form-select" id="prop_tabela_cms_id"><option value="">—</option></select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Observação</label>
+          <textarea class="form-control" id="prop_observacao" rows="2"></textarea>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Anexos</label>
+          <input type="file" class="form-control" id="prop_arquivos" multiple>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-success" id="prop_btn_enviar">
+          <i class='bx bx-send'></i> Enviar propostas
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

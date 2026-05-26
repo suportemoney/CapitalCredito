@@ -42,8 +42,8 @@ urlpatterns = [
     # Apps Segurança
     path('seguranca/permissoes/', include('apps.seguranca.permissoes.urls')),
     
-    # Apps Operacional
-    path('operacional/contratos/', include('apps.operacional.contratos.urls')),
+    # Apps Contratos (esteira operacional v2)
+    path('contratos/', include('apps.contratos_v2.urls')),
 ]
 
 # Servir arquivos de mídia durante o desenvolvimento

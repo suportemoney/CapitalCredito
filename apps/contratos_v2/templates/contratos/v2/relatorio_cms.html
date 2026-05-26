@@ -1,0 +1,989 @@
+{% extends "base-plus.html" %}
+{% load static %}
+
+{% block title %}Relatório CMS{% endblock %}
+
+{% block header_title %}Relatório CMS{% endblock %}
+
+{% block addcss_extra %}
+<style>
+/* Tema padrão: White Mode — escopo da página, sem Bootstrap nas áreas estilizadas */
+.rcms-page {
+  width: 100%;
+  align-self: stretch;
+  --rcms-bg: #ffffff;
+  --rcms-surface: #ffffff;
+  --rcms-surface2: #f1f5f9;
+  --rcms-border: #e2e8f0;
+  --rcms-text: #0f172a;
+  --rcms-muted: #64748b;
+  --rcms-accent: #2563eb;
+  --rcms-accent2: #0d9488;
+  --rcms-danger: #dc2626;
+  --rcms-radius: 14px;
+  --rcms-shadow: 0 4px 24px rgba(15, 23, 42, 0.08);
+  --rcms-shadow-lg: 0 12px 40px rgba(15, 23, 42, 0.1);
+  font-family: ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif;
+  color: var(--rcms-text);
+  background: #f8fafc;
+  max-width: 100%;
+  padding-bottom: 2rem;
+}
+
+.rcms-page * { box-sizing: border-box; }
+
+/* Não usar <header> aqui: main.css aplica height:70px em todo header e cortava o texto */
+.rcms-hero {
+  position: relative;
+  height: auto;
+  min-height: 0;
+  padding: 1.75rem 1.5rem 2rem;
+  margin-bottom: 1.5rem;
+  border-radius: var(--rcms-radius);
+  background: linear-gradient(135deg, #ffffff 0%, #f0f7ff 45%, #e8f2fe 100%);
+  border: 1px solid var(--rcms-border);
+  box-shadow: var(--rcms-shadow-lg);
+  overflow: hidden;
+}
+.rcms-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 80% 50% at 100% 0%, rgba(37, 99, 235, 0.08), transparent 55%);
+  pointer-events: none;
+}
+.rcms-hero-inner { position: relative; z-index: 1; }
+.rcms-hero h1 {
+  margin: 0 0 0.5rem;
+  font-size: 1.65rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.rcms-hero h1 i { color: var(--rcms-accent); font-size: 1.85rem; }
+.rcms-hero p {
+  margin: 0;
+  color: var(--rcms-muted);
+  font-size: 0.95rem;
+  line-height: 1.55;
+  max-width: 52rem;
+}
+
+.rcms-card {
+  background: var(--rcms-surface);
+  border: 1px solid var(--rcms-border);
+  border-radius: var(--rcms-radius);
+  padding: 1.25rem 1.35rem;
+  margin-bottom: 1.25rem;
+  box-shadow: var(--rcms-shadow);
+}
+
+.rcms-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem 1.1rem;
+  align-items: end;
+}
+.rcms-field label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--rcms-muted);
+  margin-bottom: 0.35rem;
+}
+.rcms-field select,
+.rcms-field input[type="date"],
+.rcms-field input[type="search"] {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.875rem;
+  color: var(--rcms-text);
+  background: var(--rcms-bg);
+  border: 1px solid var(--rcms-border);
+  border-radius: 10px;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.rcms-field select:focus,
+.rcms-field input:focus {
+  border-color: var(--rcms-accent);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+.rcms-field--action {
+  display: flex;
+  align-items: flex-end;
+}
+.rcms-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1.1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform 0.12s, filter 0.12s, box-shadow 0.12s;
+}
+.rcms-btn:active { transform: scale(0.98); }
+.rcms-btn--primary {
+  width: 100%;
+  color: #fff;
+  background: linear-gradient(135deg, var(--rcms-accent), #2563eb);
+  box-shadow: 0 4px 14px rgba(61, 139, 253, 0.35);
+}
+.rcms-btn--primary:hover { filter: brightness(1.05); }
+.rcms-btn--ghost {
+  color: var(--rcms-text);
+  background: var(--rcms-surface2);
+  border: 1px solid var(--rcms-border);
+}
+.rcms-btn--ghost:hover { background: #e2e8f0; }
+.rcms-btn--ok {
+  color: #fff;
+  background: linear-gradient(135deg, var(--rcms-accent2), #0d9f7a);
+  box-shadow: 0 4px 14px rgba(34, 197, 158, 0.3);
+}
+.rcms-btn--sm { padding: 0.35rem 0.65rem; font-size: 0.78rem; border-radius: 8px; }
+
+.rcms-table-wrap {
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid var(--rcms-border);
+  background: var(--rcms-bg);
+}
+.rcms-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  min-width: 1200px;
+}
+.rcms-table thead th {
+  text-align: left;
+  padding: 0.75rem 0.65rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--rcms-muted);
+  background: var(--rcms-surface2);
+  border-bottom: 1px solid var(--rcms-border);
+  white-space: nowrap;
+}
+.rcms-table thead th.rcms-num { text-align: right; }
+.rcms-table tbody td {
+  padding: 0.65rem 0.65rem;
+  border-bottom: 1px solid var(--rcms-border);
+  vertical-align: middle;
+  color: var(--rcms-text);
+}
+.rcms-table tbody tr:hover td { background: #f8fafc; }
+.rcms-table tbody td.rcms-num { text-align: right; font-variant-numeric: tabular-nums; }
+.rcms-table tbody td.rcms-nowrap { white-space: nowrap; }
+.rcms-table tbody td.rcms-small { font-size: 0.75rem; color: var(--rcms-muted); }
+.rcms-table a {
+  color: var(--rcms-accent);
+  text-decoration: none;
+  font-weight: 500;
+}
+.rcms-table a:hover { text-decoration: underline; }
+
+.rcms-badge {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: var(--rcms-surface2);
+  color: var(--rcms-muted);
+  border: 1px solid var(--rcms-border);
+}
+.rcms-badge--info {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-color: #bfdbfe;
+}
+
+.rcms-empty {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: var(--rcms-muted);
+}
+.rcms-empty--err { color: var(--rcms-danger); }
+
+/* Variáveis nos overlays: modais/toast ficam fora de .rcms-page (var() inválido quebrava o fundo) */
+.rcms-modal-overlay,
+#rcms-toast {
+  --rcms-bg: #ffffff;
+  --rcms-surface: #ffffff;
+  --rcms-surface2: #f1f5f9;
+  --rcms-border: #e2e8f0;
+  --rcms-text: #0f172a;
+  --rcms-muted: #64748b;
+  --rcms-accent: #2563eb;
+  --rcms-accent2: #0d9488;
+  --rcms-danger: #dc2626;
+  --rcms-radius: 14px;
+  --rcms-shadow: 0 4px 24px rgba(15, 23, 42, 0.08);
+  --rcms-shadow-lg: 0 12px 40px rgba(15, 23, 42, 0.1);
+  font-family: ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Modal vanilla */
+.rcms-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(15, 23, 42, 0.35);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s, visibility 0.2s;
+}
+.rcms-modal-overlay.rcms-modal--open {
+  opacity: 1;
+  visibility: visible;
+}
+.rcms-modal-box {
+  width: 100%;
+  max-width: 420px;
+  background: var(--rcms-surface);
+  border: 1px solid var(--rcms-border);
+  border-radius: var(--rcms-radius);
+  box-shadow: var(--rcms-shadow-lg);
+  overflow: hidden;
+  transform: translateY(8px);
+  transition: transform 0.2s;
+}
+.rcms-modal-overlay.rcms-modal--open .rcms-modal-box { transform: translateY(0); }
+.rcms-modal-head {
+  padding: 1rem 1.15rem;
+  background: linear-gradient(135deg, #f8fafc, #eff6ff);
+  border-bottom: 1px solid var(--rcms-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.rcms-modal-head h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--rcms-text);
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+.rcms-modal-close {
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  border-radius: 8px;
+  background: #e2e8f0;
+  color: var(--rcms-text);
+  cursor: pointer;
+  font-size: 1.25rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.rcms-modal-close:hover { background: #cbd5e1; }
+.rcms-modal-body { padding: 1.15rem; background: var(--rcms-surface); }
+.rcms-modal-box--wide { max-width: 520px; }
+.rcms-resumo {
+  margin: 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.35rem 1rem;
+  font-size: 0.85rem;
+}
+.rcms-resumo dt {
+  margin: 0;
+  color: var(--rcms-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+}
+.rcms-resumo dd {
+  margin: 0;
+  color: var(--rcms-text);
+  font-weight: 600;
+}
+.rcms-modal-section-title {
+  margin: 0 0 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--rcms-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.rcms-pago-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem 1rem;
+}
+@media (max-width: 520px) {
+  .rcms-pago-form { grid-template-columns: 1fr; }
+}
+.rcms-pago-form .rcms-field--full { grid-column: 1 / -1; }
+.rcms-modal-body .rcms-field input[type="text"],
+.rcms-modal-body .rcms-field select {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.875rem;
+  color: var(--rcms-text);
+  background: var(--rcms-bg);
+  border: 1px solid var(--rcms-border);
+  border-radius: 10px;
+  outline: none;
+}
+.rcms-preview-cms {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  background: var(--rcms-surface2);
+  border: 1px solid var(--rcms-border);
+  font-size: 0.82rem;
+}
+.rcms-preview-cms strong { color: var(--rcms-text); }
+.rcms-modal-foot {
+  padding: 0 1.15rem 1.15rem;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  background: var(--rcms-surface);
+}
+.rcms-modal-foot .rcms-btn--primary { width: auto; }
+.rcms-hint {
+  margin-top: 0.5rem;
+  font-size: 0.78rem;
+  color: var(--rcms-muted);
+  line-height: 1.45;
+}
+.rcms-alert {
+  margin-top: 0.65rem;
+  padding: 0.5rem 0.65rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+}
+.rcms-alert.rcms-hidden { display: none; }
+
+/* Contador de comprovantes TC + lista no modal */
+.rcms-comp-counter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid #bfdbfe;
+  font-weight: 700;
+  font-size: 0.82rem;
+  line-height: 1.2;
+  color: #1d4ed8;
+  background: #eff6ff;
+  cursor: pointer;
+  font-family: inherit;
+}
+.rcms-comp-counter:hover { background: #dbeafe; }
+.rcms-comp-ul {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  max-height: min(50vh, 320px);
+  overflow-y: auto;
+}
+.rcms-comp-li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--rcms-border);
+  font-size: 0.88rem;
+}
+.rcms-comp-li:last-child { border-bottom: none; }
+.rcms-comp-li-name {
+  word-break: break-word;
+  color: var(--rcms-text);
+  flex: 1;
+  min-width: 0;
+}
+.rcms-comp-dl {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 10px;
+  border: 1px solid var(--rcms-border);
+  background: var(--rcms-surface2);
+  color: var(--rcms-accent);
+  text-decoration: none;
+}
+.rcms-comp-dl:hover { background: #e2e8f0; color: #1d4ed8; }
+.rcms-comp-dl i { font-size: 1.15rem; }
+
+/* Toast */
+.rcms-toast {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 10060;
+  max-width: min(360px, calc(100vw - 2rem));
+  padding: 0.85rem 1.1rem;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  box-shadow: var(--rcms-shadow);
+  transform: translateY(120%);
+  opacity: 0;
+  transition: transform 0.28s ease, opacity 0.28s ease;
+  pointer-events: none;
+}
+.rcms-toast.rcms-toast--show {
+  transform: translateY(0);
+  opacity: 1;
+}
+.rcms-toast--ok {
+  color: #fff;
+  background: linear-gradient(135deg, #0d9f7a, #0a7d62);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+.rcms-toast--err {
+  color: #fff;
+  background: linear-gradient(135deg, #b91c1c, #991b1b);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="rcms-page" id="relatorio-cms-container">
+  <div class="rcms-hero" role="banner">
+    <div class="rcms-hero-inner">
+      <h1><i class="bx bx-spreadsheet"></i> Relatório CMS</h1>
+      <p>Visão da esteira operacional: TC parcial ou total, comprovantes, tabela CMS, classificador e tabulação &quot;Pago CMS Empresa&quot;.</p>
+    </div>
+  </div>
+
+  <section class="rcms-card">
+    <div class="rcms-filters">
+      <div class="rcms-field"><label for="filtroBanco">Banco</label><select id="filtroBanco"><option value="">Todos</option></select></div>
+      <div class="rcms-field"><label for="filtroConvenio">Convênio</label><select id="filtroConvenio"><option value="">Todos</option></select></div>
+      <div class="rcms-field"><label for="filtroProduto">Produto</label><select id="filtroProduto"><option value="">Todos</option></select></div>
+      <div class="rcms-field"><label for="filtroClassificador">Classificador</label><select id="filtroClassificador"><option value="">Todos</option></select></div>
+      <div class="rcms-field"><label for="filtroSub">Sub-status</label>
+        <select id="filtroSub">
+          <option value="">Todos</option>
+          <option value="PG_PAGO_TC_PARCIAL">Pago TC Parcial</option>
+          <option value="PG_PAGO_TC_TOTAL">Pago TC Total</option>
+          <option value="PG_PAGO_TC">Pago TC (legado)</option>
+          <option value="PG_AGUARDANDO_CMS">Aguardando CMS</option>
+          <option value="PG_PAGO_CMS">Pago CMS</option>
+          <option value="PG_PAGO_CMS_EMPRESA">Pago CMS Empresa</option>
+        </select>
+      </div>
+      <div class="rcms-field"><label for="filtroStatusCmsFin">Status CMS (fin.)</label><select id="filtroStatusCmsFin"><option value="">Todos</option></select></div>
+      <div class="rcms-field"><label for="filtroFuncionario">Consultor</label><select id="filtroFuncionario"><option value="">Todos</option></select></div>
+      <div class="rcms-field"><label for="filtroLoja">Loja</label><select id="filtroLoja"><option value="">Todas</option></select></div>
+      <div class="rcms-field"><label for="filtroDataIni">Período início</label><input type="date" id="filtroDataIni"></div>
+      <div class="rcms-field"><label for="filtroDataFim">Período fim</label><input type="date" id="filtroDataFim"></div>
+      <div class="rcms-field"><label for="filtroBusca">Busca</label><input type="search" id="filtroBusca" placeholder="CPF, nome ou nº"></div>
+      <div class="rcms-field rcms-field--action"><button type="button" class="rcms-btn rcms-btn--primary" id="btnAplicarFiltros"><i class="bx bx-filter"></i> Filtrar</button></div>
+    </div>
+  </section>
+
+  <section class="rcms-card" style="padding: 0;">
+    <div class="rcms-table-wrap">
+      <table class="rcms-table" id="tabelaRelatorioCms">
+        <thead>
+          <tr>
+            <th>Nº</th>
+            <th>Cliente</th>
+            <th>CPF</th>
+            <th>Consultor</th>
+            <th>Loja</th>
+            <th>Banco / Convênio / Produto</th>
+            <th>Tabela CMS</th>
+            <th>Classif.</th>
+            <th class="rcms-num">AF</th>
+            <th class="rcms-num">TC</th>
+            <th class="rcms-num">Pago TC</th>
+            <th>Data pag. TC</th>
+            <th>Comprovantes</th>
+            <th class="rcms-num">CMS Rec.</th>
+            <th class="rcms-num">CMS Rep.</th>
+            <th class="rcms-num">CMS Plást.</th>
+            <th>Status esteira</th>
+            <th>CMS (fin.)</th>
+            <th class="rcms-num">Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tbodyRelatorio">
+          <tr><td colspan="19" class="rcms-empty">Carregando…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<div class="rcms-modal-overlay" id="modalPagoCmsEmpresa" aria-hidden="true">
+  <div class="rcms-modal-box rcms-modal-box--wide" role="dialog" aria-labelledby="rcms-modal-pago-title">
+    <div class="rcms-modal-head">
+      <h2 id="rcms-modal-pago-title"><i class="bx bx-check-shield"></i> Confirmar Pago CMS Empresa</h2>
+      <button type="button" class="rcms-modal-close" id="modalPagoCmsFechar" aria-label="Fechar">&times;</button>
+    </div>
+    <div class="rcms-modal-body">
+      <input type="hidden" id="pagoCmsContratoId">
+      <dl class="rcms-resumo">
+        <dt>Cliente</dt><dd id="pagoCmsCliente">—</dd>
+        <dt>Proposta</dt><dd id="pagoCmsProposta">—</dd>
+        <dt>Sub-status</dt><dd id="pagoCmsSub">—</dd>
+        <dt>Tabela CMS (uso)</dt><dd id="pagoCmsTabela">—</dd>
+        <dt>AF contrato</dt><dd id="pagoCmsAfContrato">—</dd>
+      </dl>
+      <p class="rcms-modal-section-title">Ajustes financeiros (não alteram o catálogo da tabela CMS)</p>
+      <div class="rcms-pago-form">
+        <div class="rcms-field rcms-field--full">
+          <label for="pagoCmsInBase">AF base para CMS (R$)</label>
+          <input type="text" id="pagoCmsInBase" inputmode="decimal" placeholder="Vazio = AF do contrato como base" autocomplete="off">
+        </div>
+        <div class="rcms-field">
+          <label for="pagoCmsInTr">% recebido (flat)</label>
+          <input type="text" id="pagoCmsInTr" inputmode="decimal" autocomplete="off">
+        </div>
+        <div class="rcms-field">
+          <label for="pagoCmsInTp">% repasse (flat)</label>
+          <input type="text" id="pagoCmsInTp" inputmode="decimal" autocomplete="off">
+        </div>
+        <div class="rcms-field">
+          <label for="pagoCmsInTpl">% plástico (flat)</label>
+          <input type="text" id="pagoCmsInTpl" inputmode="decimal" autocomplete="off">
+        </div>
+        <div class="rcms-field rcms-field--full">
+          <label for="pagoCmsSelClassif">Classificador banco</label>
+          <select id="pagoCmsSelClassif">
+            <option value="M1">M1 (100%)</option>
+            <option value="M2">M2 (50%)</option>
+            <option value="M3">M3 (0%)</option>
+          </select>
+        </div>
+      </div>
+      <div class="rcms-preview-cms" id="pagoCmsPreview">
+        <strong>Prévia CMS:</strong>
+        recebido <span id="pagoCmsPvRec">—</span> · repasse <span id="pagoCmsPvRep">—</span> · plástico <span id="pagoCmsPvPla">—</span>
+      </div>
+      <p class="rcms-hint">Os percentuais gravam apenas no contrato (snapshot). RegisterMoney é atualizado como no CRM. Confirmar altera o sub-status para &quot;Pago CMS Empresa&quot;.</p>
+    </div>
+    <div class="rcms-modal-foot">
+      <button type="button" class="rcms-btn rcms-btn--ghost" id="modalPagoCmsCancelar">Cancelar</button>
+      <button type="button" class="rcms-btn rcms-btn--primary" id="btnConfirmarPagoCms"><i class="bx bx-check"></i> Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<div class="rcms-modal-overlay" id="modalComprovantesTc" aria-hidden="true">
+  <div class="rcms-modal-box rcms-modal-box--wide" role="dialog" aria-labelledby="rcms-modal-comp-title">
+    <div class="rcms-modal-head">
+      <h2 id="rcms-modal-comp-title"><i class="bx bx-paperclip"></i> Comprovantes TC</h2>
+      <button type="button" class="rcms-modal-close" id="modalCompFechar" aria-label="Fechar">&times;</button>
+    </div>
+    <div class="rcms-modal-body">
+      <p class="rcms-muted" id="rcms-comp-sub" style="margin:0;font-size:0.85rem;">—</p>
+      <ul class="rcms-comp-ul" id="rcms-comp-list"></ul>
+    </div>
+    <div class="rcms-modal-foot">
+      <button type="button" class="rcms-btn rcms-btn--ghost" id="modalCompFecharRodape">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<div id="rcms-toast" class="rcms-toast" aria-live="polite"></div>
+{% endblock %}
+
+{% block addjs_extra %}
+<form id="rcms-csrf-holder" style="display:none" aria-hidden="true">{% csrf_token %}</form>
+<script>
+(function(){
+    'use strict';
+    const $ = (s, c) => (c || document).querySelector(s);
+    /** Token CSRF: hidden do Django (confiável) e fallback no cookie csrftoken. */
+    const csrf = function(){
+        const inp = document.querySelector('#rcms-csrf-holder input[name="csrfmiddlewaretoken"]');
+        if (inp && inp.value) return inp.value;
+        const m = document.cookie.match(/(?:^|;)\s*csrftoken=([^;]+)/);
+        if (!m) return '';
+        try { return decodeURIComponent(m[1]); } catch (e) { return m[1]; }
+    };
+    const money = (v) => (v==null||v==='') ? '—' : Number(v).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+    const esc = (s) => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+
+    let _toastTimer = null;
+    function toast(msg, ok){
+        const el = $('#rcms-toast');
+        el.textContent = msg;
+        el.className = 'rcms-toast rcms-toast--' + (ok ? 'ok' : 'err');
+        el.classList.add('rcms-toast--show');
+        clearTimeout(_toastTimer);
+        _toastTimer = setTimeout(function(){ el.classList.remove('rcms-toast--show'); }, 3200);
+    }
+
+    const modalPagoEl = $('#modalPagoCmsEmpresa');
+    function refreshBodyScrollLock(){
+        document.body.style.overflow = modalPagoEl.classList.contains('rcms-modal--open') ? 'hidden' : '';
+    }
+    function openPagoModal(){ modalPagoEl.classList.add('rcms-modal--open'); modalPagoEl.setAttribute('aria-hidden', 'false'); refreshBodyScrollLock(); }
+    function closePagoModal(){ modalPagoEl.classList.remove('rcms-modal--open'); modalPagoEl.setAttribute('aria-hidden', 'true'); refreshBodyScrollLock(); }
+
+    modalPagoEl.addEventListener('click', function(ev){ if (ev.target === modalPagoEl) closePagoModal(); });
+    $('#modalPagoCmsFechar').addEventListener('click', closePagoModal);
+    $('#modalPagoCmsCancelar').addEventListener('click', closePagoModal);
+
+    function parseLocaleNum(raw){
+        let s = String(raw || '').trim();
+        if (!s) return NaN;
+        if (s.indexOf(',') >= 0) {
+            s = s.replace(/\./g, '').replace(',', '.');
+        }
+        const n = Number(s);
+        return Number.isFinite(n) ? n : NaN;
+    }
+
+    function updatePagoCmsPreview(){
+        const defB = parseLocaleNum(modalPagoEl.getAttribute('data-default-base'));
+        let base = parseLocaleNum($('#pagoCmsInBase').value);
+        if (!(base > 0)) base = defB > 0 ? defB : NaN;
+        const tr = parseLocaleNum($('#pagoCmsInTr').value);
+        const tp = parseLocaleNum($('#pagoCmsInTp').value);
+        const tpl = parseLocaleNum($('#pagoCmsInTpl').value);
+        const fmt = function(v){
+            if (v == null || !Number.isFinite(v)) return '—';
+            return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        };
+        if (!(base > 0)) {
+            $('#pagoCmsPvRec').textContent = '—';
+            $('#pagoCmsPvRep').textContent = '—';
+            $('#pagoCmsPvPla').textContent = '—';
+            return;
+        }
+        $('#pagoCmsPvRec').textContent = Number.isFinite(tr) ? fmt(base * tr / 100) : '—';
+        $('#pagoCmsPvRep').textContent = Number.isFinite(tp) ? fmt(base * tp / 100) : '—';
+        $('#pagoCmsPvPla').textContent = Number.isFinite(tpl) ? fmt(base * tpl / 100) : '—';
+    }
+
+    ['pagoCmsInBase', 'pagoCmsInTr', 'pagoCmsInTp', 'pagoCmsInTpl', 'pagoCmsSelClassif'].forEach(function(id){
+        const el = $('#' + id);
+        if (el) el.addEventListener('input', updatePagoCmsPreview);
+        if (el) el.addEventListener('change', updatePagoCmsPreview);
+    });
+
+    function fillPagoCmsFromButton(btn){
+        $('#pagoCmsContratoId').value = btn.getAttribute('data-id') || '';
+        modalPagoEl.setAttribute('data-default-base', btn.getAttribute('data-base-af') || '');
+        $('#pagoCmsCliente').textContent = (btn.getAttribute('data-cliente') || '').trim() || '—';
+        $('#pagoCmsProposta').textContent = (btn.getAttribute('data-proposta') || '').trim() || '—';
+        $('#pagoCmsSub').textContent = (btn.getAttribute('data-sub') || '').trim() || '—';
+        $('#pagoCmsTabela').textContent = (btn.getAttribute('data-tabela') || '').trim() || '—';
+        $('#pagoCmsAfContrato').textContent = money(btn.getAttribute('data-af'));
+        const vBaseStored = (btn.getAttribute('data-valor-af-base-cms') || '').trim();
+        $('#pagoCmsInBase').value = vBaseStored ? vBaseStored.replace('.', ',') : '';
+        $('#pagoCmsInTr').value = (btn.getAttribute('data-taxa-rec') || '').replace('.', ',');
+        $('#pagoCmsInTp').value = (btn.getAttribute('data-taxa-rep') || '').replace('.', ',');
+        $('#pagoCmsInTpl').value = (btn.getAttribute('data-taxa-pla') || '').replace('.', ',');
+        const cl = (btn.getAttribute('data-classif') || 'M1').toUpperCase();
+        $('#pagoCmsSelClassif').value = ['M1', 'M2', 'M3'].indexOf(cl) >= 0 ? cl : 'M1';
+        updatePagoCmsPreview();
+    }
+
+    function fillSelect(sel, items, idKey, labelKey){
+        const cur = sel.value;
+        sel.innerHTML = '<option value="">Todos</option>';
+        (items||[]).forEach(function(it){
+            const id = it[idKey];
+            if (id==='' || id===null) return;
+            const o = document.createElement('option');
+            o.value = String(id);
+            o.textContent = it[labelKey] || String(id);
+            sel.appendChild(o);
+        });
+        sel.value = cur;
+    }
+
+    async function carregarMeta(){
+        const r = await fetch('/contratos/api/v2/relatorio-cms/meta/');
+        const j = await r.json();
+        if (!j.ok && !j.success) throw new Error(j.erro || j.error || 'Meta indisponível');
+        fillSelect($('#filtroBanco'), j.bancos, 'id', 'titulo');
+        fillSelect($('#filtroConvenio'), j.convenios, 'id', 'titulo');
+        fillSelect($('#filtroProduto'), j.produtos, 'id', 'titulo');
+        const fc = $('#filtroClassificador');
+        fc.innerHTML = '';
+        (j.classificadores||[]).forEach(function(it){
+            const o = document.createElement('option');
+            o.value = it.id == null ? '' : String(it.id);
+            o.textContent = it.titulo || '';
+            fc.appendChild(o);
+        });
+        const fs = $('#filtroStatusCmsFin');
+        fs.innerHTML = '<option value="">Todos</option>';
+        (j.status_cms_financeiro||[]).forEach(function(it){
+            if (!it.id) return;
+            const o = document.createElement('option');
+            o.value = String(it.id);
+            o.textContent = it.titulo || it.id;
+            fs.appendChild(o);
+        });
+        const ff = $('#filtroFuncionario');
+        ff.innerHTML = '<option value="">Todos</option>';
+        (j.funcionarios||[]).forEach(function(it){
+            const o = document.createElement('option');
+            o.value = String(it.id);
+            o.textContent = it.nome || String(it.id);
+            ff.appendChild(o);
+        });
+        fillSelect($('#filtroLoja'), j.lojas || [], 'id', 'nome');
+    }
+
+    function nomeComprovanteTc(c){
+        if (c && c.nome_arquivo) return String(c.nome_arquivo);
+        const u = c && c.arquivo_url;
+        if (u) {
+            try {
+                const path = String(u).split('?')[0];
+                const seg = path.split('/').filter(Boolean).pop();
+                return seg || 'Comprovante';
+            } catch (e) { return 'Comprovante'; }
+        }
+        return c && c.id ? ('Comprovante #' + c.id) : 'Comprovante';
+    }
+
+    /** Célula: contador clicável (abre modal com nomes + download). */
+    function fmtCompCell(row){
+        const arr = row.comprovantes_tc || [];
+        const n = arr.length;
+        if (!n) return '—';
+        const enc = encodeURIComponent(JSON.stringify(arr));
+        const prop = String(row.numero_proposta || row.contrato_execucao_id || '').trim();
+        const label = n === 1 ? '1 comprovante TC' : (n + ' comprovantes TC');
+        return '<button type="button" class="rcms-comp-counter" title="Ver comprovantes" aria-label="' + esc(label) + '" data-comps="' + enc + '" data-proposta="' + esc(prop) + '"><span>' + n + '</span></button>';
+    }
+
+    const modalCompEl = $('#modalComprovantesTc');
+    function openCompModal(encoded, proposta){
+        let arr = [];
+        try { arr = JSON.parse(decodeURIComponent(encoded)); } catch (e) { arr = []; }
+        if (!arr.length) return;
+        const sub = $('#rcms-comp-sub');
+        sub.textContent = proposta ? ('Proposta ' + proposta) : 'Comprovantes de pagamento TC';
+        const ul = $('#rcms-comp-list');
+        ul.innerHTML = '';
+        arr.forEach(function(c){
+            const nome = nomeComprovanteTc(c);
+            const li = document.createElement('li');
+            li.className = 'rcms-comp-li';
+            const span = document.createElement('span');
+            span.className = 'rcms-comp-li-name';
+            span.textContent = nome;
+            li.appendChild(span);
+            const u = c.arquivo_url;
+            if (u) {
+                const a = document.createElement('a');
+                a.href = u;
+                a.className = 'rcms-comp-dl';
+                a.target = '_blank';
+                a.rel = 'noopener';
+                a.setAttribute('download', '');
+                a.setAttribute('title', 'Baixar');
+                a.setAttribute('aria-label', 'Baixar ' + nome);
+                a.innerHTML = '<i class="bx bx-download" aria-hidden="true"></i>';
+                li.appendChild(a);
+            }
+            ul.appendChild(li);
+        });
+        modalCompEl.classList.add('rcms-modal--open');
+        modalCompEl.setAttribute('aria-hidden', 'false');
+    }
+    function closeCompModal(){
+        modalCompEl.classList.remove('rcms-modal--open');
+        modalCompEl.setAttribute('aria-hidden', 'true');
+        $('#rcms-comp-list').innerHTML = '';
+    }
+
+    async function carregarLista(){
+        const qs = new URLSearchParams();
+        const b = $('#filtroBanco').value; if (b) qs.set('banco_id', b);
+        const cv = $('#filtroConvenio').value; if (cv) qs.set('convenio_id', cv);
+        const pr = $('#filtroProduto').value; if (pr) qs.set('produto_id', pr);
+        const st = $('#filtroSub').value; if (st) qs.set('status', st);
+        const sc = $('#filtroStatusCmsFin').value; if (sc) qs.set('status_cms_financeiro', sc);
+        const di = $('#filtroDataIni').value; if (di) qs.set('data_ini', di);
+        const df = $('#filtroDataFim').value; if (df) qs.set('data_fim', df);
+        const bu = ($('#filtroBusca').value||'').trim(); if (bu) qs.set('busca', bu);
+        const fu = $('#filtroFuncionario').value; if (fu) qs.set('funcionario_id', fu);
+        const fl = $('#filtroLoja').value; if (fl) qs.set('loja_id', fl);
+        const cl = $('#filtroClassificador').value; if (cl) qs.set('classificador', cl);
+
+        const tbody = $('#tbodyRelatorio');
+        tbody.innerHTML = '<tr><td colspan="19" class="rcms-empty">Carregando…</td></tr>';
+        try{
+            const r = await fetch('/contratos/api/v2/relatorio-cms/?'+qs.toString());
+            const ct = (r.headers.get('content-type') || '').toLowerCase();
+            let j;
+            if (ct.indexOf('application/json') >= 0) {
+                j = await r.json();
+            } else {
+                await r.text();
+                throw new Error('Servidor retornou HTML em vez de JSON (HTTP ' + r.status + '). Verifique login ou logs do servidor.');
+            }
+            if (!r.ok) {
+                throw new Error(j.erro || j.error || ('Falha HTTP ' + r.status));
+            }
+            const ok = j.ok === true || j.success === true;
+            if (!ok) throw new Error(j.erro || j.error || 'Falha ao listar');
+            const linhas = j.itens || j.items || [];
+            if (linhas.length === 0){
+                tbody.innerHTML = '<tr><td colspan="19" class="rcms-empty">Nenhum registro encontrado.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = linhas.map(function(row){
+                const dtTc = row.data_pagamento_tc ? new Date(row.data_pagamento_tc).toLocaleString('pt-BR') : '—';
+                return '<tr>' +
+                    '<td>'+esc(row.numero_proposta || row.contrato_execucao_id || '—')+'</td>' +
+                    '<td>'+esc(row.cliente_nome || '—')+'</td>' +
+                    '<td class="rcms-nowrap">'+esc(row.cliente_cpf || '—')+'</td>' +
+                    '<td>'+esc(row.consultor_nome || '—')+'</td>' +
+                    '<td>'+esc(row.loja_nome || '—')+'</td>' +
+                    '<td>'+esc(row.banco||'—')+' / '+esc(row.convenio||'—')+' / '+esc(row.produto||'—')+'</td>' +
+                    '<td>'+esc(row.tabela_cms || '—')+'</td>' +
+                    '<td>'+esc(row.classificador_banco || '—')+'</td>' +
+                    '<td class="rcms-num">'+money(row.valor_af)+'</td>' +
+                    '<td class="rcms-num">'+money(row.valor_tc)+'</td>' +
+                    '<td class="rcms-num">'+money(row.valor_pago_tc)+'</td>' +
+                    '<td class="rcms-small rcms-nowrap">'+esc(dtTc)+'</td>' +
+                    '<td class="rcms-small rcms-nowrap">'+fmtCompCell(row)+'</td>' +
+                    '<td class="rcms-num">'+money(row.cms_recebido)+'</td>' +
+                    '<td class="rcms-num">'+money(row.cms_repassado)+'</td>' +
+                    '<td class="rcms-num">'+money(row.cms_plastico)+'</td>' +
+                    '<td><span class="rcms-badge">'+esc(row.sub_status_label || row.sub_status || '—')+'</span></td>' +
+                    '<td><span class="rcms-badge rcms-badge--info">'+esc(row.status_cms_financeiro || '—')+'</span></td>' +
+                    '<td class="rcms-num rcms-nowrap">' +
+                      (row.pode_marcar_pago_cms_empresa ? '<button type="button" class="rcms-btn rcms-btn--ok rcms-btn--sm" data-acao="pago-cms" data-id="'+esc(String(row.contrato_execucao_id))+'" ' +
+                        'data-cliente="'+esc(row.cliente_nome || '')+'" ' +
+                        'data-proposta="'+esc(row.numero_proposta || '')+'" ' +
+                        'data-sub="'+esc(row.sub_status_label || row.sub_status || '')+'" ' +
+                        'data-tabela="'+esc(row.tabela_cms || '')+'" ' +
+                        'data-af="'+esc(row.valor_af != null && row.valor_af !== '' ? String(row.valor_af) : '')+'" ' +
+                        'data-base-af="'+esc(row.base_af_cms != null && row.base_af_cms !== '' ? String(row.base_af_cms) : '')+'" ' +
+                        'data-valor-af-base-cms="'+esc(row.valor_af_base_cms != null && row.valor_af_base_cms !== '' ? String(row.valor_af_base_cms) : '')+'" ' +
+                        'data-taxa-rec="'+esc(row.taxa_recebido_pct != null && row.taxa_recebido_pct !== '' ? String(row.taxa_recebido_pct) : '')+'" ' +
+                        'data-taxa-rep="'+esc(row.taxa_repasse_pct != null && row.taxa_repasse_pct !== '' ? String(row.taxa_repasse_pct) : '')+'" ' +
+                        'data-taxa-pla="'+esc(row.taxa_plastico_pct != null && row.taxa_plastico_pct !== '' ? String(row.taxa_plastico_pct) : '')+'" ' +
+                        'data-classif="'+esc(row.classificador_banco || 'M1')+'" ' +
+                        '>Pago CMS</button>' : '—') +
+                    '</td>' +
+                '</tr>';
+            }).join('');
+        } catch(e){
+            tbody.innerHTML = '<tr><td colspan="19" class="rcms-empty rcms-empty--err">'+esc(e.message)+'</td></tr>';
+        }
+    }
+
+    $('#modalCompFechar').addEventListener('click', closeCompModal);
+    $('#modalCompFecharRodape').addEventListener('click', closeCompModal);
+    modalCompEl.addEventListener('click', function(ev){ if (ev.target === modalCompEl) closeCompModal(); });
+
+    $('#tbodyRelatorio').addEventListener('click', function(ev){
+        const compBtn = ev.target.closest('button.rcms-comp-counter');
+        if (compBtn) {
+            const raw = compBtn.getAttribute('data-comps');
+            const prop = (compBtn.getAttribute('data-proposta') || '').trim();
+            if (raw) openCompModal(raw, prop);
+            return;
+        }
+        const btn = ev.target.closest('button[data-acao]');
+        if (!btn) return;
+        const acao = btn.getAttribute('data-acao');
+        if (acao === 'pago-cms'){
+            fillPagoCmsFromButton(btn);
+            openPagoModal();
+        }
+    });
+
+    $('#btnConfirmarPagoCms').addEventListener('click', function(){
+        const id = $('#pagoCmsContratoId').value;
+        if (!id){ toast('Contrato inválido.', false); return; }
+        const tr = ($('#pagoCmsInTr').value || '').trim();
+        const tp = ($('#pagoCmsInTp').value || '').trim();
+        const tpl = ($('#pagoCmsInTpl').value || '').trim();
+        if (!tr || !tp || !tpl){
+            toast('Preencha os três percentuais (recebido, repasse e plástico).', false);
+            return;
+        }
+        const body = {
+            contrato_id: id,
+            contrato_execucao_id: id,
+            taxa_recebido_snapshot: tr.replace(',', '.'),
+            taxa_repasse_snapshot: tp.replace(',', '.'),
+            taxa_plastico_snapshot: tpl.replace(',', '.'),
+            classificador_banco_operacional: $('#pagoCmsSelClassif').value,
+        };
+        const bRaw = ($('#pagoCmsInBase').value || '').trim();
+        body.valor_af_base_cms = bRaw ? bRaw.replace(/\./g, '').replace(',', '.') : null;
+        const tok = csrf();
+        if (!tok) {
+            toast('Sessão/CSRF indisponível. Atualize a página (F5) e tente de novo.', false);
+            return;
+        }
+        fetch('/contratos/api/v2/relatorio-cms/pago-cms-empresa/', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {'Content-Type': 'application/json', 'X-CSRFToken': tok},
+            body: JSON.stringify(body)
+        }).then(function(r){
+            const ct = (r.headers.get('content-type') || '').toLowerCase();
+            if (ct.indexOf('application/json') >= 0) {
+                return r.json().then(function(j){ return {r: r, j: j}; });
+            }
+            return r.text().then(function(){
+                const hint = r.status === 403
+                    ? 'Acesso negado (403). Atualize a página ou verifique permissão financeira.'
+                    : 'Resposta não JSON (HTTP ' + r.status + ').';
+                throw new Error(hint);
+            });
+        }).then(function(pair){
+            const j = pair.j;
+            const ok = j.ok === true || j.success === true;
+            if (!ok) throw new Error(j.erro || j.error || 'Falha');
+            if (!pair.r.ok) throw new Error(j.erro || j.error || ('Falha HTTP ' + pair.r.status));
+            closePagoModal();
+            toast('Pago CMS Empresa registrado', true);
+            carregarLista();
+        }).catch(function(e){ toast(e.message || 'Erro ao salvar', false); });
+    });
+
+    $('#btnAplicarFiltros').addEventListener('click', carregarLista);
+    document.addEventListener('DOMContentLoaded', function(){
+        carregarMeta().then(carregarLista).catch(function(e){
+            toast(e.message || 'Erro ao carregar filtros', false);
+            carregarLista();
+        });
+    });
+})();
+</script>
+{% endblock %}

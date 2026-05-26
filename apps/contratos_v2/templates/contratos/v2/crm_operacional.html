@@ -1,0 +1,922 @@
+{% extends "base-plus.html" %}
+{% load static %}
+
+{% block title %}Esteira Operacional{% endblock %}
+
+{% block header_title %}Esteira Operacional{% endblock %}
+
+{% block addcss_extra %}
+<link rel="stylesheet" href="{% static 'contratos/css/crm_operacional.css' %}?v=20260522a">
+{% endblock %}
+
+{% block content %}
+{# Tabulações operacionais: simulação, digitação, análise, etc. #}
+<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+<div id="crm-container" data-superuser="{{ user.is_superuser|yesno:'true,false' }}">
+
+    <header class="crm-page-header">
+        <div class="crm-page-header-inner">
+            <div class="crm-page-header-icon" aria-hidden="true">
+                <i class='bx bx-bar-chart-alt-2'></i>
+            </div>
+            <div>
+                <h1 class="crm-page-title">Esteira Operacional</h1>
+                <p class="crm-page-subtitle">Visão unificada do fluxo operacional: simulação, digitação, formalização, análise, CIP, REFIN, anuência, pagamento e pendências.</p>
+            </div>
+        </div>
+    </header>
+
+    <section class="crm-kpi-grid" id="crmKpiGrid" aria-label="Resumo da esteira">
+        <article class="crm-kpi-card crm-kpi-card--blue" data-kpi="em_andamento">
+            <div class="crm-kpi-card-top">
+                <span class="crm-kpi-icon"><i class='bx bx-trending-up'></i></span>
+                <span class="crm-kpi-label">Total em andamento</span>
+            </div>
+            <div class="crm-kpi-value" id="kpiEmAndamento">—</div>
+            <div class="crm-kpi-delta neutral" id="kpiDeltaEmAndamento">—</div>
+        </article>
+        <article class="crm-kpi-card crm-kpi-card--amber" data-kpi="pendencias">
+            <div class="crm-kpi-card-top">
+                <span class="crm-kpi-icon"><i class='bx bx-error-circle'></i></span>
+                <span class="crm-kpi-label">Pendências</span>
+            </div>
+            <div class="crm-kpi-value" id="kpiPendencias">—</div>
+            <div class="crm-kpi-delta neutral" id="kpiDeltaPendencias">—</div>
+        </article>
+        <article class="crm-kpi-card crm-kpi-card--purple" data-kpi="formalizacao">
+            <div class="crm-kpi-card-top">
+                <span class="crm-kpi-icon"><i class='bx bx-file-blank'></i></span>
+                <span class="crm-kpi-label">Formalização</span>
+            </div>
+            <div class="crm-kpi-value" id="kpiFormalizacao">—</div>
+            <div class="crm-kpi-delta neutral" id="kpiDeltaFormalizacao">—</div>
+        </article>
+        <article class="crm-kpi-card crm-kpi-card--green" data-kpi="pagamentos">
+            <div class="crm-kpi-card-top">
+                <span class="crm-kpi-icon"><i class='bx bx-wallet'></i></span>
+                <span class="crm-kpi-label">Pagamentos</span>
+            </div>
+            <div class="crm-kpi-value" id="kpiPagamentos">—</div>
+            <div class="crm-kpi-delta neutral" id="kpiDeltaPagamentos">—</div>
+        </article>
+        <article class="crm-kpi-card crm-kpi-card--red" data-kpi="cancelados">
+            <div class="crm-kpi-card-top">
+                <span class="crm-kpi-icon"><i class='bx bx-x-circle'></i></span>
+                <span class="crm-kpi-label">Cancelados</span>
+            </div>
+            <div class="crm-kpi-value" id="kpiCancelados">—</div>
+            <div class="crm-kpi-delta neutral" id="kpiDeltaCancelados">—</div>
+        </article>
+    </section>
+
+    <section class="crm-toolbar">
+        <div class="crm-toolbar-row">
+            <div class="crm-search-wrap">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text"><i class='bx bx-search'></i></span>
+                    <input type="search" class="form-control" id="searchUnif" placeholder="Buscar por nome, CPF ou Nº contrato...">
+                </div>
+            </div>
+            <select class="form-select form-select-sm crm-filter-select" id="filtroPeriodo" title="Período">
+                <option value="">Período</option>
+                <option value="7d">Últimos 7 dias</option>
+                <option value="30d">Últimos 30 dias</option>
+                <option value="mes_atual">Mês atual</option>
+                <option value="mes_anterior">Mês anterior</option>
+            </select>
+            <select class="form-select form-select-sm crm-filter-select" id="filtroBanco" title="Banco">
+                <option value="">Banco</option>
+            </select>
+            <select class="form-select form-select-sm crm-filter-select" id="filtroConvenio" title="Convênio">
+                <option value="">Convênio</option>
+            </select>
+            <select class="form-select form-select-sm crm-filter-select" id="filtroProduto" title="Produto">
+                <option value="">Produto</option>
+            </select>
+            <select class="form-select form-select-sm crm-filter-select" id="filtroSolicitante" title="Solicitante">
+                <option value="">Solicitante</option>
+            </select>
+            <button type="button" class="btn btn-outline-secondary btn-sm crm-btn-toolbar" id="btnCrmMaisFiltros" aria-expanded="false" aria-controls="crmMaisFiltrosPanel">
+                <i class='bx bx-filter-alt me-1'></i>Mais filtros
+            </button>
+            <button type="button" class="btn btn-sm crm-btn-toolbar crm-btn-limpar" id="btnCrmLimparFiltros">
+                <i class='bx bx-revision me-1'></i>Limpar
+            </button>
+        </div>
+        <div class="crm-mais-filtros-panel collapse" id="crmMaisFiltrosPanel">
+            <div class="chip-bar chip-bar-sub" id="chipsSubStatus"></div>
+        </div>
+        <div class="chip-bar mt-2" id="chipsEtapa">
+            <span class="chip active" style="--chip-color:#2563EB" data-filter="ALL">Todos</span>
+            <span class="chip" style="--chip-color:var(--sim)" data-filter="SIMULACAO">Simulação</span>
+            <span class="chip" style="--chip-color:var(--dig)" data-filter="DIGITACAO">Digitação</span>
+            <span class="chip" style="--chip-color:var(--form)" data-filter="FORMALIZACAO">Formalização</span>
+            <span class="chip" style="--chip-color:var(--anal)" data-filter="ANALISE">Análise</span>
+            <span class="chip" style="--chip-color:var(--cip)" data-filter="CIP">CIP</span>
+            <span class="chip" style="--chip-color:var(--refin)" data-filter="REFIN">REFIN</span>
+            <span class="chip" style="--chip-color:var(--anu)" data-filter="ANUENCIA">Anuência</span>
+            <span class="chip" style="--chip-color:var(--pag)" data-filter="PAGAMENTO">Pagamento</span>
+            <span class="chip" style="--chip-color:var(--pend)" data-filter="PENDENCIAS">Pendências</span>
+            <span class="chip" style="--chip-color:var(--cancel)" data-filter="CANCELADO">Cancelado</span>
+        </div>
+    </section>
+
+    <section class="crm-table-card">
+        <div class="table-wrap">
+            <table class="modern-table" id="tabelaUnificada">
+                <thead>
+                    <tr id="theadUnifRow">
+                        <th class="crm-col-dot"></th>
+                        <th style="width:95px">Nº Proposta</th>
+                        <th style="width:95px">Nº Contrato</th>
+                        <th style="width:175px">Nome Cliente</th>
+                        <th style="width:115px">CPF</th>
+                        <th style="width:95px">Banco</th>
+                        <th style="width:90px">Convênio</th>
+                        <th style="width:90px">Produto</th>
+                        <th style="width:110px">Solicitante</th>
+                        <th style="width:72px" class="text-center">Pendência</th>
+                        <th style="width:60px" class="text-center">Link</th>
+                        <th style="width:100px">Tabulação</th>
+                        <th style="width:110px">Status</th>
+                        <th style="width:185px" class="text-end">Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="tbodyUnif"></tbody>
+            </table>
+        </div>
+        <footer class="crm-table-footer" id="crmTableFooter">
+            <span id="crmPaginationInfo">Mostrando 0 registros</span>
+            <nav class="crm-pagination" id="crmPagination" aria-label="Paginação da tabela"></nav>
+            <div class="crm-page-size-wrap">
+                <label for="crmPageSize" class="mb-0">Linhas por página:</label>
+                <select id="crmPageSize" class="form-select form-select-sm" style="width:auto">
+                    <option value="10" selected>10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
+            </div>
+        </footer>
+    </section>
+
+</div><!-- /crm-container -->
+
+
+<!-- ═══════════════════════════════════════════════════════
+     MODAIS
+═══════════════════════════════════════════════════════ -->
+
+<!-- Modal Visualizar Ficha -->
+<div class="modal fade" id="modalFicha" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
+        <div class="modal-content rounded-3 overflow-hidden">
+            <div class="modal-header mh-sim">
+                <h5 class="modal-title fw-bold"><i class='bx bx-user-detail me-2'></i>Ficha do Registro</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0">
+                <!-- Novo layout (2 tabs): Dados+Proposta / Arquivos. Histórico passa a abrir em modal próprio. -->
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 px-3 pt-3 border-bottom">
+                    <ul class="nav nav-tabs flex-grow-1 border-0 mb-0" id="tabsFicha" role="tablist">
+                    <li class="nav-item">
+                        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#fichaTabPessoais" type="button" role="tab">
+                            <i class='bx bx-id-card me-1'></i>Dados &amp; Proposta
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#fichaTabArquivos" type="button" role="tab">
+                            <i class='bx bx-folder me-1'></i>Arquivos
+                        </button>
+                    </li>
+                    </ul>
+                    <button type="button" class="btn btn-outline-secondary btn-sm mb-2 d-none" id="btnFichaPdf" title="Baixar PDF da ficha (sem linha do tempo)" aria-label="Baixar PDF da ficha">
+                        <i class="bx bx-printer me-1"></i>PDF
+                    </button>
+                </div>
+                <div class="tab-content p-3">
+                    <!-- Tab 1: Dados Pessoais + Proposta/Contrato (fundidos) -->
+                    <div class="tab-pane fade show active" id="fichaTabPessoais">
+                        <div id="fichaRepasseResumo" class="d-none mb-3"></div>
+                        <div id="fichaConteudoPessoais" class="row g-3"></div>
+                        <hr class="my-3"/>
+                        <div id="fichaConteudoProposta"></div>
+                    </div>
+                    <!-- Tab 2: Arquivos do contrato (preenchido via JS) -->
+                    <div class="tab-pane fade" id="fichaTabArquivos">
+                        <div id="fichaConteudoArquivos">
+                            <p class="small text-muted mb-2">Lista de arquivos anexados ao contrato. Use os botões para adicionar/remover quando permitido pela etapa.</p>
+                            <div id="fichaMidiaResumo" class="small mb-2"></div>
+                            <ul class="list-group list-group-flush small" id="fichaListaArquivos"></ul>
+                            <p class="text-muted small mb-0 d-none" id="fichaSemArquivos">Nenhum arquivo anexado.</p>
+                            <div class="mt-3 pt-2 border-top d-none" id="fichaBlkEnviosVendedor">
+                                <div class="fw-semibold small text-muted mb-1"><i class="bx bx-user me-1"></i>Comprovantes enviados pelo vendedor</div>
+                                <p id="fichaEnviosVendedorEmpty" class="small text-muted mb-1 d-none">Nenhum envio do vendedor.</p>
+                                <ul class="list-group list-group-flush small mb-0" id="fichaEnviosVendedorLista"></ul>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Histórico da ficha: apenas via modal Auditoria (api/v2/auditoria-fluxo/) -->
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0 flex-wrap gap-2">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-warning btn-sm d-none" id="btnFichaPendencias" data-acess="SCT189" title="Pendências do contrato">
+                    <i class="bx bx-error-circle me-1"></i>Pendências
+                </button>
+                <button type="button" class="btn btn-outline-primary btn-sm d-none" id="btnFichaEditar">
+                    <i class="bx bx-edit me-1"></i>Editar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Evoluir -->
+<div class="modal fade" id="modalEvoluir" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content rounded-3 overflow-hidden">
+            <div class="modal-header mh-anal">
+                <h5 class="modal-title fw-bold"><i class='bx bx-right-arrow-circle me-2'></i>Evoluir Registro</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="evoluirTipo" value="">
+                <input type="hidden" id="evoluirId" value="">
+
+                <!-- Seletor de Etapa -->
+                <div class="mb-3" id="evoluirGrupoEtapa">
+                    <label class="form-label fw-semibold">Etapa <span class="text-danger">*</span></label>
+                    <select class="form-select" id="evoluirEtapa">
+                        <option value="">Carregando...</option>
+                    </select>
+                </div>
+
+                <!-- Seletor de Sub-status (aparece após escolher etapa) -->
+                <div class="mb-3 d-none" id="evoluirGrupoSub">
+                    <label class="form-label fw-semibold">Status <span class="text-danger">*</span></label>
+                    <select class="form-select" id="evoluirSub">
+                        <option value="">Selecione o status...</option>
+                    </select>
+                </div>
+
+                <!-- Link de formalização (condicional) -->
+                <div class="mb-3 d-none" id="evoluirGrupoLink">
+                    <label class="form-label fw-semibold">Link de Formalização <span class="text-danger">*</span></label>
+                    <input type="url" class="form-control" id="evoluirLink" placeholder="https://...">
+                </div>
+
+                <!-- Tabela CMS (condicional) -->
+                <div class="mb-3 d-none" id="evoluirGrupoTabela">
+                    <label class="form-label fw-semibold">Tabela CMS <span class="text-danger">*</span></label>
+                    <select class="form-select" id="evoluirTabelaCms">
+                        <option value="">Carregando tabelas...</option>
+                    </select>
+                </div>
+
+                <!-- Nº Contrato (condicional, junto com Tabela CMS) -->
+                <div class="mb-3 d-none" id="evoluirGrupoNumContrato">
+                    <label class="form-label fw-semibold">Nº Contrato <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="evoluirNumContrato"
+                           maxlength="30" autocomplete="off"
+                           placeholder="Informe o nº do contrato (banco)">
+                    <div class="form-text">Alfanumérico, obrigatório para gerar o contrato.</div>
+                </div>
+
+                <div class="mb-3 d-none border rounded-2 p-3 d-none" id="evoluirBlkEnviosVendedorWrap" hidden aria-hidden="true">
+                    <div class="fw-semibold small text-muted mb-1"><i class="bx bx-user me-1"></i>Comprovantes enviados pelo vendedor</div>
+                    <p id="evoluirEnviosVendedorEmpty" class="small text-muted mb-1">Nenhum envio registrado.</p>
+                    <ul class="list-group list-group-flush small mb-0 d-none" id="evoluirEnviosVendedorLista"></ul>
+                </div>
+                <!-- Pago TC + valores CMS (supervisor, quando contrato tem TC > 0) -->
+                <div class="mb-3 d-none border rounded-2 p-3 bg-light" id="evoluirGrupoPagoTc">
+                    <div class="fw-semibold mb-2"><i class="bx bx-money me-1"></i>Confirmar Pago TC e valores CMS</div>
+                    <p class="small text-muted mb-2" id="evoluirPagoTcHint">Valores sugeridos a partir do snapshot da tabela na contratação.</p>
+                    <div class="alert alert-danger py-2 small mb-2 d-none" id="evoluirPctcVideoAlert" role="alert">
+                        Envio do vídeo de conscientização é obrigatório antes do Pago TC. Faça o upload do vídeo no contrato e tente novamente.
+                    </div>
+                    <div class="border rounded-2 p-3 mb-3 bg-white" id="evoluirPctcRepasseCard">
+                        <div class="fw-semibold small mb-2"><i class="bx bx-transfer-alt me-1"></i>Repasse de carteira</div>
+                        <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                            <span class="badge rounded-pill bg-secondary" id="evoluirPctcRepasseBadge">Repasse: —</span>
+                        </div>
+                        <div class="row g-2 small">
+                            <div class="col-md-4">
+                                <div class="text-muted mb-0">Solicitante (responsável atual)</div>
+                                <div class="fw-semibold" id="evoluirPctcRepasseSolicitante">—</div>
+                            </div>
+                            <div class="col-md-4" id="evoluirPctcRepasseOrigemWrap">
+                                <div class="text-muted mb-0">Repassado por (origem)</div>
+                                <div class="fw-semibold" id="evoluirPctcRepasseOrigem">—</div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-muted mb-0">Quem abriu a solicitação</div>
+                                <div class="fw-semibold" id="evoluirPctcRepasseCriador">—</div>
+                            </div>
+                        </div>
+                        <p class="small mb-0 mt-2 text-muted" id="evoluirPctcRepasseResumo"></p>
+                    </div>
+                    <p class="small text-info mb-2 d-none" id="evoluirPctcRepasseBanner" aria-hidden="true"></p>
+                    <div class="mb-2 d-none" id="evoluirPctcDestinatariosWrap">
+                        <div class="small fw-semibold mb-1">Destinatário(s) do RegisterMoney</div>
+                        <ul class="small mb-0 ps-3" id="evoluirPctcDestinatarios"></ul>
+                    </div>
+                    <div class="mb-2 border-bottom pb-2" id="evoluirPctcLojaWrap">
+                        <div class="small fw-semibold mb-1">Venda associada a uma loja?</div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="evoluirPctcAssocLoja" id="evoluirPctcAssocLojaNao" value="0" checked>
+                            <label class="form-check-label small" for="evoluirPctcAssocLojaNao">Não</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="evoluirPctcAssocLoja" id="evoluirPctcAssocLojaSim" value="1">
+                            <label class="form-check-label small" for="evoluirPctcAssocLojaSim">Sim</label>
+                        </div>
+                        <div class="alert alert-warning py-1 small mb-0 mt-2 d-none" id="evoluirPctcLojaSemOpcoes" role="alert">
+                            Não há loja em comum entre os destinatários para associar à venda. Use &quot;Não&quot; ou cadastre o M2M de lojas nos funcionários.
+                        </div>
+                        <div class="mt-2 d-none" id="evoluirPctcLojaSelectWrap">
+                            <label class="form-label small mb-0">Loja <span class="text-danger">*</span></label>
+                            <select class="form-select form-select-sm" id="evoluirPctcLojaId">
+                                <option value="">Selecione...</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-md-6">
+                            <label class="form-label small mb-0">Classificador <span class="text-danger">*</span></label>
+                            <select class="form-select form-select-sm" id="evoluirPctcClassificador">
+                                <option value="">Carregando...</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small mb-0">Valor TC (valor_est) <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control form-control-sm" id="evoluirPctcValorEst" inputmode="decimal" autocomplete="off">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small mb-0">AF</label>
+                            <input type="text" class="form-control form-control-sm" id="evoluirPctcAf" inputmode="decimal" autocomplete="off">
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="evoluirPctcFlagCms">
+                                <label class="form-check-label small" for="evoluirPctcFlagCms">Marcar CMS como pago</label>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="evoluirPctcForcarM3">
+                                <label class="form-check-label small" for="evoluirPctcForcarM3">
+                                    Exceção M3 manual (0% — apenas casos excepcionais)
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="small text-muted mb-1 mt-2 d-none" id="evoluirPctcRankingFormula"></p>
+                    <div class="small" id="evoluirPctcRankingLinhas"></div>
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-2 pt-2 border-top">
+                        <p class="small text-muted mb-0 flex-grow-1">
+                            Salve TC, classificador e loja antes dos comprovantes. <strong>Confirmar</strong> evolui o status do contrato.
+                        </p>
+                        <button type="button" class="btn btn-sm btn-outline-primary" id="evoluirPctcSalvarDados">
+                            <i class="bx bx-save me-1"></i>Salvar dados (TC, classificador, loja)
+                        </button>
+                    </div>
+
+                    <!-- Boletos / comprovantes TC (parcial/total) -->
+                    <div class="border-top mt-3 pt-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="fw-semibold small"><i class="bx bx-receipt me-1"></i>Adicionar Boletos</div>
+                            <span class="badge rounded-pill bg-secondary" id="evoluirTcBadgeStatus" title="Status calculado pela soma de comprovantes">—</span>
+                        </div>
+                        <p class="small text-muted mb-2">Operacional e consultor podem anexar comprovantes. Boletos enviados pelo consultor na consulta cliente aparecem abaixo para conferência.</p>
+                        <p class="small text-muted mb-2" id="evoluirTcEnviosPendentesEmpty">Nenhum boleto pendente do consultor/vendedor.</p>
+                        <div class="table-responsive mb-3 d-none" id="evoluirTcEnviosPendentesWrap">
+                            <table class="table table-sm table-borderless align-middle mb-0">
+                                <thead class="small text-muted">
+                                    <tr>
+                                        <th>Título</th>
+                                        <th>Arquivo</th>
+                                        <th style="min-width: 7rem;">Valor</th>
+                                        <th class="text-end">Ação</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="evoluirTcEnviosPendentes"></tbody>
+                            </table>
+                        </div>
+                        <div class="small fw-semibold text-muted mb-1">Salvar comprovante (operacional)</div>
+                        <div class="row g-2 mb-2">
+                            <div class="col-md-4">
+                                <label class="form-label small mb-0">Valor do comprovante <span class="text-danger">*</span></label>
+                                {# type="text": máscara pt-BR (vírgula) no JS; type="number" apaga valores com vírgula. #}
+                                <input type="text" class="form-control form-control-sm" id="evoluirTcCompValor" inputmode="decimal" autocomplete="off" placeholder="0,00">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small mb-0">Arquivo <span class="text-danger">*</span></label>
+                                <input type="file" class="form-control form-control-sm" id="evoluirTcCompArquivo" accept="image/*,application/pdf">
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end">
+                                <button type="button" class="btn btn-sm btn-success w-100" id="evoluirTcCompEnviar">
+                                    <i class="bx bx-receipt me-1"></i>Salvar comprovante
+                                </button>
+                            </div>
+                        </div>
+                        <div class="small fw-semibold text-muted mb-1 mt-2">Comprovantes confirmados</div>
+                        <div class="alert alert-danger py-1 small mb-2 d-none" id="evoluirTcCompAlerta" role="alert"></div>
+                        <div class="d-flex justify-content-between small text-muted mb-1">
+                            <span>Total TC: <strong id="evoluirTcValorTc">R$ 0,00</strong></span>
+                            <span>Soma comprovantes: <strong id="evoluirTcSomaAcumulada">R$ 0,00</strong></span>
+                            <span>Saldo: <strong id="evoluirTcSaldo">R$ 0,00</strong></span>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-borderless align-middle mb-0">
+                                <thead class="small text-muted">
+                                    <tr>
+                                        <th>Data</th>
+                                        <th>Valor</th>
+                                        <th>Por</th>
+                                        <th>Arquivo</th>
+                                        <th class="text-end">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="evoluirTcCompLista">
+                                    <tr><td colspan="5" class="text-muted small text-center py-2">Nenhum comprovante registrado.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pago CMS: tabela (somente leitura) + percentuais editáveis (financeiro) -->
+                <div class="mb-3 d-none border rounded-2 p-3 bg-light" id="evoluirGrupoPagoCms">
+                    <div class="fw-semibold mb-2"><i class="bx bx-table me-1"></i>Confirmar percentuais CMS</div>
+                    <p class="small text-muted mb-2">O nome da tabela é apenas informativo. Altere os percentuais se necessário; os valores em R$ nos RegisterMoney serão recalculados com base no AF.</p>
+                    <div class="mb-2">
+                        <label class="form-label small mb-0">Tabela CMS</label>
+                        <input type="text" class="form-control form-control-sm bg-white" id="evoluirPcmsTitulo" readonly tabindex="-1">
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-md-4">
+                            <label class="form-label small mb-0">Taxa recebido (%) <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control form-control-sm" id="evoluirPcmsTaxaRec" inputmode="decimal" autocomplete="off">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small mb-0">Taxa repasse (%) <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control form-control-sm" id="evoluirPcmsTaxaRep" inputmode="decimal" autocomplete="off">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small mb-0">Taxa plástico (%) <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control form-control-sm" id="evoluirPcmsTaxaPla" inputmode="decimal" autocomplete="off">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Observação (sempre disponível, obrigatória em alguns casos) -->
+                <div class="mb-2" id="evoluirGrupoObs">
+                    <label class="form-label fw-semibold" id="evoluirLabelObs">Observação</label>
+                    <textarea class="form-control" id="evoluirObs" rows="2" placeholder="Observação opcional..."></textarea>
+                </div>
+
+                <div id="evoluirAlerta" class="alert alert-warning d-none py-2 small"></div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-anal" id="btnConfirmarEvolucao">
+                    <i class='bx bx-check me-1'></i>Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Valor Saldo (produto PORT — Pago Cliente) -->
+<div class="modal fade" id="modalValorSaldoPort" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-3 overflow-hidden">
+            <div class="modal-header mh-anal">
+                <h5 class="modal-title fw-bold"><i class="bx bx-wallet me-2"></i>Valor Saldo (PORT)</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="small text-muted mb-3">
+                    Informe o <strong>Valor Saldo</strong> do contrato de portabilidade antes de confirmar o Pago Cliente.
+                </p>
+                <div class="alert alert-danger py-2 small d-none" id="valorSaldoPortAlerta" role="alert"></div>
+                <div class="mb-0">
+                    <label class="form-label fw-semibold">Valor Saldo <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="valorSaldoPortInput" inputmode="decimal" autocomplete="off"
+                           placeholder="Ex.: 15.420,50">
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Voltar</button>
+                <button type="button" class="btn btn-anal" id="btnConfirmarValorSaldoPort">
+                    <i class="bx bx-check me-1"></i>Continuar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Port + Refin (Pago Cliente gera contrato REFIN) -->
+<div class="modal fade" id="modalRefinPort" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content rounded-3 overflow-hidden">
+            <div class="modal-header mh-anal">
+                <h5 class="modal-title fw-bold"><i class="bx bx-link-alt me-2"></i>Port + Refin — dados do REFIN</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="small text-muted mb-3">
+                    Ao confirmar, o contrato PORT será marcado como <strong>Pago Cliente</strong> e será criado o contrato REFIN vinculado (mesmo cliente e arquivos).
+                </p>
+                <div class="alert alert-danger py-2 small d-none" id="refinPortAlerta" role="alert"></div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Nº contrato REFIN <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="refinPortNumContrato" maxlength="30" autocomplete="off"
+                           placeholder="Número do contrato no banco (REFIN)">
+                </div>
+                <div class="row g-2 mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label small text-muted mb-0">Banco</label>
+                        <input type="text" class="form-control form-control-sm bg-light" id="refinPortBanco" readonly tabindex="-1">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small text-muted mb-0">Convênio</label>
+                        <input type="text" class="form-control form-control-sm bg-light" id="refinPortConvenio" readonly tabindex="-1">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small text-muted mb-0">Produto</label>
+                        <input type="text" class="form-control form-control-sm bg-light" id="refinPortProduto" readonly tabindex="-1">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Tabela CMS <span class="text-danger">*</span></label>
+                    <select class="form-select" id="refinPortTabelaCms">
+                        <option value="">Selecione...</option>
+                    </select>
+                </div>
+                <div class="mb-3 d-none" id="refinPortValorSaldoWrap">
+                    <label class="form-label small text-muted mb-0">Valor Saldo (PORT)</label>
+                    <input type="text" class="form-control form-control-sm bg-light" id="refinPortValorSaldo" readonly tabindex="-1">
+                </div>
+                <div class="row g-2 mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label small text-muted mb-0">Valor parcela</label>
+                        <input type="text" class="form-control form-control-sm" id="refinPortParcela" inputmode="decimal" autocomplete="off">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small text-muted mb-0">Prazo</label>
+                        <input type="text" class="form-control form-control-sm" id="refinPortPrazo" inputmode="numeric" autocomplete="off">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small text-muted mb-0">AF</label>
+                        <input type="text" class="form-control form-control-sm" id="refinPortAf" inputmode="decimal" autocomplete="off">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small text-muted mb-0">TC</label>
+                        <input type="text" class="form-control form-control-sm" id="refinPortTc" inputmode="decimal" autocomplete="off">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small text-muted mb-0">Liberado</label>
+                        <input type="text" class="form-control form-control-sm" id="refinPortLiberado" inputmode="decimal" autocomplete="off">
+                    </div>
+                </div>
+                <div class="border rounded-2 p-2 bg-light d-none" id="refinPortPortadosWrap">
+                    <div class="small fw-semibold text-muted mb-1"><i class="bx bx-transfer me-1"></i>Contratos portados (replicados no REFIN)</div>
+                    <ul class="list-group list-group-flush small mb-0" id="refinPortPortadosLista"></ul>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Voltar</button>
+                <button type="button" class="btn btn-anal" id="btnConfirmarRefinPort">
+                    <i class="bx bx-check me-1"></i>Confirmar Pago Cliente + REFIN
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Registrar propostas simuladas -->
+<div class="modal fade" id="modalPropostasSimuladas" tabindex="-1" aria-labelledby="modalPropostasSimuladasLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content rounded-3 overflow-hidden">
+            <div class="modal-header mh-sim">
+                <h5 class="modal-title fw-bold" id="modalPropostasSimuladasLabel">
+                    <i class='bx bx-list-plus me-2'></i>Registrar propostas simuladas
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted small mb-2" id="propostasSimHint">Preencha banco, convênio, produto e valores. Você pode adicionar várias linhas.</p>
+                <div class="mb-3">
+                    <label for="propostasSimObservacao" class="form-label small text-muted mb-1">Observação geral do retorno <span class="text-muted">(opcional)</span></label>
+                    <textarea class="form-control form-control-sm" id="propostasSimObservacao" rows="3" placeholder="Mensagem ao vendedor sobre o conjunto de propostas enviadas…"></textarea>
+                </div>
+                <div id="propostasSimRows" class="propostas-sim-rows"></div>
+                <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="btnPropostasSimAdd">
+                    <i class='bx bx-plus me-1'></i>Adicionar proposta
+                </button>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnSalvarPropostasSim">
+                    <i class='bx bx-save me-1'></i>Salvar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: auditoria / linha do tempo (CRM) -->
+<div class="modal fade" id="modalAuditoriaCrm" tabindex="-1" aria-labelledby="modalAuditoriaCrmLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+        <div class="modal-content rounded-3 overflow-hidden">
+            <div class="modal-header mh-anal">
+                <h5 class="modal-title fw-bold" id="modalAuditoriaCrmLabel">
+                    <i class="bx bx-git-branch me-2"></i><span id="auditoriaTituloTexto">Auditoria do fluxo</span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <div id="auditoriaMeta" class="small text-muted border-bottom pb-3 mb-3"></div>
+                <div id="auditoriaTimeline" class="auditoria-timeline-host"></div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: arquivos e vídeo do contrato (CRM) -->
+<div class="modal fade" id="modalArquivosContrato" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+        <div class="modal-content rounded-3 overflow-hidden">
+            <div class="modal-header mh-anal">
+                <h5 class="modal-title fw-bold" id="crmArqTitulo"><i class="bx bx-folder me-2"></i>Arquivos do contrato</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <p class="small text-muted mb-3" id="crmArqSubtitulo"></p>
+                <p id="crmArqAlertaLeitura" class="alert alert-warning py-2 small mb-3 d-none" role="status">Contrato cancelado: não é permitido adicionar ou alterar vídeo/arquivos.</p>
+                <div class="mb-3">
+                    <div class="fw-semibold small mb-1"><i class="bx bx-video me-1"></i>Vídeo de conscientização</div>
+                    <div id="crmArqVideoBloco" class="small">—</div>
+                </div>
+                <div class="mb-2">
+                    <div class="fw-semibold small mb-1"><i class="bx bx-file me-1"></i>Arquivos do cliente</div>
+                    <ul class="list-group list-group-flush small" id="crmArqListaArquivos"></ul>
+                    <p class="text-muted small mb-0 d-none" id="crmArqSemArquivos">Nenhum arquivo anexado.</p>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0 flex-wrap gap-2">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-outline-primary btn-sm" id="crmArqBtnVideo"><i class="bx bx-video-plus me-1"></i>Adicionar vídeo</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" id="crmArqBtnArquivo"><i class="bx bx-upload me-1"></i>Adicionar arquivo</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: enviar vídeo (CRM) -->
+<div class="modal fade" id="modalCrmUploadVideo" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-3 overflow-hidden">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title fw-bold"><i class="bx bx-video me-2"></i>Enviar vídeo</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="crmUpVidContratoId" value="">
+                <label class="form-label small">Arquivo de vídeo <span class="text-danger">*</span></label>
+                <input type="file" class="form-control form-control-sm" id="crmUpVidFile"
+                       accept=".mp4,.mov,.avi,video/mp4,video/quicktime,video/x-msvideo">
+                <div class="form-text small">Formatos: .mp4, .mov, .avi. Tamanho máximo: 35 MB.</div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary btn-sm" id="crmUpVidConfirmar"><i class="bx bx-upload me-1"></i>Enviar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: enviar arquivo (CRM) -->
+<div class="modal fade" id="modalCrmUploadArquivo" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-3 overflow-hidden">
+            <div class="modal-header mh-anal">
+                <h5 class="modal-title fw-bold"><i class="bx bx-file me-2"></i>Adicionar arquivo</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="crmUpArqContratoId" value="">
+                <div class="mb-2">
+                    <label class="form-label small mb-0">Título <span class="text-muted">(opcional)</span></label>
+                    <input type="text" class="form-control form-control-sm" id="crmUpArqTitulo" placeholder="Nome exibido na lista" maxlength="200">
+                </div>
+                <label class="form-label small">Arquivo <span class="text-danger">*</span></label>
+                <input type="file" class="form-control form-control-sm" id="crmUpArqFile">
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-anal btn-sm" id="crmUpArqConfirmar"><i class="bx bx-upload me-1"></i>Enviar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Linha do tempo: modal Auditoria (api/v2/auditoria-fluxo/) -->
+
+<!-- Modal Editar dados (Validação [7]) -->
+<div class="modal fade" id="modalEditarDados" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
+        <div class="modal-content rounded-3 overflow-hidden">
+            <div class="modal-header mh-anal">
+                <h5 class="modal-title fw-bold"><i class="bx bx-edit me-2"></i>Editar dados do contrato</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body p-0">
+                <input type="hidden" id="editDadosContratoId" value="">
+                <ul class="nav nav-tabs px-3 pt-3" id="tabsEditar" role="tablist">
+                    <li class="nav-item">
+                        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#editarTabDados" type="button" role="tab">
+                            <i class='bx bx-id-card me-1'></i>Dados &amp; Proposta
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#editarTabArquivos" type="button" role="tab">
+                            <i class='bx bx-folder me-1'></i>Arquivos
+                        </button>
+                    </li>
+                </ul>
+                <div class="tab-content p-3">
+                    <div class="tab-pane fade show active" id="editarTabDados">
+                        <p class="small text-muted mb-3">Apenas campos não críticos podem ser editados. Toda alteração é registrada na linha do tempo.</p>
+                        <h6 class="small fw-semibold text-uppercase text-muted">Dados do cliente</h6>
+                        <div id="editClienteContatosResumo" class="mb-3"></div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-6"><label class="form-label small mb-0">Nome completo</label><input type="text" class="form-control form-control-sm" data-edit-field="cliente.nome_completo"></div>
+                            <div class="col-md-6"><label class="form-label small mb-0">E-mail <span class="text-muted fw-normal">(dinâmico quando existir)</span></label><input type="email" class="form-control form-control-sm" data-edit-field="cliente.email"></div>
+                            <div class="col-md-4"><label class="form-label small mb-0">Telefone <span class="text-muted fw-normal">(dinâmico quando existir)</span></label><input type="text" class="form-control form-control-sm" data-edit-field="cliente.telefone"></div>
+                            <div class="col-md-4"><label class="form-label small mb-0">RG</label><input type="text" class="form-control form-control-sm" data-edit-field="cliente.numero_rg"></div>
+                            <div class="col-md-4"><label class="form-label small mb-0">Data nascimento</label><input type="date" class="form-control form-control-sm" data-edit-field="cliente.data_nascimento"></div>
+                            <div class="col-md-4"><label class="form-label small mb-0">Nome da mãe</label><input type="text" class="form-control form-control-sm" data-edit-field="cliente.nome_mae"></div>
+                            <div class="col-md-4"><label class="form-label small mb-0">Nome do pai</label><input type="text" class="form-control form-control-sm" data-edit-field="cliente.nome_pai"></div>
+                            <div class="col-md-4"><label class="form-label small mb-0">Naturalidade</label><input type="text" class="form-control form-control-sm" data-edit-field="cliente.naturalidade"></div>
+                        </div>
+                        <h6 class="small fw-semibold text-uppercase text-muted">Dados da proposta</h6>
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-4"><label class="form-label small mb-0">Valor parcela</label><input type="text" class="form-control form-control-sm" data-edit-field="proposta.valor_parcela" inputmode="decimal"></div>
+                            <div class="col-md-4"><label class="form-label small mb-0">Valor AF</label><input type="text" class="form-control form-control-sm" data-edit-field="proposta.valor_af" inputmode="decimal"></div>
+                            <div class="col-md-4"><label class="form-label small mb-0">Valor liberado</label><input type="text" class="form-control form-control-sm" data-edit-field="proposta.valor_liberado" inputmode="decimal"></div>
+                            <div class="col-md-4"><label class="form-label small mb-0">Coeficiente</label><input type="text" class="form-control form-control-sm" data-edit-field="proposta.coeficiente" inputmode="decimal"></div>
+                            <div class="col-md-4"><label class="form-label small mb-0">Prazo</label><input type="number" min="1" class="form-control form-control-sm" data-edit-field="proposta.prazo"></div>
+                            <div class="col-md-4"><label class="form-label small mb-0">Valor TC</label><input type="text" class="form-control form-control-sm" data-edit-field="proposta.valor_tc" inputmode="decimal"></div>
+                        </div>
+                        <h6 class="small fw-semibold text-uppercase text-muted">Contrato</h6>
+                        <div class="row g-2">
+                            <div class="col-md-6"><label class="form-label small mb-0">Nº contrato (banco)</label><input type="text" class="form-control form-control-sm" data-edit-field="contrato.numero_contrato"></div>
+                            <div class="col-md-6"><label class="form-label small mb-0">Link formalização</label><input type="url" class="form-control form-control-sm" data-edit-field="contrato.link_formalizacao"></div>
+                        </div>
+                        <div id="editDadosAlerta" class="alert alert-warning d-none py-2 small mt-3"></div>
+                    </div>
+                    <div class="tab-pane fade" id="editarTabArquivos">
+                        <p class="small text-muted mb-2">Anexar ou remover arquivos vinculados ao cliente deste contrato.</p>
+                        <div class="row g-2 align-items-end mb-3">
+                            <div class="col-md-5">
+                                <label class="form-label small mb-0">Arquivo</label>
+                                <input type="file" class="form-control form-control-sm" id="editArqInputFile">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small mb-0">Título (opcional)</label>
+                                <input type="text" class="form-control form-control-sm" id="editArqInputTitulo" placeholder="Ex.: RG, Comprovante de residência">
+                            </div>
+                            <div class="col-md-3 d-grid">
+                                <button type="button" class="btn btn-sm btn-outline-primary" id="btnEditArqEnviar">
+                                    <i class="bx bx-upload me-1"></i>Adicionar
+                                </button>
+                            </div>
+                        </div>
+                        <ul class="list-group list-group-flush small" id="editArqLista"></ul>
+                        <p class="text-muted small mb-0 d-none" id="editArqSemArquivos">Nenhum arquivo anexado.</p>
+                        <div id="editArqAlerta" class="alert alert-warning d-none py-2 small mt-3"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnSalvarEdicaoDados">
+                    <i class="bx bx-save me-1"></i>Salvar alterações
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Pendências do contrato (consultor/supervisor) -->
+<div class="modal fade" id="modalPendencias" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content rounded-3 overflow-hidden">
+            <div class="modal-header" style="background:#fff3cd;color:#664d03;">
+                <h5 class="modal-title fw-bold"><i class="bx bx-error-circle me-2"></i>Pendências</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="pendenciasContratoId" value="">
+                <div id="pendenciasClienteContatos" class="mb-3"></div>
+
+                <!-- Lista de pendências existentes -->
+                <div class="mb-3">
+                    <div class="fw-semibold small mb-1">Pendências em aberto</div>
+                    <ul class="list-group list-group-flush small" id="pendenciasLista"></ul>
+                    <p class="text-muted small mb-0 d-none" id="pendenciasVazia">Nenhuma pendência aberta.</p>
+                </div>
+
+                <hr>
+
+                <!-- Form de criar pendência (restrito por permissão) -->
+                <div id="pendenciaForm" data-acess="SCT189">
+                    <div class="fw-semibold small mb-1">Criar nova pendência</div>
+                    <p class="small text-muted mb-2">Marque uma ou mais opções e descreva a observação.</p>
+                    <div class="row g-2">
+                        <div class="col-md-5">
+                            <label class="form-label small mb-0">Tipo(s) <span class="text-danger">*</span></label>
+                            <div class="border rounded px-2 py-2 bg-light small">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="DADOS_CLIENTE" id="pendenciaTipoDc">
+                                    <label class="form-check-label" for="pendenciaTipoDc">Dados do Cliente</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="DADOS_PROPOSTA" id="pendenciaTipoProp">
+                                    <label class="form-check-label" for="pendenciaTipoProp">Dados da Proposta</label>
+                                </div>
+                                <div class="form-check mb-0">
+                                    <input class="form-check-input" type="checkbox" value="FALTA_ARQUIVO" id="pendenciaTipoArq">
+                                    <label class="form-check-label" for="pendenciaTipoArq">Falta de Arquivo</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-7">
+                            <label class="form-label small mb-0">Observação <span class="text-danger">*</span></label>
+                            <textarea class="form-control form-control-sm" id="pendenciaObs" rows="2" placeholder="Descreva a pendência..."></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div id="pendenciaAlerta" class="alert alert-warning d-none py-2 small mt-2"></div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-warning" id="btnSalvarPendencia" data-acess="SCT189">
+                    <i class="bx bx-save me-1"></i>Registrar pendência
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index:9999">
+    <div id="toastMsg" class="toast align-items-center text-white border-0" role="alert">
+        <div class="d-flex">
+            <div class="toast-body fw-semibold" id="toastBody"></div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block addjs_extra %}
+<script src="{% static 'contratos/js/crm_operacional.js' %}?v=20260522e"></script>
+<script>
+/*
+  Script auxiliar (layout novo: 2 tabs na ficha + botões separados).
+  Validação [6]: a linha do tempo foi retirada deste modal; o acesso
+  fica concentrado no botão "Auditoria" da coluna Ações da grid
+  (modalAuditoriaCrm → api/v2/auditoria-fluxo/). Este bloco cuida apenas
+  dos demais botões do rodapé da ficha (Editar).
+*/
+(function(){
+    'use strict';
+    const $ = (sel, ctx) => (ctx || document).querySelector(sel);
+    const on = (el, ev, fn) => el && el.addEventListener(ev, fn);
+
+    // Botão Editar da ficha: delega abertura/populate/save ao crm_operacional.js
+    // (função global `abrirModalEditarDados`, Validação [7]). Fallback mínimo
+    // mantido caso o JS externo ainda não tenha carregado.
+    on($('#btnFichaEditar'), 'click', function(){
+        const id = this.getAttribute('data-contrato-id') || '';
+        const tipoFicha = this.getAttribute('data-ficha-tipo') || 'contrato';
+        if (window.abrirModalEditarDados) {
+            window.abrirModalEditarDados(tipoFicha, id);
+            return;
+        }
+        $('#editDadosContratoId').value = id;
+        new bootstrap.Modal($('#modalEditarDados')).show();
+    });
+
+    /* Registrar pendência: tratado em crm_operacional.js (Validação [9]). */
+})();
+</script>
+{% endblock %}

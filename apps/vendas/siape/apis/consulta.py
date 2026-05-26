@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q, Count, Prefetch
 from apps.seguranca.permissoes.decorators import controle_acess
 from apps.vendas.siape.models import Cliente, Matricula, Margens, Contrato, Campanha
+from apps.vendas.siape.services.carteira_operacional import get_or_create_carteira
 
 @login_required
 # @controle_acess('SS25')  # TEMPORARIAMENTE DESABILITADO PARA DEBUG
@@ -105,11 +106,15 @@ def api_buscar_clientes(request):
                 } for contrato in contratos],
             })
         
+        carteira, _ = get_or_create_carteira(cliente, request.user)
+
         return JsonResponse({
             'success': True,
             'data': {
                 'dados_pessoais': dados_pessoais,
                 'matriculas': matriculas_data,
+                'carteira_id': carteira.id,
+                'status_comercial': carteira.status_comercial or 'EM_NEGOCIACAO',
             }
         })
         

@@ -368,3 +368,348 @@ class HorarioDisponivel(models.Model):
             models.Index(fields=['tabulacao', 'status']),
         ]
 
+
+# --- Esteira comercial + financeiro (integração apps.contratos_v2) ---
+
+class ClassificacaoValor(models.Model):
+    """Percentual do consultor sobre a base TC (ranking / Pago TC)."""
+    titulo = models.CharField(max_length=120, verbose_name='Título')
+    percentual = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        verbose_name='Percentual',
+        help_text='Ex.: 50.00 para 50%',
+    )
+    status = models.BooleanField(default=True, verbose_name='Ativo')
+    data_criacao = models.DateTimeField(auto_now_add=True, verbose_name='Data de criação')
+
+    class Meta:
+        verbose_name = 'Classificação de valor'
+        verbose_name_plural = 'Classificações de valor'
+        ordering = ['-data_criacao']
+
+    def __str__(self):
+        return f'{self.titulo} - {self.percentual}%'
+
+
+class CarteiraClientes(models.Model):
+    """Núcleo da esteira comercial: cliente SIAPE + vínculos operacionais (contratos v2)."""
+    STATUS_CHOICES = [
+        ('ATIVO', 'Ativo'),
+        ('INATIVO', 'Inativo'),
+    ]
+    STATUS_COMERCIAL_CHOICES = [
+        ('EM_NEGOCIACAO', 'Em Negociação'),
+        ('AGENDAR', 'Agendar'),
+        ('SEM_INTERESSE', 'Sem Interesse'),
+        ('NAO_E_O_CLIENTE', 'Não é o Cliente'),
+        ('AGUARDANDO_DOCUMENTOS', 'Aguardando Documentos'),
+        ('DESISTENCIA', 'Desistência'),
+        ('NEGOCIO_FECHADO', 'Negócio Fechado'),
+        ('SIMULACAO', 'Simulação'),
+        ('OPERACIONAL', 'Operacional'),
+        ('SOLICITACAO_PROPOSTAS', 'Solicitação de Propostas'),
+        ('PROPOSTAS', 'Propostas'),
+        ('INELEGIVEL', 'Inelegível'),
+        ('DIGITACAO', 'Digitação'),
+        ('FINALIZADA', 'Finalizada'),
+    ]
+    SUB_STATUS_PROPOSTA_COMERCIAL_CHOICES = [
+        ('ACEITE', 'Aceite'),
+        ('VERIFICANDO', 'Verificando'),
+        ('VERIFICADO', 'Verificado'),
+    ]
+    TAG_PROPOSTA_CONTAINER_CHOICES = [
+        ('AGUARDANDO', 'Aguardando'),
+        ('SUCESSO', 'Sucesso'),
+        ('INELEGIVEL', 'Inelegível'),
+    ]
+    TAG_STATUS_OPERACIONAL_CHOICES = [
+        ('AGUARDANDO_SIMULACAO', 'Aguardando Simulação'),
+        ('AGUARDANDO_PROPOSTA', 'Aguardando Proposta'),
+        ('AGUARDANDO_DIGITACAO', 'Aguardando Digitação'),
+        ('EM_DIGITACAO', 'Em Digitação'),
+    ]
+
+    cliente = models.ForeignKey(
+        Cliente,
+        on_delete=models.CASCADE,
+        related_name='carteira_clientes',
+        verbose_name='Cliente',
+    )
+    cliente_operacional = models.ForeignKey(
+        'contratos_v2.ClienteDadosPessoais',
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name='carteiras_siape',
+        verbose_name='Cliente operacional (contratos)',
+    )
+    simulacoes_operacionais = models.ManyToManyField(
+        'contratos_v2.Simulacao',
+        blank=True,
+        related_name='carteiras_siape',
+        verbose_name='Simulações (operacional)',
+    )
+    contratos_operacionais = models.ManyToManyField(
+        'contratos_v2.ContratoExecucao',
+        blank=True,
+        related_name='carteiras_siape',
+        verbose_name='Contratos (operacional)',
+    )
+    propostas_operacionais = models.ManyToManyField(
+        'contratos_v2.PropostaDados',
+        blank=True,
+        related_name='carteiras_siape_propostas',
+        verbose_name='Propostas (operacional)',
+    )
+    user_responsavel = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='carteira_como_responsavel',
+        verbose_name='Usuário responsável',
+    )
+    user_repasse = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='carteira_como_repasse',
+        verbose_name='Usuário repasse',
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='ATIVO',
+        db_index=True,
+        verbose_name='Status',
+    )
+    status_comercial = models.CharField(
+        max_length=30,
+        choices=STATUS_COMERCIAL_CHOICES,
+        default='EM_NEGOCIACAO',
+        db_index=True,
+        blank=True,
+        null=True,
+        verbose_name='Status comercial',
+    )
+    observacao = models.TextField(blank=True, null=True, verbose_name='Observação')
+    tabulacao_operacional = models.CharField(
+        max_length=140,
+        blank=True,
+        null=True,
+        db_index=True,
+        verbose_name='Tabulação operacional (agregada)',
+    )
+    tags_operacionais = models.TextField(blank=True, null=True, verbose_name='Tags operacionais')
+    data_criacao = models.DateTimeField(auto_now_add=True, verbose_name='Data de criação')
+    tag_proposta_container = models.CharField(
+        max_length=20,
+        choices=TAG_PROPOSTA_CONTAINER_CHOICES,
+        blank=True,
+        null=True,
+        db_index=True,
+        verbose_name='Tag container propostas',
+    )
+    sub_status_propostas_comercial = models.CharField(
+        max_length=20,
+        choices=SUB_STATUS_PROPOSTA_COMERCIAL_CHOICES,
+        blank=True,
+        null=True,
+        db_index=True,
+        verbose_name='Sub-status propostas (comercial)',
+    )
+    tag_status_operacional = models.CharField(
+        max_length=40,
+        choices=TAG_STATUS_OPERACIONAL_CHOICES,
+        blank=True,
+        null=True,
+        db_index=True,
+        verbose_name='Tag status operacional',
+    )
+
+    class Meta:
+        verbose_name = 'Carteira de cliente'
+        verbose_name_plural = 'Carteira de clientes'
+        ordering = ['-data_criacao']
+        indexes = [
+            models.Index(fields=['user_responsavel']),
+            models.Index(fields=['user_repasse']),
+            models.Index(fields=['status']),
+            models.Index(fields=['status_comercial']),
+        ]
+
+    def __str__(self):
+        return f'Carteira - {self.cliente.nome}'
+
+
+class ArquivoCarteiraCliente(models.Model):
+    carteira_clientes = models.ForeignKey(
+        CarteiraClientes,
+        on_delete=models.CASCADE,
+        related_name='arquivos_carteira',
+        verbose_name='Carteira',
+    )
+    arquivo = models.FileField(upload_to='carteira_clientes/%Y/%m/', verbose_name='Arquivo')
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='arquivos_carteira_enviados',
+        verbose_name='Usuário',
+    )
+    data_criacao = models.DateTimeField(auto_now_add=True, verbose_name='Data de criação')
+
+    class Meta:
+        verbose_name = 'Arquivo da carteira'
+        verbose_name_plural = 'Arquivos da carteira'
+        ordering = ['-data_criacao']
+
+
+class TabulacaoVendedor(models.Model):
+    """Histórico de tabulação comercial da carteira."""
+    TIPO_CHOICES = CarteiraClientes.STATUS_COMERCIAL_CHOICES
+
+    carteira_clientes = models.ForeignKey(
+        CarteiraClientes,
+        on_delete=models.CASCADE,
+        related_name='tabulacoes_vendedor',
+        verbose_name='Carteira',
+    )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='tabulacoes_vendedor',
+        verbose_name='Usuário',
+    )
+    tipo = models.CharField(max_length=30, choices=TIPO_CHOICES, db_index=True, verbose_name='Tipo')
+    observacao = models.TextField(blank=True, null=True, verbose_name='Observação')
+    data_criacao = models.DateTimeField(auto_now_add=True, verbose_name='Data de criação')
+
+    class Meta:
+        verbose_name = 'Tabulação vendedor'
+        verbose_name_plural = 'Tabulações vendedor'
+        ordering = ['-data_criacao']
+
+
+class RegisterMoney(models.Model):
+    """Registro financeiro (TC/CMS) vinculado ao contrato operacional."""
+    CLASSIFICADOR_TC_CHOICES = (
+        ('M1', 'M1 (100% - Novo)'),
+        ('M2', 'M2 (50% - Retrabalho)'),
+        ('M3', 'M3 (0% - Manual)'),
+    )
+    TIPO_CLASSIFICACAO_CHOICES = (
+        ('NOVO', 'Novo'),
+        ('RETRABALHO', 'Retrabalho'),
+        ('MANUAL', 'Manual M3'),
+    )
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Usuário')
+    loja = models.ForeignKey(
+        'rh_admin.Loja',
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        verbose_name='Loja',
+    )
+    cpf_cliente = models.CharField(max_length=14, blank=True, null=True, db_index=True)
+    produto = models.ForeignKey(
+        Produto,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name='Produto',
+    )
+    valor_est = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        blank=True,
+        null=True,
+        verbose_name='Valor estimado (TC)',
+    )
+    valor_pago_acumulado = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0,
+        verbose_name='TC pago acumulado',
+    )
+    af = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True, verbose_name='AF')
+    valor_cms_recebido = models.DecimalField(
+        max_digits=12, decimal_places=2, blank=True, null=True, verbose_name='CMS recebido'
+    )
+    valor_cms_repassado = models.DecimalField(
+        max_digits=12, decimal_places=2, blank=True, null=True, verbose_name='CMS repassado'
+    )
+    valor_cms_plastico = models.DecimalField(
+        max_digits=12, decimal_places=2, blank=True, null=True, verbose_name='CMS plástico'
+    )
+    flag_cms_pago = models.BooleanField(default=False, verbose_name='CMS pago')
+    classificador_auto = models.CharField(
+        max_length=2,
+        choices=CLASSIFICADOR_TC_CHOICES,
+        blank=True,
+        null=True,
+        db_index=True,
+    )
+    tipo_classificacao = models.CharField(
+        max_length=15,
+        choices=TIPO_CLASSIFICACAO_CHOICES,
+        blank=True,
+        null=True,
+    )
+    status = models.BooleanField(default=True, blank=True, null=True, verbose_name='Ativo')
+    data = models.DateTimeField(default=timezone.now, blank=True, null=True, db_index=True)
+    data_pago = models.DateTimeField(blank=True, null=True, db_index=True)
+    empresa = models.ForeignKey(
+        'rh_admin.Empresa',
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name='registros_financeiros',
+    )
+    departamento = models.ForeignKey(
+        'rh_admin.Departamento',
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name='registros_financeiros',
+    )
+    setor = models.ForeignKey(
+        'rh_admin.Setor',
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name='registros_financeiros',
+    )
+    equipe = models.ForeignKey(
+        'rh_admin.Equipe',
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name='registros_financeiros',
+    )
+    flg_ponta = models.BooleanField(default=False, blank=True, null=True, verbose_name='Flag ponta')
+    classificacao_valor = models.ForeignKey(
+        ClassificacaoValor,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name='registros_financeiros',
+    )
+    contrato_execucao = models.ForeignKey(
+        'contratos_v2.ContratoExecucao',
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name='registros_financeiros_tc',
+    )
+    flag_repasse = models.BooleanField(default=False, verbose_name='Linha de repasse')
+
+    class Meta:
+        verbose_name = 'Registro financeiro'
+        verbose_name_plural = 'Registros financeiros'
+        ordering = ['-data']
+
+    def __str__(self):
+        return f'RM #{self.pk} - {self.cpf_cliente or "-"}'
+

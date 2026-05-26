@@ -1,0 +1,611 @@
+{% extends "base-plus.html" %}
+{% load static %}
+
+{% block title %}Catálogos{% endblock %}
+
+{% block addcss_extra %}
+<link rel="stylesheet" href="{% static 'contratos/css/config.css' %}">
+{% endblock %}
+
+{% block content %}
+<div id="config-container" data-superuser="{{ user.is_superuser|yesno:'true,false' }}">
+
+    <!-- Cabeçalho da página -->
+    <div class="config-header">
+        <h1 class="main-title">
+            <i class='bx bx-cog'></i>
+            Catálogos
+        </h1>
+        <p class="main-subtitle">
+            Bancos, convênios, produtos e tabelas CMS usados nas propostas e digitação. Itens inativos ficam ocultos nas telas operacionais.
+        </p>
+        <div class="config-header-actions">
+            <a href="{% url 'contratos:crm_operacional_v2' %}" class="btn btn-sm btn-outline-secondary">
+                <i class='bx bx-grid-alt me-1'></i>CRM
+            </a>
+            <button type="button" class="btn btn-sm btn-outline-primary" id="btnRefreshAll">
+                <i class='bx bx-refresh me-1'></i>Atualizar
+            </button>
+        </div>
+    </div>
+
+    <!-- Abas -->
+    <ul class="nav nav-pills main-tabs" id="tabMain" role="tablist">
+        <li class="nav-item">
+            <button class="nav-link tab-banco active" data-bs-toggle="pill" data-bs-target="#pane-banco" type="button">
+                <i class='bx bx-building'></i>
+                Bancos
+                <span class="badge badge-count bg-white text-primary rounded-pill ms-1" id="ctBanco">0</span>
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link tab-conv" data-bs-toggle="pill" data-bs-target="#pane-conv" type="button">
+                <i class='bx bx-handshake'></i>
+                Convênios
+                <span class="badge badge-count bg-white text-success rounded-pill ms-1" id="ctConv">0</span>
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link tab-prod" data-bs-toggle="pill" data-bs-target="#pane-prod" type="button">
+                <i class='bx bx-package'></i>
+                Produtos
+                <span class="badge badge-count bg-white text-warning rounded-pill ms-1" id="ctProd">0</span>
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link tab-cms" data-bs-toggle="pill" data-bs-target="#pane-cms" type="button">
+                <i class='bx bx-table'></i>
+                Tabelas CMS
+                <span class="badge badge-count bg-white rounded-pill ms-1" id="ctCms">0</span>
+            </button>
+        </li>
+        {% if user.is_superuser %}
+        <li class="nav-item">
+            <button class="nav-link tab-audit" data-bs-toggle="pill" data-bs-target="#pane-auditoria" type="button" id="tabBtnAuditoria">
+                <i class='bx bx-history'></i>
+                Auditoria
+            </button>
+        </li>
+        {% endif %}
+    </ul>
+
+    <div class="tab-content">
+
+        <!-- ══════════ BANCOS ══════════ -->
+        <div class="tab-pane fade show active" id="pane-banco">
+            <div class="content-card">
+                <div class="section-header">
+                    <h2><i class='bx bx-building' style="color:var(--color-banco)"></i>Bancos</h2>
+                    <div class="tab-toolbar mb-0">
+                        <button type="button" class="btn btn-banco btn-novo-banco">
+                            <i class='bx bx-plus me-1'></i>Novo Banco
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-banco btn-import-csv" data-tipo="banco">
+                            <i class='bx bx-upload me-1'></i>Importar CSV
+                        </button>
+                        <div class="search-wrap">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text"><i class='bx bx-search text-muted'></i></span>
+                                <input type="search" class="form-control border-start-0" id="searchBanco" placeholder="Buscar banco...">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-wrap">
+                    <table class="modern-table">
+                        <thead>
+                            <tr>
+                                <th style="width:60px">ID</th>
+                                <th>Título</th>
+                                <th style="width:120px">Código</th>
+                                <th style="width:90px">Status</th>
+                                <th style="width:140px" class="text-end">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyBanco">
+                            <tr class="loading-row"><td colspan="5"><i class='bx bx-loader-alt bx-spin d-block mb-2'></i>Carregando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════ CONVÊNIOS ══════════ -->
+        <div class="tab-pane fade" id="pane-conv">
+            <div class="content-card">
+                <div class="section-header">
+                    <h2><i class='bx bx-handshake' style="color:var(--color-conv)"></i>Convênios</h2>
+                    <div class="tab-toolbar mb-0">
+                        <button type="button" class="btn btn-conv btn-novo-convenio">
+                            <i class='bx bx-plus me-1'></i>Novo Convênio
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-conv btn-import-csv" data-tipo="convenio">
+                            <i class='bx bx-upload me-1'></i>Importar CSV
+                        </button>
+                        <div class="search-wrap">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text"><i class='bx bx-search text-muted'></i></span>
+                                <input type="search" class="form-control border-start-0" id="searchConv" placeholder="Buscar convênio...">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-wrap">
+                    <table class="modern-table">
+                        <thead>
+                            <tr>
+                                <th style="width:60px">ID</th>
+                                <th>Título</th>
+                                <th style="width:90px">Status</th>
+                                <th style="width:140px" class="text-end">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyConvenio">
+                            <tr class="loading-row"><td colspan="4"><i class='bx bx-loader-alt bx-spin d-block mb-2'></i>Carregando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════ PRODUTOS ══════════ -->
+        <div class="tab-pane fade" id="pane-prod">
+            <div class="content-card">
+                <div class="section-header">
+                    <h2><i class='bx bx-package' style="color:var(--color-prod)"></i>Produtos</h2>
+                    <div class="tab-toolbar mb-0">
+                        <button type="button" class="btn btn-prod btn-novo-produto">
+                            <i class='bx bx-plus me-1'></i>Novo Produto
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-prod btn-import-csv" data-tipo="produto">
+                            <i class='bx bx-upload me-1'></i>Importar CSV
+                        </button>
+                        <div class="search-wrap">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text"><i class='bx bx-search text-muted'></i></span>
+                                <input type="search" class="form-control border-start-0" id="searchProd" placeholder="Buscar produto...">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-wrap">
+                    <table class="modern-table">
+                        <thead>
+                            <tr>
+                                <th style="width:60px">ID</th>
+                                <th>Título</th>
+                                <th style="width:110px">Flags</th>
+                                <th style="width:90px">Status</th>
+                                <th style="width:140px" class="text-end">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyProduto">
+                            <tr class="loading-row"><td colspan="5"><i class='bx bx-loader-alt bx-spin d-block mb-2'></i>Carregando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════ TABELAS CMS ══════════ -->
+        <div class="tab-pane fade" id="pane-cms">
+            <div class="content-card">
+                <div class="section-header">
+                    <h2><i class='bx bx-table' style="color:var(--color-cms)"></i>Tabelas CMS</h2>
+                    <div class="tab-toolbar mb-0">
+                        <button type="button" class="btn btn-cms btn-novo-tabela">
+                            <i class='bx bx-plus me-1'></i>Nova Tabela CMS
+                        </button>
+                        <div class="search-wrap">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text"><i class='bx bx-search text-muted'></i></span>
+                                <input type="search" class="form-control border-start-0" id="searchCms" placeholder="Buscar tabela...">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-wrap">
+                    <table class="modern-table" id="tabelaCms">
+                        <thead id="theadTabelaCms">
+                            <tr>
+                                <th style="width:60px" class="cms-th-sortable" data-sort="id">
+                                    <span class="cms-th-label">ID <i class="bx bx-sort cms-sort-icon"></i></span>
+                                </th>
+                                <th class="cms-th-sortable" data-sort="titulo">
+                                    <span class="cms-th-label">Título <i class="bx bx-sort cms-sort-icon"></i></span>
+                                    <input type="search" class="form-control form-control-sm cms-col-filter" id="filtCmsTitulo" placeholder="Filtrar..." autocomplete="off">
+                                </th>
+                                <th class="cms-th-sortable" data-sort="banco_titulo">
+                                    <span class="cms-th-label">Banco <i class="bx bx-sort cms-sort-icon"></i></span>
+                                    <input type="search" class="form-control form-control-sm cms-col-filter" id="filtCmsBanco" placeholder="Filtrar..." autocomplete="off">
+                                </th>
+                                <th class="cms-th-sortable" data-sort="convenio_titulo">
+                                    <span class="cms-th-label">Convênio <i class="bx bx-sort cms-sort-icon"></i></span>
+                                    <input type="search" class="form-control form-control-sm cms-col-filter" id="filtCmsConvenio" placeholder="Filtrar..." autocomplete="off">
+                                </th>
+                                <th class="cms-th-sortable" data-sort="produto_titulo">
+                                    <span class="cms-th-label">Produto <i class="bx bx-sort cms-sort-icon"></i></span>
+                                    <input type="search" class="form-control form-control-sm cms-col-filter" id="filtCmsProduto" placeholder="Filtrar..." autocomplete="off">
+                                </th>
+                                <th style="min-width:140px" class="cms-th-sortable" data-sort="taxa_recebido">
+                                    <span class="cms-th-label">Taxas (rec/rep/plás) <i class="bx bx-sort cms-sort-icon"></i></span>
+                                    <div class="cms-taxa-filtros">
+                                        <input type="number" step="0.0001" class="form-control form-control-sm cms-col-filter" id="filtCmsRecMin" placeholder="Rec mín" autocomplete="off">
+                                        <input type="number" step="0.0001" class="form-control form-control-sm cms-col-filter" id="filtCmsRecMax" placeholder="Rec máx" autocomplete="off">
+                                        <input type="number" step="0.0001" class="form-control form-control-sm cms-col-filter" id="filtCmsRepMin" placeholder="Rep mín" autocomplete="off">
+                                        <input type="number" step="0.0001" class="form-control form-control-sm cms-col-filter" id="filtCmsRepMax" placeholder="Rep máx" autocomplete="off">
+                                    </div>
+                                </th>
+                                <th style="width:100px" class="cms-th-sortable" data-sort="classificador_banco">
+                                    <span class="cms-th-label">Classif. <i class="bx bx-sort cms-sort-icon"></i></span>
+                                    <select class="form-select form-select-sm cms-col-filter" id="filtCmsClassif">
+                                        <option value="">Todos</option>
+                                        <option value="M1">M1</option>
+                                        <option value="M2">M2</option>
+                                        <option value="M3">M3</option>
+                                    </select>
+                                </th>
+                                <th style="width:100px" class="cms-th-sortable" data-sort="status">
+                                    <span class="cms-th-label">Status <i class="bx bx-sort cms-sort-icon"></i></span>
+                                    <select class="form-select form-select-sm cms-col-filter" id="filtCmsStatus">
+                                        <option value="">Todos</option>
+                                        <option value="1">Ativo</option>
+                                        <option value="0">Inativo</option>
+                                    </select>
+                                </th>
+                                <th style="width:110px" class="text-end">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyTabela">
+                            <tr class="loading-row"><td colspan="9"><i class='bx bx-loader-alt bx-spin d-block mb-2'></i>Carregando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        {% if user.is_superuser %}
+        <!-- ══════════ AUDITORIA (superuser) ══════════ -->
+        <div class="tab-pane fade" id="pane-auditoria">
+            <div class="content-card audit-card">
+                <div class="section-header">
+                    <h2><i class='bx bx-history' style="color:#6c757d"></i>Histórico de alterações</h2>
+                    <p class="text-muted small mb-0">Registro de quem alterou catálogos, quando e o que mudou (antes/depois).</p>
+                </div>
+                <div class="audit-filters row g-2 align-items-end mb-3">
+                    <div class="col-md-2 col-6">
+                        <label class="form-label small fw-semibold mb-1">Entidade</label>
+                        <select class="form-select form-select-sm" id="filtLogEntidade">
+                            <option value="">Todas</option>
+                            <option value="banco">Banco</option>
+                            <option value="convenio">Convênio</option>
+                            <option value="produto">Produto</option>
+                            <option value="tabela_cms">Tabela CMS</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 col-6">
+                        <label class="form-label small fw-semibold mb-1">Ação</label>
+                        <select class="form-select form-select-sm" id="filtLogAcao">
+                            <option value="">Todas</option>
+                            <option value="criar">Criação</option>
+                            <option value="editar">Edição</option>
+                            <option value="inativar">Inativação</option>
+                            <option value="reativar">Reativação</option>
+                            <option value="excluir">Exclusão</option>
+                            <option value="importar_csv">Importação CSV</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 col-6">
+                        <label class="form-label small fw-semibold mb-1">De</label>
+                        <input type="date" class="form-control form-control-sm" id="filtLogDataInicio">
+                    </div>
+                    <div class="col-md-2 col-6">
+                        <label class="form-label small fw-semibold mb-1">Até</label>
+                        <input type="date" class="form-control form-control-sm" id="filtLogDataFim">
+                    </div>
+                    <div class="col-md-4 col-12 d-flex gap-2 flex-wrap">
+                        <button type="button" class="btn btn-sm btn-primary" id="btnFiltrarLogs">
+                            <i class='bx bx-filter-alt me-1'></i>Filtrar
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="btnLimparFiltrosLogs">
+                            <i class='bx bx-x me-1'></i>Limpar
+                        </button>
+                    </div>
+                </div>
+                <div class="table-wrap">
+                    <table class="modern-table audit-table">
+                        <thead>
+                            <tr>
+                                <th style="width:150px">Data</th>
+                                <th style="width:140px">Usuário</th>
+                                <th style="width:110px">Ação</th>
+                                <th style="width:110px">Entidade</th>
+                                <th style="width:80px">ID</th>
+                                <th>Resumo</th>
+                                <th style="width:90px" class="text-end">Detalhes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyLogs">
+                            <tr class="loading-row"><td colspan="7"><i class='bx bx-loader-alt bx-spin d-block mb-2'></i>Selecione a aba ou filtre para carregar...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="audit-pagination d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2">
+                    <span class="text-muted small" id="auditLogInfo">—</span>
+                    <div class="btn-group btn-group-sm">
+                        <button type="button" class="btn btn-outline-secondary" id="btnLogsPrev" disabled><i class='bx bx-chevron-left'></i></button>
+                        <button type="button" class="btn btn-outline-secondary" id="btnLogsNext" disabled><i class='bx bx-chevron-right'></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+    </div><!-- /tab-content -->
+
+</div><!-- /#config-container -->
+
+
+<!-- ══════════════════════════════════════
+     MODAIS
+══════════════════════════════════════ -->
+
+<!-- Modal Banco -->
+<div class="modal fade" id="modalBanco" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-3 overflow-hidden">
+            <div class="modal-header mh-banco">
+                <h5 class="modal-title fw-bold"><i class='bx bx-building me-2'></i><span id="modalBancoTitle">Novo Banco</span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="bancoEditId" value="">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Título <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="bancoTitulo" maxlength="150" placeholder="Nome do banco">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Código</label>
+                    <input type="text" class="form-control" id="bancoCodigo" maxlength="30" placeholder="Ex: 001">
+                </div>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="bancoAtivo" checked>
+                    <label class="form-check-label" for="bancoAtivo">Ativo</label>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-banco" id="btnSalvarBanco">
+                    <i class='bx bx-save me-1'></i>Salvar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Convênio -->
+<div class="modal fade" id="modalConvenio" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-3 overflow-hidden">
+            <div class="modal-header mh-conv">
+                <h5 class="modal-title fw-bold"><i class='bx bx-handshake me-2'></i><span id="modalConvTitle">Novo Convênio</span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="convenioEditId" value="">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Título <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="convenioTitulo" maxlength="150" placeholder="Nome do convênio">
+                </div>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="convenioAtivo" checked>
+                    <label class="form-check-label" for="convenioAtivo">Ativo</label>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-conv" id="btnSalvarConvenio">
+                    <i class='bx bx-save me-1'></i>Salvar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Produto -->
+<div class="modal fade" id="modalProduto" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-3 overflow-hidden">
+            <div class="modal-header mh-prod">
+                <h5 class="modal-title fw-bold"><i class='bx bx-package me-2'></i><span id="modalProdTitle">Novo Produto</span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="produtoEditId" value="">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Título <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="produtoTitulo" maxlength="150" placeholder="Nome do produto">
+                </div>
+                <div class="form-check form-switch mb-2">
+                    <input class="form-check-input" type="checkbox" id="produtoAtivo" checked>
+                    <label class="form-check-label" for="produtoAtivo">Ativo</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="produtoFlagPortRefin">
+                    <label class="form-check-label" for="produtoFlagPortRefin">Port + Refin</label>
+                    <div class="form-text">No Pago Cliente do CRM, gera contrato REFIN vinculado.</div>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="produtoFlagRefinDaPort">
+                    <label class="form-check-label" for="produtoFlagRefinDaPort">Refin da Port</label>
+                    <div class="form-text">Produto usado na segunda proposta do par (apenas um ativo).</div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-prod" id="btnSalvarProduto">
+                    <i class='bx bx-save me-1'></i>Salvar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Tabela CMS -->
+<div class="modal fade" id="modalTabela" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content rounded-3 overflow-hidden">
+            <div class="modal-header mh-cms">
+                <h5 class="modal-title fw-bold"><i class='bx bx-table me-2'></i><span id="modalCmsTitle">Nova Tabela CMS</span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="tabelaEditId" value="">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Título <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="tabelaTitulo" maxlength="200" placeholder="Descrição da tabela">
+                </div>
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold"><i class='bx bx-building text-primary me-1'></i>Banco <span class="text-danger">*</span></label>
+                        <select class="form-select" id="tabelaBancoId"></select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold"><i class='bx bx-handshake text-success me-1'></i>Convênio <span class="text-danger">*</span></label>
+                        <select class="form-select" id="tabelaConvenioId"></select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold"><i class='bx bx-package text-warning me-1'></i>Produto <span class="text-danger">*</span></label>
+                        <select class="form-select" id="tabelaProdutoId"></select>
+                    </div>
+                </div>
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Taxa recebido</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class='bx bx-trending-up text-success'></i></span>
+                            <input type="text" class="form-control" id="tabelaTxRec" placeholder="0.0000">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Taxa repasse</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class='bx bx-transfer text-primary'></i></span>
+                            <input type="text" class="form-control" id="tabelaTxRep" placeholder="0.0000">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Taxa plástico</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class='bx bx-credit-card text-secondary'></i></span>
+                            <input type="text" class="form-control" id="tabelaTxPla" placeholder="0.0000">
+                        </div>
+                    </div>
+                </div>
+                <!-- Classificador Banco: rótulo informativo da tabela (M1 100% / M2 50% / M3 0%). -->
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">
+                            <i class='bx bx-bookmark text-info me-1'></i>Classificador Banco <span class="text-danger">*</span>
+                        </label>
+                        <select class="form-select" id="tabelaClassificadorBanco" required>
+                            <option value="M1">M1 (100%)</option>
+                            <option value="M2">M2 (50%)</option>
+                            <option value="M3">M3 (0%)</option>
+                        </select>
+                        <div class="form-text">Rótulo informativo da tabela. Não altera o Classificador TC do RegisterMoney (que é calculado automaticamente pela regra novo/retrabalho 90 dias).</div>
+                    </div>
+                </div>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="tabelaAtivo" checked>
+                    <label class="form-check-label" for="tabelaAtivo">Ativo</label>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-cms" id="btnSalvarTabela">
+                    <i class='bx bx-save me-1'></i>Salvar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Importar CSV -->
+<div class="modal fade" id="modalImportCsv" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-3 overflow-hidden">
+            <div class="modal-header" id="importModalHeader">
+                <h5 class="modal-title fw-bold" id="importModalTitle">
+                    <i class='bx bx-upload me-2'></i>Importar CSV
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="importTipo" value="">
+
+                <p class="text-muted small mb-3" id="importDica"></p>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Arquivo CSV <span class="text-danger">*</span></label>
+                    <input type="file" class="form-control" id="importArquivo" accept=".csv">
+                    <div class="form-text">Formato aceito: <code>.csv</code> — UTF-8 ou Latin-1 (com ou sem cabeçalho, conforme o tipo).</div>
+                </div>
+
+                <div id="importResult" class="import-result d-none"></div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn" id="btnEnviarImport">
+                    <i class='bx bx-cloud-upload me-1'></i>Importar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if user.is_superuser %}
+<!-- Modal detalhes do log -->
+<div class="modal fade" id="modalLogDetalhe" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+        <div class="modal-content rounded-3 overflow-hidden">
+            <div class="modal-header" style="background:#495057;color:#fff">
+                <h5 class="modal-title fw-bold"><i class='bx bx-detail me-2'></i>Detalhes da auditoria</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="small text-muted mb-3" id="logDetalheResumo"></p>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <h6 class="fw-semibold text-danger"><i class='bx bx-left-arrow-alt me-1'></i>Antes</h6>
+                        <pre class="audit-json-pre" id="logDetalheAntes">—</pre>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="fw-semibold text-success"><i class='bx bx-right-arrow-alt me-1'></i>Depois</h6>
+                        <pre class="audit-json-pre" id="logDetalheDepois">—</pre>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Toast de feedback -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index:9999">
+    <div id="toastMsg" class="toast align-items-center text-white border-0" role="alert" aria-live="assertive">
+        <div class="d-flex">
+            <div class="toast-body fw-semibold" id="toastBody"></div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block addjs_extra %}
+<script src="{% static 'contratos/js/config.js' %}"></script>
+{% endblock %}

@@ -424,43 +424,19 @@
                 <i class="bx bx-chevron-down subcategory-arrow"></i>
               </a>
               <ul class="options-menu">
-                {% if user|has_access:'SS34' %}
+                {% if user|has_access:'SS35' or user|has_access:'SCT189' %}
                 <li>
-                  <a href="{% url 'contratos:novo_contrato' %}">
-                    <i class="bx bx-plus-circle"></i>
-                    <span class="menu-label">Novo Contrato</span>
-                  </a>
-                </li>
-                {% endif %}
-                {% if user|has_access:'SS35' %}
-                <li>
-                  <a href="{% url 'contratos:acompanhamento_crm' %}">
+                  <a href="{% url 'contratos:crm_operacional_v2' %}">
                     <i class="bx bx-bar-chart-alt-2"></i>
-                    <span class="menu-label">Acompanhamento CRM</span>
+                    <span class="menu-label">CRM Operacional</span>
                   </a>
                 </li>
                 {% endif %}
-                {% if user|has_access:'SS36' %}
+                {% if user|has_access:'SS38' or user|has_access:'SCT192' %}
                 <li>
-                  <a href="{% url 'contratos:acompanhamento_tabela' %}">
-                    <i class="bx bx-table"></i>
-                    <span class="menu-label">Acompanhamento Tabela</span>
-                  </a>
-                </li>
-                {% endif %}
-                {% if user|has_access:'SS37' %}
-                <li>
-                  <a href="{% url 'contratos:gerenciar_bancos' %}">
-                    <i class="bx bx-building"></i>
-                    <span class="menu-label">Gerenciar Bancos</span>
-                  </a>
-                </li>
-                {% endif %}
-                {% if user|has_access:'SS38' %}
-                <li>
-                  <a href="{% url 'contratos:administrativo' %}">
+                  <a href="{% url 'contratos:config_v2' %}">
                     <i class="bx bx-cog"></i>
-                    <span class="menu-label">Administrativo</span>
+                    <span class="menu-label">Configuração Catálogos</span>
                   </a>
                 </li>
                 {% endif %}
