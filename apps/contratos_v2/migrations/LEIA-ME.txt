@@ -14,3 +14,13 @@ O aviso "have changes not yet reflected in a migration" depois de só o siape.00
 não foram aplicados. Siga a ordem acima.
 
 Não rode makemigrations na VPS, salvo se migrate acusar erro concreto de coluna.
+
+=== Pasta apps/operacional (lixo no servidor) ===
+
+O repositório não tem mais apps/operacional/. O git pull não remove pasta órfã
+no disco. Na VPS, se ainda existir:
+
+  git ls-files apps/operacional
+  rm -rf apps/operacional
+
+App em uso: apps/contratos_v2/ — URL /contratos/
