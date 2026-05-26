@@ -15,6 +15,8 @@
     window.__clienteDadosPessoaisId = null;
 
     function setBotoesSimulacaoProposta() {
+        if (!window.isSuperUser) return;
+
         const btnSim = document.getElementById('btn-simulacao-consulta');
         const btnProp = document.getElementById('btn-proposta-consulta');
         if (!btnSim || !btnProp) return;
@@ -144,6 +146,7 @@
     }
 
     window.abrirModalSimulacao = function () {
+        if (!window.isSuperUser) return;
         if (!window.__carteiraIdAtual) {
             alert('Carteira não encontrada. Busque o cliente novamente.');
             return;
@@ -155,6 +158,7 @@
     };
 
     window.abrirModalPropostas = function () {
+        if (!window.isSuperUser) return;
         if (!window.__carteiraIdAtual) {
             alert('Carteira não encontrada. Busque o cliente novamente.');
             return;
