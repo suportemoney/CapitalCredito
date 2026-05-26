@@ -5,7 +5,6 @@ import os
 import re
 from urllib.parse import quote
 
-import requests
 from django.conf import settings
 from django.core.files.base import ContentFile
 
@@ -162,6 +161,11 @@ def _baixar_imagem(url, timeout=15):
     if not url:
         return None, None
     try:
+        try:
+            import requests
+        except ImportError:
+            logger.warning('Pacote requests não instalado; logo remoto indisponível.')
+            return None
         r = requests.get(url, timeout=timeout, headers={'User-Agent': 'MoneyConsig/1.0'})
         if r.status_code != 200 or not r.content:
             return None, None
