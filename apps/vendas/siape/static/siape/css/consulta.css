@@ -257,7 +257,7 @@
     word-break: break-word;
 }
 
-/* Cards de margem horizontais */
+/* Cards de margem — layout mockup: barra dourada + corpo escuro em colunas */
 .siape-consulta .siape-margens-row {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -265,48 +265,84 @@
 }
 
 .siape-consulta .siape-margem-card {
-    background: #fff;
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    background: linear-gradient(135deg, var(--siape-dark-soft) 0%, var(--siape-dark) 100%);
     border-radius: var(--siape-radius);
     overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+    min-height: 100px;
 }
 
-.siape-consulta .siape-margem-card__icon {
-    background: var(--siape-dark);
-    color: var(--siape-gold);
-    padding: 0.65rem 1rem;
-    font-size: 1.35rem;
+.siape-consulta .siape-margem-card__bar {
+    width: 52px;
+    min-width: 52px;
+    background: var(--siape-gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 1.5rem;
+}
+
+.siape-consulta .siape-margem-card__bar i {
+    font-size: 1.45rem;
+    line-height: 1;
+}
+
+.siape-consulta .siape-margem-card__content {
+    flex: 1;
+    padding: 0.85rem 1rem 0.85rem 0.9rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.65rem;
+    min-width: 0;
 }
 
 .siape-consulta .siape-margem-card__title {
-    background: var(--siape-dark-soft);
     color: #fff;
-    font-weight: 600;
-    font-size: 0.85rem;
-    padding: 0.5rem 1rem;
+    font-weight: 700;
+    font-size: 0.9rem;
+    line-height: 1.2;
+    margin: 0;
 }
 
-.siape-consulta .siape-margem-card__values {
-    padding: 0.75rem 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-    font-size: 0.85rem;
+.siape-consulta .siape-margem-card__cols {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    align-items: end;
 }
 
-.siape-consulta .siape-margem-card__values > div {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.siape-consulta .siape-margem-col {
+    text-align: center;
+    padding: 0 0.4rem;
+    border-right: 1px solid rgba(255, 255, 255, 0.12);
 }
 
-.siape-consulta .siape-margem-card__values span {
-    color: var(--siape-text-muted);
+.siape-consulta .siape-margem-col:last-child {
+    border-right: none;
 }
 
-.siape-consulta .siape-margem-saldo strong {
+.siape-consulta .siape-margem-col__label {
+    display: block;
+    font-size: 0.68rem;
+    color: rgba(255, 255, 255, 0.55);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.3rem;
+}
+
+.siape-consulta .siape-margem-col__value {
+    display: block;
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: #fff;
+    white-space: nowrap;
+}
+
+.siape-consulta .siape-margem-col--saldo .siape-margem-col__value {
     color: var(--siape-gold);
 }
 
@@ -414,9 +450,20 @@
 }
 
 /* Responsivo */
+@media (max-width: 1200px) {
+    .siape-consulta .siape-margem-col__value {
+        font-size: 0.72rem;
+        white-space: normal;
+    }
+}
+
 @media (max-width: 992px) {
     .siape-consulta .siape-margens-row {
         grid-template-columns: 1fr;
+    }
+
+    .siape-consulta .siape-margem-col__value {
+        font-size: 0.85rem;
     }
 }
 
