@@ -1,126 +1,442 @@
-.card {
+/* Consulta SIAPE — estilos escopados ao mockup */
+.siape-consulta {
+    --siape-gold: #D4AF37;
+    --siape-gold-dark: #b8941f;
+    --siape-dark: #1a1a1a;
+    --siape-dark-soft: #2c2c2c;
+    --siape-bg: #f0f0f0;
+    --siape-radius: 10px;
+    --siape-text-muted: #6c757d;
+}
+
+.siape-consulta .siape-resultados {
+    background: var(--siape-bg);
+    border-radius: var(--siape-radius);
+    padding: 1.25rem;
+}
+
+.siape-consulta .siape-search-card {
     border: none;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
+    border-radius: var(--siape-radius);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    background: #fff;
 }
 
-.card-header {
-    background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%);
-    color: #D4AF37;
-    border-bottom: 2px solid #D4AF37;
-    padding: 15px 20px;
-}
-
-.card-header h5, .card-header h6 {
-    margin: 0;
+.siape-consulta .siape-section-title {
     font-weight: 600;
+    color: var(--siape-dark);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
-.card-body {
-    padding: 25px;
+.siape-consulta .siape-section-title i {
+    color: var(--siape-gold);
+    font-size: 1.35rem;
 }
 
-.table {
-    margin-top: 0;
+.siape-consulta .form-label {
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 0.35rem;
 }
 
-.table thead {
-    background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%);
-    color: #D4AF37;
+.siape-consulta .form-control:focus,
+.siape-consulta .form-select:focus {
+    border-color: var(--siape-gold);
+    box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.25);
 }
 
-.table thead th {
-    border-bottom: 2px solid #D4AF37;
+/* Botões dourados */
+.siape-consulta .siape-btn-gold {
+    background: linear-gradient(135deg, var(--siape-gold) 0%, var(--siape-gold-dark) 100%);
+    border: none;
+    color: var(--siape-dark);
     font-weight: 600;
-    padding: 12px;
-}
-
-.table tbody tr {
+    padding: 0.55rem 1.25rem;
+    border-radius: 6px;
     transition: all 0.2s ease;
 }
 
-.table tbody tr:hover {
-    background-color: #f8f9fa;
-    transform: scale(1.01);
+.siape-consulta .siape-btn-gold:hover:not(:disabled) {
+    background: linear-gradient(135deg, var(--siape-gold-dark) 0%, #9a7d1a 100%);
+    color: var(--siape-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(212, 175, 55, 0.35);
 }
 
-.table tbody td {
-    padding: 12px;
+.siape-consulta .siape-btn-gold:disabled {
+    opacity: 0.55;
+}
+
+.siape-consulta .siape-btn-outline-gold {
+    background: transparent;
+    border: 1px solid var(--siape-gold);
+    color: var(--siape-gold);
+    font-weight: 600;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.siape-consulta .siape-btn-outline-gold:hover:not(:disabled) {
+    background: rgba(212, 175, 55, 0.12);
+    color: var(--siape-gold-dark);
+    border-color: var(--siape-gold-dark);
+}
+
+.siape-consulta .siape-btn-muted {
+    opacity: 0.85;
+}
+
+/* Card escuro do cliente */
+.siape-consulta .siape-client-hero {
+    background: linear-gradient(135deg, var(--siape-dark-soft) 0%, var(--siape-dark) 100%);
+    border-radius: var(--siape-radius);
+    padding: 1.5rem;
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.siape-consulta .siape-client-hero__inner {
+    display: flex;
+    gap: 1.25rem;
+    align-items: flex-start;
+    margin-bottom: 1.25rem;
+}
+
+.siape-consulta .siape-client-hero__avatar {
+    width: 72px;
+    height: 72px;
+    min-width: 72px;
+    border-radius: 50%;
+    background: rgba(212, 175, 55, 0.15);
+    border: 2px solid var(--siape-gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.siape-consulta .siape-client-hero__avatar i {
+    font-size: 2.5rem;
+    color: var(--siape-gold);
+}
+
+.siape-consulta .siape-client-hero__nome {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 0 0.75rem;
+    color: #fff;
+}
+
+.siape-consulta .siape-label {
+    display: block;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.65);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-bottom: 0.15rem;
+}
+
+.siape-consulta .siape-value {
+    font-weight: 500;
+    color: #fff;
+}
+
+.siape-consulta .siape-badge-ativo {
+    display: inline-block;
+    background: var(--siape-gold);
+    color: var(--siape-dark);
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    text-transform: uppercase;
+    margin-left: 0.35rem;
     vertical-align: middle;
 }
 
-.btn-primary {
-    background: linear-gradient(135deg, #D4AF37 0%, #b8941f 100%);
-    border: none;
-    color: #1a1a1a;
+.siape-consulta .siape-client-hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(212, 175, 55, 0.25);
+}
+
+/* Barra de status matrícula */
+.siape-consulta .siape-status-bar {
+    background: #fff;
+    border-radius: var(--siape-radius);
+    padding: 0.75rem 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
+}
+
+.siape-consulta .siape-status-bar__left {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.siape-consulta .siape-status-label {
+    color: var(--siape-text-muted);
+    font-size: 0.875rem;
+}
+
+.siape-consulta .siape-status-campanha {
+    color: var(--siape-gold);
+}
+
+.siape-consulta .siape-select-matricula {
+    max-width: 180px;
+    display: inline-block;
+    border-color: var(--siape-gold);
     font-weight: 600;
-    padding: 10px 25px;
-    border-radius: 4px;
-    transition: all 0.3s ease;
+    color: var(--siape-dark);
 }
 
-.btn-primary:hover {
-    background: linear-gradient(135deg, #b8941f 0%, #9a7d1a 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(212, 175, 55, 0.3);
-}
-
-.btn-secondary {
-    background: #6c757d;
-    border: none;
-    color: white;
-    font-weight: 600;
-}
-
-.btn-secondary:hover {
-    background: #5a6268;
-    color: white;
-}
-
-.form-label {
+.siape-consulta .siape-link-detalhes {
+    color: var(--siape-gold);
+    text-decoration: none;
+    font-size: 0.875rem;
     font-weight: 500;
-    color: #333;
-    margin-bottom: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
 }
 
-.form-control,
-.form-select {
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    padding: 10px 12px;
-    transition: all 0.3s ease;
+.siape-consulta .siape-link-detalhes:hover {
+    color: var(--siape-gold-dark);
 }
 
-.form-control:focus,
-.form-select:focus {
-    border-color: #D4AF37;
-    box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.25);
-    outline: none;
+.siape-consulta .siape-detalhes-extra {
+    border: none;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
 }
 
-.card-header.bg-primary {
-    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
+/* Grid 3x2 informações */
+.siape-consulta .siape-info-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
 }
 
-.card-header.bg-info {
-    background: linear-gradient(135deg, #17a2b8 0%, #117a8b 100%) !important;
+.siape-consulta .siape-info-item {
+    background: #fff;
+    border-radius: var(--siape-radius);
+    padding: 0.85rem 1rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
 }
 
-.card-header.bg-success {
-    background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%) !important;
+.siape-consulta .siape-info-item > i {
+    font-size: 1.25rem;
+    color: var(--siape-gold);
+    margin-top: 0.15rem;
 }
 
-.card-header.bg-primary,
-.card-header.bg-info,
-.card-header.bg-success {
-    color: white !important;
-    border-bottom: none;
+.siape-consulta .siape-info-label {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--siape-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
 }
 
-.card-header.bg-primary h6,
-.card-header.bg-info h6,
-.card-header.bg-success h6 {
-    color: white;
+.siape-consulta .siape-info-value {
     font-weight: 600;
+    color: var(--siape-dark);
+    font-size: 0.9rem;
+    word-break: break-word;
 }
 
+/* Cards de margem horizontais */
+.siape-consulta .siape-margens-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+}
+
+.siape-consulta .siape-margem-card {
+    background: #fff;
+    border-radius: var(--siape-radius);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.siape-consulta .siape-margem-card__icon {
+    background: var(--siape-dark);
+    color: var(--siape-gold);
+    padding: 0.65rem 1rem;
+    font-size: 1.35rem;
+}
+
+.siape-consulta .siape-margem-card__title {
+    background: var(--siape-dark-soft);
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 0.5rem 1rem;
+}
+
+.siape-consulta .siape-margem-card__values {
+    padding: 0.75rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    font-size: 0.85rem;
+}
+
+.siape-consulta .siape-margem-card__values > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.siape-consulta .siape-margem-card__values span {
+    color: var(--siape-text-muted);
+}
+
+.siape-consulta .siape-margem-saldo strong {
+    color: var(--siape-gold);
+}
+
+/* Tabela contratos */
+.siape-consulta .siape-contratos-card {
+    border: none;
+    border-radius: var(--siape-radius);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.siape-consulta .siape-table-contratos thead {
+    background: linear-gradient(135deg, var(--siape-dark-soft) 0%, var(--siape-dark) 100%);
+    color: var(--siape-gold);
+}
+
+.siape-consulta .siape-table-contratos thead th {
+    border-bottom: 2px solid var(--siape-gold);
+    font-weight: 600;
+    padding: 0.75rem;
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+
+.siape-consulta .siape-table-contratos tbody td {
+    padding: 0.65rem 0.75rem;
+    vertical-align: middle;
+    font-size: 0.875rem;
+}
+
+.siape-consulta .siape-table-contratos tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* Sidebar */
+.siape-consulta .siape-sidebar-card {
+    border: none;
+    border-radius: var(--siape-radius);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.siape-consulta .siape-sidebar-title {
+    font-weight: 700;
+    color: var(--siape-dark);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--siape-gold);
+}
+
+.siape-consulta .siape-sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.siape-consulta .siape-sidebar-item:last-child {
+    margin-bottom: 0;
+}
+
+.siape-consulta .siape-sidebar-item__icon {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    border-radius: 50%;
+    background: var(--siape-dark);
+    color: var(--siape-gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+}
+
+.siape-consulta .siape-sidebar-label {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--siape-text-muted);
+    text-transform: uppercase;
+}
+
+.siape-consulta .siape-sidebar-value {
+    font-weight: 600;
+    color: var(--siape-dark);
+    font-size: 0.9rem;
+}
+
+.siape-consulta .siape-gold-text {
+    color: var(--siape-gold) !important;
+}
+
+.siape-consulta .siape-sidebar-meta {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    margin-bottom: 0.85rem;
+}
+
+.siape-consulta .siape-sidebar-meta:last-child {
+    margin-bottom: 0;
+}
+
+.siape-consulta .siape-sidebar-meta > i {
+    color: var(--siape-gold);
+    font-size: 1.15rem;
+    margin-top: 0.15rem;
+}
+
+/* Responsivo */
+@media (max-width: 992px) {
+    .siape-consulta .siape-margens-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .siape-consulta .siape-info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .siape-consulta .siape-client-hero__inner {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .siape-consulta .siape-client-hero__actions {
+        justify-content: center;
+    }
+
+    .siape-consulta .siape-status-bar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

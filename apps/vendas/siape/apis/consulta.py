@@ -78,6 +78,7 @@ def api_buscar_clientes(request):
                 'upag': matricula.upag or '',
                 'base_calculo': float(matricula.base_calculo) if matricula.base_calculo else 0,
                 'rjur': matricula.rjur or '',
+                'rubrica': matricula.rubrica or '',
                 'campanha': matricula.campanha.titulo,
                 'qtd_contratos': contratos.count(),
                 'margens': {
@@ -102,6 +103,7 @@ def api_buscar_clientes(request):
                     'banco': contrato.banco or '',
                     'valor_parcela': float(contrato.valor_parcela) if contrato.valor_parcela else 0,
                     'parcelas_restantes': contrato.parcelas_restantes or 0,
+                    'numero_parcela': contrato.numero_parcela or 1,
                     'campanha': contrato.campanha.titulo,
                 } for contrato in contratos],
             })
@@ -159,6 +161,7 @@ def api_detalhes_cliente(request, cliente_id):
                 'upag': matricula.upag or '',
                 'base_calculo': float(matricula.base_calculo) if matricula.base_calculo else 0,
                 'rjur': matricula.rjur or '',
+                'rubrica': matricula.rubrica or '',
                 'campanha': matricula.campanha.titulo,
                 'qtd_contratos': contratos.count(),
                 'margens': {
@@ -183,6 +186,7 @@ def api_detalhes_cliente(request, cliente_id):
                     'banco': contrato.banco or '',
                     'valor_parcela': float(contrato.valor_parcela) if contrato.valor_parcela else 0,
                     'parcelas_restantes': contrato.parcelas_restantes or 0,
+                    'numero_parcela': contrato.numero_parcela or 1,
                     'campanha': contrato.campanha.titulo,
                 } for contrato in contratos],
             })

@@ -6,207 +6,293 @@
 {% block header_title %}Consulta Cliente - SIAPE{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5>Buscar Cliente</h5>
+<div class="siape-consulta container-fluid">
+    <div class="siape-search-card card mb-4">
+        <div class="card-body">
+            <h5 class="siape-section-title mb-3">
+                <i class='bx bx-search-alt'></i> Buscar Cliente
+            </h5>
+            <form id="formBuscarCliente" class="row g-3 align-items-end">
+                {% if user.is_superuser %}
+                <div class="col-md-4">
+                    <label class="form-label">Campanha</label>
+                    <select class="form-select" id="filtroCampanha" name="campanha_id">
+                        <option value="">Todas as campanhas ativas</option>
+                    </select>
                 </div>
-                <div class="card-body">
-                    <form id="formBuscarCliente" class="row g-3">
-                        {% if user.is_superuser %}
-                        <div class="col-md-4">
-                            <label class="form-label">Campanha</label>
-                            <select class="form-select" id="filtroCampanha" name="campanha_id">
-                                <option value="">Todas as campanhas ativas</option>
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                        {% else %}
-                        <div class="col-md-4" style="display: none;">
-                            <label class="form-label">Campanha</label>
-                            <select class="form-select" id="filtroCampanha" name="campanha_id">
-                                <option value="" selected>Todas as campanhas ativas</option>
-                            </select>
-                        </div>
-                        <div class="col-md-8">
-                        {% endif %}
-                            <label class="form-label">CPF</label>
-                            <input type="text" class="form-control" id="buscaCliente" name="busca" placeholder="Digite o CPF do cliente (apenas números)" maxlength="11" required>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label">&nbsp;</label>
-                            <button type="submit" class="btn btn-primary w-100">
-                                <i class='bx bx-search'></i> Buscar
-                            </button>
-                        </div>
-                    </form>
+                <div class="col-md-6">
+                {% else %}
+                <div class="col-md-4 d-none">
+                    <label class="form-label">Campanha</label>
+                    <select class="form-select" id="filtroCampanha" name="campanha_id">
+                        <option value="" selected>Todas as campanhas ativas</option>
+                    </select>
                 </div>
-            </div>
+                <div class="col-md-8">
+                {% endif %}
+                    <label class="form-label">CPF</label>
+                    <input type="text" class="form-control" id="buscaCliente" name="busca" placeholder="Digite o CPF do cliente (apenas números)" maxlength="11" required>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn siape-btn-gold w-100">
+                        <i class='bx bx-search'></i> Buscar
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
-    <div class="row mt-4" id="area-resultados" style="display: none;">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    <div id="detalhes-cliente-container" style="display: none;">
-                        
-                        <div id="dados-pessoais-card" class="card mb-3">
-                            <div class="card-header">
-                                <h6>Dados Pessoais</h6>
+    <div id="area-resultados" class="siape-resultados" style="display: none;">
+        <div id="detalhes-cliente-container" style="display: none;">
+            <div class="row g-4">
+                <div class="col-lg-9 siape-main order-2 order-lg-1">
+                    <div id="dados-pessoais-card" class="siape-client-hero mb-4">
+                        <div class="siape-client-hero__inner">
+                            <div class="siape-client-hero__avatar">
+                                <i class='bx bx-user'></i>
                             </div>
-                            <div class="card-body">
-                                <div class="row mb-3">
-                                    <div class="col-md-3">
-                                        <strong>Nome:</strong> <span id="dp-nome"></span>
+                            <div class="siape-client-hero__info flex-grow-1">
+                                <h2 class="siape-client-hero__nome" id="dp-nome"></h2>
+                                <div class="row g-2 siape-client-hero__fields">
+                                    <div class="col-sm-6 col-md-4">
+                                        <span class="siape-label">CPF</span>
+                                        <span class="siape-value" id="dp-cpf"></span>
                                     </div>
-                                    <div class="col-md-3">
-                                        <strong>CPF:</strong> <span id="dp-cpf"></span>
+                                    <div class="col-sm-6 col-md-2">
+                                        <span class="siape-label">UF</span>
+                                        <span class="siape-value" id="dp-uf"></span>
                                     </div>
-                                    <div class="col-md-2">
-                                        <strong>UF:</strong> <span id="dp-uf"></span>
+                                    <div class="col-sm-6 col-md-3">
+                                        <span class="siape-label">Situação Funcional</span>
+                                        <span class="siape-value" id="dp-situacao-wrap"><span id="dp-situacao"></span></span>
                                     </div>
-                                    <div class="col-md-4">
-                                        <strong>Situação Funcional:</strong> <span id="dp-situacao"></span>
+                                    <div class="col-sm-6 col-md-3">
+                                        <span class="siape-label">Celular</span>
+                                        <span class="siape-value" id="dp-celular">-</span>
                                     </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-3">
-                                        <strong>Celular:</strong> <span id="dp-celular">-</span>
-                                    </div>
-                                </div>
-                                <div class="row mt-2">
-                                    <div class="col-12">
-                                        <button type="button" class="btn btn-primary btn-sm me-2" onclick="abrirModalContato()" id="btn-adicionar-contato">
-                                            <i class='bx bx-phone'></i> Adicionar Contato
-                                        </button>
-                                        <button type="button" class="btn btn-success btn-sm me-2" onclick="abrirModalEsteira()" id="btn-adicionar-esteira">
-                                            <i class='bx bx-plus-circle'></i> Adicionar à Esteira
-                                        </button>
-                                        <button type="button" class="btn btn-info btn-sm me-2" onclick="abrirModalCalculadoras()">
-                                            <i class='bx bx-calculator'></i> Calculadoras
-                                        </button>
-                                        {% if user.is_superuser %}
-                                        <button type="button" class="btn btn-outline-info btn-sm me-2" id="btn-simulacao-consulta"
-                                                style="display: none;" disabled onclick="abrirModalSimulacao()"
-                                                title="Enviar solicitação de simulação operacional">
-                                            <i class='bx bx-calculator'></i> Simulação
-                                        </button>
-                                        <button type="button" class="btn btn-outline-success btn-sm me-2" id="btn-proposta-consulta"
-                                                style="display: none;" disabled onclick="abrirModalPropostas()"
-                                                title="Enviar propostas para digitação">
-                                            <i class='bx bx-send'></i> Proposta
-                                        </button>
-                                        {% endif %}
-                                        <button type="button" class="btn btn-warning btn-sm" onclick="abrirModalSimulador()">
-                                            <i class='bx bx-money'></i> Calculadora
-                                        </button>
+                                    <div class="col-sm-6 col-md-4">
+                                        <span class="siape-label">Tipo de Base</span>
+                                        <span class="siape-value" id="dp-tipo-base">-</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
-                        <div id="matriculas-container">
-                            <div class="card mb-3">
-                                <div class="card-header">
-                                    <h6>Matrículas</h6>
-                                </div>
-                                <div class="card-body">
-                                    <div class="table-responsive">
-                                        <table class="table table-hover">
-                                            <thead>
-                                                <tr>
-                                                    <th>Matrícula</th>
-                                                    <th>Matrícula Instituidor</th>
-                                                    <th>Órgão</th>
-                                                    <th>UPAG</th>
-                                                    <th>Qtd Contratos</th>
-                                                    <th>Base Cálculo</th>
-                                                    <th>RJUR</th>
-                                                    <th>Campanha</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="matriculas-tbody">
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div id="detalhes-matricula-container" style="display: none;">
-                            <button type="button" class="btn btn-secondary mb-3" onclick="voltarParaMatriculas()">
-                                <i class='bx bx-arrow-back'></i> Voltar para Matrículas
+                        <div class="siape-client-hero__actions">
+                            <button type="button" class="btn siape-btn-outline-gold btn-sm" onclick="abrirModalContato()" id="btn-adicionar-contato">
+                                <i class='bx bx-phone'></i> Adicionar Contato
                             </button>
-                            
-                            <div class="card mb-3">
-                                <div class="card-header">
-                                    <h6 id="matricula-selecionada-titulo">Matrícula: <span id="matricula-numero"></span></h6>
+                            <button type="button" class="btn siape-btn-outline-gold btn-sm" onclick="abrirModalEsteira()" id="btn-adicionar-esteira">
+                                <i class='bx bx-plus-circle'></i> Adicionar à Esteira
+                            </button>
+                            <button type="button" class="btn siape-btn-outline-gold btn-sm" onclick="abrirModalCalculadoras()">
+                                <i class='bx bx-calculator'></i> Calculadoras
+                            </button>
+                            {% if user.is_superuser %}
+                            <button type="button" class="btn siape-btn-outline-gold btn-sm" id="btn-simulacao-consulta"
+                                    style="display: none;" disabled onclick="abrirModalSimulacao()"
+                                    title="Enviar solicitação de simulação operacional">
+                                <i class='bx bx-calculator'></i> Simulação
+                            </button>
+                            <button type="button" class="btn siape-btn-gold btn-sm" id="btn-proposta-consulta"
+                                    style="display: none;" disabled onclick="abrirModalPropostas()"
+                                    title="Enviar propostas para digitação">
+                                <i class='bx bx-send'></i> Proposta
+                            </button>
+                            {% endif %}
+                            <button type="button" class="btn siape-btn-outline-gold btn-sm siape-btn-muted" onclick="abrirModalSimulador()">
+                                <i class='bx bx-money'></i> Calculadora
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="detalhes-matricula-inline">
+                        <div class="siape-status-bar mb-3">
+                            <div class="siape-status-bar__left">
+                                <span class="siape-status-label">Matrícula:</span>
+                                <select class="form-select form-select-sm siape-select-matricula" id="select-matricula">
+                                    <option value="">—</option>
+                                </select>
+                                <span class="siape-status-label ms-3">Campanha:</span>
+                                <strong class="siape-status-campanha" id="status-campanha">—</strong>
+                            </div>
+                            <a class="siape-link-detalhes" data-bs-toggle="collapse" href="#collapse-detalhes-matricula" role="button" aria-expanded="false" id="btn-ver-detalhes-matricula">
+                                <i class='bx bx-show'></i> Ver detalhes completos
+                            </a>
+                        </div>
+
+                        <div class="collapse mb-3" id="collapse-detalhes-matricula">
+                            <div class="siape-detalhes-extra card">
+                                <div class="card-body py-2">
+                                    <div class="row g-2 small">
+                                        <div class="col-md-4"><strong>Matrícula Instituidor:</strong> <span id="detalhe-matricula-instituidor">—</span></div>
+                                        <div class="col-md-4"><strong>Qtd. Contratos:</strong> <span id="detalhe-qtd-contratos">—</span></div>
+                                        <div class="col-md-4"><strong>RJUR:</strong> <span id="detalhe-rjur">—</span></div>
+                                    </div>
                                 </div>
                             </div>
+                        </div>
 
-                            <div class="row mb-3">
-                                <div class="col-md-4">
-                                    <div class="card">
-                                        <div class="card-header bg-primary text-white">
-                                            <h6>Margem 5%</h6>
-                                        </div>
-                                        <div class="card-body">
-                                            <p><strong>Bruta:</strong> R$ <span id="margem-5-bruta">0,00</span></p>
-                                            <p><strong>Util:</strong> R$ <span id="margem-5-util">0,00</span></p>
-                                            <p><strong>Saldo:</strong> R$ <span id="margem-5-saldo">0,00</span></p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="card">
-                                        <div class="card-header bg-info text-white">
-                                            <h6>Margem Benefício 5%</h6>
-                                        </div>
-                                        <div class="card-body">
-                                            <p><strong>Bruta:</strong> R$ <span id="margem-5b-bruta">0,00</span></p>
-                                            <p><strong>Util:</strong> R$ <span id="margem-5b-util">0,00</span></p>
-                                            <p><strong>Saldo:</strong> R$ <span id="margem-5b-saldo">0,00</span></p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="card">
-                                        <div class="card-header bg-success text-white">
-                                            <h6>Margem 35%</h6>
-                                        </div>
-                                        <div class="card-body">
-                                            <p><strong>Bruta:</strong> R$ <span id="margem-35-bruta">0,00</span></p>
-                                            <p><strong>Util:</strong> R$ <span id="margem-35-util">0,00</span></p>
-                                            <p><strong>Saldo:</strong> R$ <span id="margem-35-saldo">0,00</span></p>
-                                        </div>
-                                    </div>
+                        <div class="siape-info-grid mb-4">
+                            <div class="siape-info-item">
+                                <i class='bx bx-buildings'></i>
+                                <div>
+                                    <span class="siape-info-label">Órgão</span>
+                                    <span class="siape-info-value" id="grid-orgao">—</span>
                                 </div>
                             </div>
-
-                            <div class="card">
-                                <div class="card-header">
-                                    <h6>Contratos</h6>
+                            <div class="siape-info-item">
+                                <i class='bx bx-map'></i>
+                                <div>
+                                    <span class="siape-info-label">UPAG</span>
+                                    <span class="siape-info-value" id="grid-upag">—</span>
                                 </div>
-                                <div class="card-body">
-                                    <div class="table-responsive">
-                                        <table class="table table-hover">
-                                            <thead>
-                                                <tr>
-                                                    <th>Contrato</th>
-                                                    <th>Tipo Contrato</th>
-                                                    <th>Banco</th>
-                                                    <th>Valor Parcela</th>
-                                                    <th>Parcelas Restantes</th>
-                                                    <th>Campanha</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="contratos-tbody">
-                                            </tbody>
-                                        </table>
-                                    </div>
+                            </div>
+                            <div class="siape-info-item">
+                                <i class='bx bx-receipt'></i>
+                                <div>
+                                    <span class="siape-info-label">Rubrica</span>
+                                    <span class="siape-info-value" id="grid-rubrica">—</span>
+                                </div>
+                            </div>
+                            <div class="siape-info-item">
+                                <i class='bx bx-file'></i>
+                                <div>
+                                    <span class="siape-info-label">RJUR</span>
+                                    <span class="siape-info-value" id="grid-rjur">—</span>
+                                </div>
+                            </div>
+                            <div class="siape-info-item">
+                                <i class='bx bx-wallet'></i>
+                                <div>
+                                    <span class="siape-info-label">Base de Cálculo</span>
+                                    <span class="siape-info-value" id="grid-base-calculo">—</span>
+                                </div>
+                            </div>
+                            <div class="siape-info-item">
+                                <i class='bx bx-id-card'></i>
+                                <div>
+                                    <span class="siape-info-label">Matrícula Instituído</span>
+                                    <span class="siape-info-value" id="grid-matricula-instituidor">—</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="siape-margens-row mb-4">
+                            <div class="siape-margem-card">
+                                <div class="siape-margem-card__icon"><i class='bx bx-pie-chart-alt-2'></i></div>
+                                <div class="siape-margem-card__title">Margem 5%</div>
+                                <div class="siape-margem-card__values">
+                                    <div><span>Bruta</span><strong>R$ <span id="margem-5-bruta">0,00</span></strong></div>
+                                    <div><span>Util</span><strong>R$ <span id="margem-5-util">0,00</span></strong></div>
+                                    <div class="siape-margem-saldo"><span>Saldo</span><strong>R$ <span id="margem-5-saldo">0,00</span></strong></div>
+                                </div>
+                            </div>
+                            <div class="siape-margem-card">
+                                <div class="siape-margem-card__icon"><i class='bx bx-gift'></i></div>
+                                <div class="siape-margem-card__title">Margem Benefício 5%</div>
+                                <div class="siape-margem-card__values">
+                                    <div><span>Bruta</span><strong>R$ <span id="margem-5b-bruta">0,00</span></strong></div>
+                                    <div><span>Util</span><strong>R$ <span id="margem-5b-util">0,00</span></strong></div>
+                                    <div class="siape-margem-saldo"><span>Saldo</span><strong>R$ <span id="margem-5b-saldo">0,00</span></strong></div>
+                                </div>
+                            </div>
+                            <div class="siape-margem-card">
+                                <div class="siape-margem-card__icon"><i class='bx bx-trending-up'></i></div>
+                                <div class="siape-margem-card__title">Margem 35%</div>
+                                <div class="siape-margem-card__values">
+                                    <div><span>Bruta</span><strong>R$ <span id="margem-35-bruta">0,00</span></strong></div>
+                                    <div><span>Util</span><strong>R$ <span id="margem-35-util">0,00</span></strong></div>
+                                    <div class="siape-margem-saldo"><span>Saldo</span><strong>R$ <span id="margem-35-saldo">0,00</span></strong></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="siape-contratos-card card" id="siape-contratos">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                                    <h5 class="siape-section-title mb-0">
+                                        <i class='bx bx-folder'></i> Contratos
+                                    </h5>
+                                    <a href="#siape-contratos" class="btn btn-sm siape-btn-outline-gold">Ver todos os contratos</a>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table siape-table-contratos mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Contrato</th>
+                                                <th>Tipo Contrato</th>
+                                                <th>Banco</th>
+                                                <th>Valor Parcela</th>
+                                                <th>Parcelas Restantes</th>
+                                                <th>Nº Parcela</th>
+                                                <th>Campanha</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="contratos-tbody">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 siape-sidebar order-1 order-lg-2">
+                    <div class="siape-sidebar-card card mb-3">
+                        <div class="card-body">
+                            <h6 class="siape-sidebar-title">Resumo do Cliente</h6>
+                            <div class="siape-sidebar-item">
+                                <div class="siape-sidebar-item__icon"><i class='bx bx-id-card'></i></div>
+                                <div>
+                                    <span class="siape-sidebar-label">Matrícula</span>
+                                    <span class="siape-sidebar-value" id="sidebar-matricula">—</span>
+                                </div>
+                            </div>
+                            <div class="siape-sidebar-item">
+                                <div class="siape-sidebar-item__icon"><i class='bx bx-wallet'></i></div>
+                                <div>
+                                    <span class="siape-sidebar-label">Base de Cálculo</span>
+                                    <span class="siape-sidebar-value" id="sidebar-base-calculo">—</span>
+                                </div>
+                            </div>
+                            <div class="siape-sidebar-item">
+                                <div class="siape-sidebar-item__icon"><i class='bx bx-pie-chart-alt-2'></i></div>
+                                <div>
+                                    <span class="siape-sidebar-label">Margem Disponível 5%</span>
+                                    <span class="siape-sidebar-value siape-gold-text" id="sidebar-margem-5">—</span>
+                                </div>
+                            </div>
+                            <div class="siape-sidebar-item">
+                                <div class="siape-sidebar-item__icon"><i class='bx bx-trending-up'></i></div>
+                                <div>
+                                    <span class="siape-sidebar-label">Margem Disponível 35%</span>
+                                    <span class="siape-sidebar-value siape-gold-text" id="sidebar-margem-35">—</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="siape-sidebar-card card">
+                        <div class="card-body">
+                            <h6 class="siape-sidebar-title">Informações Adicionais</h6>
+                            <div class="siape-sidebar-meta">
+                                <i class='bx bx-calendar'></i>
+                                <div>
+                                    <span class="siape-sidebar-label">Data da Consulta</span>
+                                    <span class="siape-sidebar-value" id="sidebar-data-consulta">—</span>
+                                </div>
+                            </div>
+                            <div class="siape-sidebar-meta">
+                                <i class='bx bx-user'></i>
+                                <div>
+                                    <span class="siape-sidebar-label">Consultado por</span>
+                                    <span class="siape-sidebar-value" id="sidebar-consultado-por">{{ user.get_full_name|default:user.username }}</span>
+                                </div>
+                            </div>
+                            <div class="siape-sidebar-meta">
+                                <i class='bx bx-target-lock'></i>
+                                <div>
+                                    <span class="siape-sidebar-label">Origem</span>
+                                    <span class="siape-sidebar-value" id="sidebar-origem">—</span>
                                 </div>
                             </div>
                         </div>

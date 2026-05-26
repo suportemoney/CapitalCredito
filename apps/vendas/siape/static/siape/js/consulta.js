@@ -4,11 +4,18 @@ let matriculaSelecionada = null;
 let clienteCPFAtual = null;
 
 $(document).ready(function() {
-    if (typeof isSuperUser !== 'undefined' && isSuperUser) {
+    if (typeof window.isSuperUser !== 'undefined' && window.isSuperUser) {
         carregarCampanhas();
     } else {
         $('#filtroCampanha').val('').prop('disabled', true);
     }
+
+    $('#select-matricula').on('change', function() {
+        const id = parseInt($(this).val(), 10);
+        if (id) {
+            selecionarMatricula(id);
+        }
+    });
     
     $('#formBuscarCliente').on('submit', function(e) {
         e.preventDefault();
@@ -103,6 +110,9 @@ function selecionarCliente(clienteId) {
             if (response.success) {
                 clienteSelecionado = response.data;
                 exibirDetalhesCliente(response.data);
+                if (response.data.matriculas && response.data.matriculas.length > 0) {
+                    selecionarMatricula(response.data.matriculas[0].id);
+                }
             } else {
                 alert('Erro: ' + (response.message || 'Erro desconhecido'));
             }
@@ -118,42 +128,37 @@ function exibirDetalhesCliente(dados) {
     const dp = dados.dados_pessoais;
     
     clienteCPFAtual = dp.cpf;
-    $('#dp-nome').text(dp.nome);
+    matriculaSelecionada = null;
+    $('#dp-nome').text(dp.nome || '—');
     $('#dp-cpf').text(formatarCPF(dp.cpf));
-    $('#dp-uf').text(dp.uf);
-    $('#dp-situacao').text(dp.situacao_funcional);
+    $('#dp-uf').text(dp.uf || '—');
+    renderSituacaoFuncional(dp.situacao_funcional);
     $('#dp-celular').text(dp.celular ? formatarTelefone(dp.celular) : '-');
+    $('#dp-tipo-base').text(formatarTipoBase(dp.tipo_base));
     $('#esteira-cpf').val(dp.cpf);
-    $('#contato-cliente-id').val(dp.id);
-    
-    const tbody = $('#matriculas-tbody');
-    tbody.empty();
-    
-    if (dados.matriculas.length === 0) {
-        tbody.append('<tr><td colspan="8" class="text-center">Nenhuma matrícula encontrada</td></tr>');
+    $('#contato-cliente-id').val(dp.id || '');
+
+    const agora = new Date();
+    $('#sidebar-data-consulta').text(
+        agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+    );
+
+    const selectMat = $('#select-matricula');
+    selectMat.empty();
+    if (!dados.matriculas || dados.matriculas.length === 0) {
+        selectMat.append('<option value="">Nenhuma matrícula</option>');
+        limparDetalhesMatricula();
     } else {
         dados.matriculas.forEach(function(mat) {
-            const matriculaInstituidor = mat.matricula_instituidor || '-';
-            const row = `
-                <tr style="cursor: pointer;" onclick="selecionarMatricula(${mat.id})">
-                    <td>${escapeHtml(mat.matricula)}</td>
-                    <td>${escapeHtml(matriculaInstituidor)}</td>
-                    <td>${escapeHtml(mat.orgao)}</td>
-                    <td>${escapeHtml(mat.upag)}</td>
-                    <td>${mat.qtd_contratos}</td>
-                    <td>R$ ${formatarMoeda(mat.base_calculo)}</td>
-                    <td>${escapeHtml(mat.rjur)}</td>
-                    <td>${escapeHtml(mat.campanha)}</td>
-                </tr>
-            `;
-            tbody.append(row);
+            selectMat.append(
+                `<option value="${mat.id}">${escapeHtml(mat.matricula)} — ${escapeHtml(mat.campanha)}</option>`
+            );
         });
     }
-    
+
     $('#area-resultados').show();
     $('#detalhes-cliente-container').show();
-    $('#matriculas-container').show();
-    $('#detalhes-matricula-container').hide();
+    $('#detalhes-matricula-inline').show();
 
     if (typeof window.initConsultaOperacional === 'function') {
         window.initConsultaOperacional(
@@ -165,6 +170,37 @@ function exibirDetalhesCliente(dados) {
     }
 }
 
+function renderSituacaoFuncional(situacao) {
+    const texto = situacao || '—';
+    const $el = $('#dp-situacao');
+    $el.empty().text(texto);
+    if (texto && String(texto).toUpperCase().indexOf('ATIVO') !== -1) {
+        $el.append('<span class="siape-badge-ativo">ATIVO</span>');
+    }
+}
+
+function formatarTipoBase(tipo) {
+    if (!tipo) return '—';
+    const map = {
+        'PENSIONISTA': 'Pensionista',
+        'SERVIDOR': 'Servidor'
+    };
+    return map[String(tipo).toUpperCase()] || tipo;
+}
+
+function limparDetalhesMatricula() {
+    $('#status-campanha').text('—');
+    $('#sidebar-matricula').text('—');
+    $('#sidebar-base-calculo').text('—');
+    $('#sidebar-margem-5').text('—');
+    $('#sidebar-margem-35').text('—');
+    $('#sidebar-origem').text('—');
+    $('#grid-orgao, #grid-upag, #grid-rubrica, #grid-rjur, #grid-base-calculo, #grid-matricula-instituidor').text('—');
+    $('#detalhe-matricula-instituidor, #detalhe-qtd-contratos, #detalhe-rjur').text('—');
+    $('#margem-5-bruta, #margem-5-util, #margem-5-saldo, #margem-5b-bruta, #margem-5b-util, #margem-5b-saldo, #margem-35-bruta, #margem-35-util, #margem-35-saldo').text('0,00');
+    $('#contratos-tbody').html('<tr><td colspan="7" class="text-center">Nenhuma matrícula selecionada</td></tr>');
+}
+
 function selecionarMatricula(matriculaId) {
     if (!clienteSelecionado) return;
     
@@ -172,14 +208,29 @@ function selecionarMatricula(matriculaId) {
     if (!matricula) return;
     
     matriculaSelecionada = matricula;
+
+    $('#select-matricula').val(String(matriculaId));
+    $('#status-campanha').text(matricula.campanha || '—');
+    $('#sidebar-matricula').text(matricula.matricula || '—');
+    $('#sidebar-base-calculo').text('R$ ' + formatarMoeda(matricula.base_calculo));
+    $('#sidebar-origem').text(matricula.campanha || '—');
+
+    $('#grid-orgao').text(matricula.orgao || '—');
+    $('#grid-upag').text(matricula.upag || '—');
+    $('#grid-rubrica').text(matricula.rubrica || '—');
+    $('#grid-rjur').text(matricula.rjur || '—');
+    $('#grid-base-calculo').text('R$ ' + formatarMoeda(matricula.base_calculo));
+    $('#grid-matricula-instituidor').text(matricula.matricula_instituidor || '—');
+
+    $('#detalhe-matricula-instituidor').text(matricula.matricula_instituidor || '—');
+    $('#detalhe-qtd-contratos').text(matricula.qtd_contratos != null ? matricula.qtd_contratos : '—');
+    $('#detalhe-rjur').text(matricula.rjur || '—');
     
-    $('#matricula-numero').text(matricula.matricula);
-    $('#matricula-selecionada-titulo').html(`Matrícula: <strong>${escapeHtml(matricula.matricula)}</strong>`);
-    
-    const margens = matricula.margens;
+    const margens = matricula.margens || {};
     $('#margem-5-bruta').text(formatarMoeda(margens.bruta_5));
     $('#margem-5-util').text(formatarMoeda(margens.util_5));
     $('#margem-5-saldo').text(formatarMoeda(margens.saldo_5));
+    $('#sidebar-margem-5').text('R$ ' + formatarMoeda(margens.saldo_5));
     
     $('#margem-5b-bruta').text(formatarMoeda(margens.bruta_5b));
     $('#margem-5b-util').text(formatarMoeda(margens.util_5b));
@@ -188,12 +239,13 @@ function selecionarMatricula(matriculaId) {
     $('#margem-35-bruta').text(formatarMoeda(margens.bruta_35));
     $('#margem-35-util').text(formatarMoeda(margens.util_35));
     $('#margem-35-saldo').text(formatarMoeda(margens.saldo_35));
+    $('#sidebar-margem-35').text('R$ ' + formatarMoeda(margens.saldo_35));
     
     const contratosTbody = $('#contratos-tbody');
     contratosTbody.empty();
     
-    if (matricula.contratos.length === 0) {
-        contratosTbody.append('<tr><td colspan="6" class="text-center">Nenhum contrato encontrado</td></tr>');
+    if (!matricula.contratos || matricula.contratos.length === 0) {
+        contratosTbody.append('<tr><td colspan="7" class="text-center">Nenhum contrato encontrado</td></tr>');
     } else {
         matricula.contratos.forEach(function(contrato) {
             const row = `
@@ -203,21 +255,13 @@ function selecionarMatricula(matriculaId) {
                     <td>${escapeHtml(limparNomeBanco(contrato.banco))}</td>
                     <td>R$ ${formatarMoeda(contrato.valor_parcela)}</td>
                     <td>${contrato.parcelas_restantes}</td>
+                    <td>${contrato.numero_parcela != null ? contrato.numero_parcela : '—'}</td>
                     <td>${escapeHtml(contrato.campanha)}</td>
                 </tr>
             `;
             contratosTbody.append(row);
         });
     }
-    
-    $('#matriculas-container').hide();
-    $('#detalhes-matricula-container').show();
-}
-
-function voltarParaMatriculas() {
-    $('#matriculas-container').show();
-    $('#detalhes-matricula-container').hide();
-    matriculaSelecionada = null;
 }
 
 function formatarCPF(cpf) {
