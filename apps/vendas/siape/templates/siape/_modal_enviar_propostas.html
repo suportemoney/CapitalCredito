@@ -1,0 +1,344 @@
+{# Wizard Enviar Propostas — 3 passos (ficha, anexos, proposta) #}
+<div class="modal fade" id="modalEnviarPropostas" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content prop-wizard-modal">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title d-flex align-items-center gap-2 flex-wrap">
+          <i class='bx bx-send'></i> Enviar Propostas
+          <span class="badge bg-light text-success prop-wizard-passo-badge" id="prop-wizard-passo-label">Passo 1 de 3</span>
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="prop_carteira_id" value="">
+        <input type="hidden" id="prop_cliente_dados_pessoais_id" value="">
+
+        {# Passo 1 — Ficha do cliente #}
+        <div id="prop-wizard-passo-1" class="prop-wizard-passo">
+          <div class="alert alert-info prop-wizard-alerta mb-3">
+            <i class='bx bx-info-circle me-1'></i>
+            Preencha o CPF e os demais dados serão preenchidos automaticamente se o cliente já estiver cadastrado.
+          </div>
+
+          <div class="prop-wizard-secao card mb-3">
+            <div class="card-body">
+              <h6 class="prop-wizard-secao-titulo"><i class='bx bx-user'></i> Dados pessoais</h6>
+              <div class="row g-2">
+                <div class="col-md-4">
+                  <label class="form-label">CPF <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" id="prop_cpf" readonly>
+                </div>
+                <div class="col-md-8">
+                  <label class="form-label">Nome completo <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" id="prop_nome_completo" required>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Data de nascimento</label>
+                  <input type="date" class="form-control" id="prop_data_nascimento">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Sexo</label>
+                  <select class="form-select" id="prop_sexo">
+                    <option value="">Selecione...</option>
+                    <option value="M">Masculino</option>
+                    <option value="F">Feminino</option>
+                    <option value="OUTRO">Outro</option>
+                  </select>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Naturalidade</label>
+                  <input type="text" class="form-control" id="prop_naturalidade">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">País de origem</label>
+                  <input type="text" class="form-control" id="prop_pais_origem" value="Brasil">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">RG</label>
+                  <input type="text" class="form-control" id="prop_numero_rg">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Órgão emissor</label>
+                  <input type="text" class="form-control" id="prop_orgao_emissor_rg">
+                </div>
+                <div class="col-md-2">
+                  <label class="form-label">UF</label>
+                  <input type="text" class="form-control" id="prop_uf_emissao_rg" maxlength="2">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Data emissão RG</label>
+                  <input type="date" class="form-control" id="prop_data_emissao_rg">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Nome do pai</label>
+                  <input type="text" class="form-control" id="prop_nome_pai">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Nome da mãe</label>
+                  <input type="text" class="form-control" id="prop_nome_mae">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="prop-wizard-secao card mb-3">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="prop-wizard-secao-titulo mb-0"><i class='bx bx-envelope'></i> E-mail</h6>
+                <button type="button" class="btn btn-sm btn-success prop-btn-add-row" data-add="email">
+                  <i class='bx bx-plus'></i> Adicionar
+                </button>
+              </div>
+              <p class="small text-muted mb-2">É obrigatório informar ao menos um e-mail válido.</p>
+              <div id="prop-lista-emails"></div>
+            </div>
+          </div>
+
+          <div class="prop-wizard-secao card mb-3">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="prop-wizard-secao-titulo mb-0"><i class='bx bx-phone'></i> Contatos</h6>
+                <button type="button" class="btn btn-sm btn-success prop-btn-add-row" data-add="contato">
+                  <i class='bx bx-plus'></i> Adicionar
+                </button>
+              </div>
+              <p class="small text-muted mb-2">Telefone ou celular. Ao informar o CPF, os contatos da base SIAPE podem ser preenchidos automaticamente.</p>
+              <div id="prop-lista-contatos"></div>
+            </div>
+          </div>
+
+          <div class="prop-wizard-secao card mb-3">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="prop-wizard-secao-titulo mb-0"><i class='bx bx-map'></i> Endereço</h6>
+                <button type="button" class="btn btn-sm btn-success prop-btn-add-row" data-add="endereco">
+                  <i class='bx bx-plus'></i> Adicionar
+                </button>
+              </div>
+              <div id="prop-lista-enderecos"></div>
+            </div>
+          </div>
+
+          <div class="prop-wizard-secao card mb-3">
+            <div class="card-body">
+              <h6 class="prop-wizard-secao-titulo"><i class='bx bx-credit-card'></i> Dados bancários (conta de recebimento)</h6>
+              <div class="row g-2">
+                <div class="col-md-4">
+                  <label class="form-label">Banco <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" id="prop_banco_nome" data-field="banco">
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">Agência <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" id="prop_agencia" data-field="agencia">
+                </div>
+                <div class="col-md-2">
+                  <label class="form-label">DV agência</label>
+                  <input type="text" class="form-control" id="prop_dv_agencia" data-field="dv_agencia">
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">Conta <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" id="prop_conta" data-field="conta">
+                </div>
+                <div class="col-md-2">
+                  <label class="form-label">DV conta</label>
+                  <input type="text" class="form-control" id="prop_dv_conta" data-field="dv_conta">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Tipo de conta <span class="text-danger">*</span></label>
+                  <select class="form-select" id="prop_tipo_conta" data-field="tipo_conta">
+                    <option value="">Selecione...</option>
+                    <option value="CORRENTE">Corrente</option>
+                    <option value="POUPANCA">Poupança</option>
+                    <option value="SALARIO">Salário</option>
+                  </select>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Tipo de pagamento <span class="text-danger">*</span></label>
+                  <select class="form-select" id="prop_tipo_pagamento" data-field="tipo_pagamento">
+                    <option value="">Selecione...</option>
+                    <option value="CREDITO_CONTA">Crédito em conta</option>
+                    <option value="ORDEM_PAGAMENTO">Ordem de pagamento</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="prop-wizard-secao card mb-3">
+            <div class="card-body">
+              <h6 class="prop-wizard-secao-titulo"><i class='bx bx-shield-quarter'></i> Dados do serviço (matrícula e acesso ao portal — opcional)</h6>
+              <div class="row g-2">
+                <div class="col-md-6">
+                  <label class="form-label">Matrícula (serviço)</label>
+                  <input type="text" class="form-control" id="prop_bancario_matricula" data-field="matricula">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Senha (serviço)</label>
+                  <input type="password" class="form-control" id="prop_bancario_senha" data-field="senha" autocomplete="new-password">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="prop-wizard-secao card mb-3">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="prop-wizard-secao-titulo mb-0"><i class='bx bx-user-plus'></i> Representante (se houver)</h6>
+                <button type="button" class="btn btn-sm btn-success prop-btn-add-row" data-add="representante">
+                  <i class='bx bx-plus'></i> Adicionar
+                </button>
+              </div>
+              <div id="prop-lista-representantes"></div>
+            </div>
+          </div>
+        </div>
+
+        {# Passo 2 — Anexos #}
+        <div id="prop-wizard-passo-2" class="prop-wizard-passo d-none">
+          <div class="prop-wizard-secao card">
+            <div class="card-body">
+              <h6 class="prop-wizard-secao-titulo"><i class='bx bx-paperclip'></i> Arquivos da proposta</h6>
+              <p class="text-muted small">Anexe documentos necessários para a análise operacional (PDF, imagens, etc.).</p>
+              <div class="mb-3">
+                <label class="form-label">Anexos</label>
+                <input type="file" class="form-control" id="prop_arquivos" multiple>
+              </div>
+              <ul class="list-group list-group-flush small" id="prop-lista-arquivos-preview"></ul>
+            </div>
+          </div>
+        </div>
+
+        {# Passo 3 — Dados da proposta #}
+        <div id="prop-wizard-passo-3" class="prop-wizard-passo d-none">
+          <div class="prop-wizard-secao card">
+            <div class="card-body">
+              <h6 class="prop-wizard-secao-titulo"><i class='bx bx-file'></i> Dados da proposta</h6>
+              <div class="row g-2 mb-3">
+                <div class="col-md-4">
+                  <label class="form-label">Banco <span class="text-danger">*</span></label>
+                  <select class="form-select" id="prop_banco_id"><option value="">Carregando...</option></select>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Convênio <span class="text-danger">*</span></label>
+                  <select class="form-select" id="prop_convenio_id"><option value="">—</option></select>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Produto <span class="text-danger">*</span></label>
+                  <select class="form-select" id="prop_produto_id"><option value="">—</option></select>
+                </div>
+              </div>
+              <div class="row g-2 mb-3">
+                <div class="col-md-3">
+                  <label class="form-label">Valor AF</label>
+                  <input type="text" class="form-control" id="prop_valor_af" placeholder="0,00">
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">Valor TC</label>
+                  <input type="text" class="form-control" id="prop_valor_tc" placeholder="0,00">
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">Parcela</label>
+                  <input type="text" class="form-control" id="prop_valor_parcela" placeholder="0,00">
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">Prazo</label>
+                  <input type="number" class="form-control" id="prop_prazo" min="1">
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Tabela CMS</label>
+                <select class="form-select" id="prop_tabela_cms_id"><option value="">—</option></select>
+              </div>
+              <div class="mb-0">
+                <label class="form-label">Observação</label>
+                <textarea class="form-control" id="prop_observacao" rows="3"></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer prop-wizard-footer flex-wrap gap-2">
+        <button type="button" class="btn prop-wizard-btn-cancelar" data-bs-dismiss="modal" id="prop-wizard-btn-cancelar">
+          <i class='bx bx-x'></i> Cancelar
+        </button>
+        <button type="button" class="btn prop-wizard-btn-voltar d-none" id="prop-wizard-btn-voltar">
+          <i class='bx bx-left-arrow-alt'></i> Voltar
+        </button>
+        <button type="button" class="btn prop-wizard-btn-proximo" id="prop-wizard-btn-proximo">
+          Próximo <i class='bx bx-right-arrow-alt'></i>
+        </button>
+        <button type="button" class="btn prop-wizard-btn-enviar d-none" id="prop_btn_enviar">
+          <i class='bx bx-send'></i> Enviar propostas
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# Templates de linhas dinâmicas #}
+<template id="tpl-prop-email">
+  <div class="prop-dyn-row row g-2 align-items-end mb-2">
+    <div class="col">
+      <input type="email" class="form-control prop-dyn-email" placeholder="email@exemplo.com">
+    </div>
+    <div class="col-auto">
+      <button type="button" class="btn btn-outline-danger btn-sm prop-btn-remove-row" title="Remover"><i class='bx bx-trash'></i></button>
+    </div>
+  </div>
+</template>
+
+<template id="tpl-prop-contato">
+  <div class="prop-dyn-row row g-2 align-items-end mb-2">
+    <div class="col-md-4">
+      <select class="form-select prop-dyn-contato-tipo">
+        <option value="CELULAR">Celular</option>
+        <option value="TELEFONE_FIXO">Telefone fixo</option>
+      </select>
+    </div>
+    <div class="col">
+      <input type="text" class="form-control prop-dyn-contato-valor" placeholder="(00) 00000-0000">
+    </div>
+    <div class="col-auto">
+      <button type="button" class="btn btn-outline-danger btn-sm prop-btn-remove-row" title="Remover"><i class='bx bx-trash'></i></button>
+    </div>
+  </div>
+</template>
+
+<template id="tpl-prop-endereco">
+  <div class="prop-dyn-row border rounded p-2 mb-2">
+    <div class="row g-2 align-items-end">
+      <div class="col-md-3">
+        <label class="form-label small mb-0">CEP</label>
+        <input type="text" class="form-control form-control-sm prop-dyn-end-cep">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label small mb-0">Logradouro</label>
+        <input type="text" class="form-control form-control-sm prop-dyn-end-logradouro">
+      </div>
+      <div class="col-md-2">
+        <div class="form-check mt-3">
+          <input class="form-check-input prop-dyn-end-principal" type="radio" name="prop_endereco_principal">
+          <label class="form-check-label small">Principal</label>
+        </div>
+      </div>
+      <div class="col-md-1 text-end">
+        <button type="button" class="btn btn-outline-danger btn-sm prop-btn-remove-row" title="Remover"><i class='bx bx-trash'></i></button>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template id="tpl-prop-representante">
+  <div class="prop-dyn-row row g-2 align-items-end mb-2">
+    <div class="col-md-6">
+      <input type="text" class="form-control prop-dyn-rep-nome" placeholder="Nome do representante">
+    </div>
+    <div class="col">
+      <input type="text" class="form-control prop-dyn-rep-cpf" placeholder="CPF">
+    </div>
+    <div class="col-auto">
+      <button type="button" class="btn btn-outline-danger btn-sm prop-btn-remove-row" title="Remover"><i class='bx bx-trash'></i></button>
+    </div>
+  </div>
+</template>

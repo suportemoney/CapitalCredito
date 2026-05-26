@@ -88,11 +88,6 @@
                                 <i class='bx bx-calculator'></i> Calculadoras
                             </button>
                             {% if user.is_superuser %}
-                            <button type="button" class="btn siape-btn-outline-gold btn-sm" id="btn-simulacao-consulta"
-                                    style="display: none;" disabled onclick="abrirModalSimulacao()"
-                                    title="Enviar solicitação de simulação operacional">
-                                <i class='bx bx-calculator'></i> Simulação
-                            </button>
                             <button type="button" class="btn siape-btn-gold btn-sm" id="btn-proposta-consulta"
                                     style="display: none;" disabled onclick="abrirModalPropostas()"
                                     title="Enviar propostas para digitação">
@@ -641,7 +636,7 @@
     </div>
 </div>
 {% if user.is_superuser %}
-{% include 'siape/_modais_simulacao_proposta.html' %}
+{% include 'siape/_modal_enviar_propostas.html' %}
 {% endif %}
 
 {% endblock %}
@@ -653,6 +648,7 @@
 {% block addjs_extra %}
 <script src="{% static 'siape/js/consulta.js' %}"></script>
 <script src="{% static 'siape/js/consulta_operacional.js' %}"></script>
+<script src="{% static 'siape/js/consulta_proposta_wizard.js' %}"></script>
 <script>
     window.isSuperUser = {% if user.is_superuser %}true{% else %}false{% endif %};
 </script>
