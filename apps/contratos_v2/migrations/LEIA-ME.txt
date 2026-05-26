@@ -1,21 +1,17 @@
-App Django com label `contratos_v2` (tabelas contratos_v2_* no banco).
-Não colide com o legado `contratos_*` do operacional antigo.
+App label: contratos_v2 (tabelas contratos_v2_* no MySQL).
 
-=== SOMENTE NA VPS (com MySQL e venv ativa) ===
+=== Na VPS (com venv e MySQL) ===
 
-  1. git pull
-  2. pip install -r requirements.txt
-  3. python manage.py makemigrations contratos_v2
-     (gera apps/contratos_v2/migrations/0001_initial.py — commitar de volta no git se quiser fixar)
-  4. python manage.py migrate siape 0005
-  5. python manage.py migrate contratos_v2
-  6. python manage.py migrate siape 0007
-  7. python manage.py migrate
+  git pull
+  pip install -r requirements.txt
 
-A migração siape.0007 (não mais 0006) depende de contratos_v2.0001_initial.
+  python manage.py migrate siape 0005
+  python manage.py migrate contratos_v2
+  python manage.py migrate siape 0007
+  python manage.py migrate
 
-Se no django_migrations existir siape.0006 (nome antigo), remova essa linha ou:
-  python manage.py migrate siape 0005 --fake
-antes de seguir.
+Não é necessário makemigrations — o 0001_initial.py já está no repositório.
 
-Este repositório local não tem banco; não rode migrate/makemigrations aqui.
+Se existir linha siape.0006 em django_migrations (versão antiga), remova-a antes de migrar.
+
+Este clone local não tem banco; não rode migrate aqui.
