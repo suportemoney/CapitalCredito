@@ -1,4 +1,4 @@
-# Vínculos M2M e FKs da carteira com apps.contratos_v2 (label contratos_v2)
+# Vínculos M2M e FKs da carteira com contratos_v2 (após contratos_v2.0001_initial)
 
 import django.db.models.deletion
 from django.db import migrations, models
