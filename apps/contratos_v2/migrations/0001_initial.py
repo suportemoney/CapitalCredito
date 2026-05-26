@@ -424,7 +424,10 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name='contratoexecucao',
-            index=models.Index(fields=['etapa_operacional', 'sub_status_operacional']),
+            index=models.Index(
+                fields=['etapa_operacional', 'sub_status_operacional'],
+                name='c_v2_ce_etapa_sub_ix',
+            ),
         ),
         migrations.AddIndex(
             model_name='contratoexecucao',
@@ -559,11 +562,11 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name='pendencia',
-            index=models.Index(fields=['contrato_execucao', 'resolvido']),
+            index=models.Index(fields=['contrato_execucao', 'resolvido'], name='c_v2_pend_ce_res_ix'),
         ),
         migrations.AddIndex(
             model_name='pendencia',
-            index=models.Index(fields=['tipo', 'resolvido']),
+            index=models.Index(fields=['tipo', 'resolvido'], name='c_v2_pend_tipo_res_ix'),
         ),
         migrations.CreateModel(
             name='EnvioComprovantePagamentoVendedor',
@@ -583,7 +586,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name='enviocomprovantepagamentovendedor',
-            index=models.Index(fields=['contrato_execucao', '-criado_em']),
+            index=models.Index(fields=['contrato_execucao', '-criado_em'], name='c_v2_env_comp_ce_ix'),
         ),
         migrations.CreateModel(
             name='ComprovanteTC',

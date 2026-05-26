@@ -12,18 +12,18 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddIndex(
             model_name='carteiraclientes',
-            index=models.Index(fields=['user_responsavel']),
+            index=models.Index(fields=['user_responsavel'], name='siape_cart_user_resp_idx'),
         ),
         migrations.AddIndex(
             model_name='carteiraclientes',
-            index=models.Index(fields=['user_repasse']),
+            index=models.Index(fields=['user_repasse'], name='siape_cart_user_rep_idx'),
         ),
         migrations.AddIndex(
             model_name='carteiraclientes',
-            index=models.Index(fields=['status']),
+            index=models.Index(fields=['status'], name='siape_cart_status_idx'),
         ),
         migrations.AddIndex(
             model_name='carteiraclientes',
-            index=models.Index(fields=['status_comercial']),
+            index=models.Index(fields=['status_comercial'], name='siape_cart_st_com_idx'),
         ),
     ]
