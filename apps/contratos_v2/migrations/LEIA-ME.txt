@@ -1,17 +1,16 @@
 App label: contratos_v2 (tabelas contratos_v2_* no MySQL).
 
-=== Na VPS (com venv e MySQL) ===
+=== Na VPS ===
 
   git pull
-  pip install -r requirements.txt
 
-  python manage.py migrate siape 0005
   python manage.py migrate contratos_v2
   python manage.py migrate siape 0007
+  python manage.py migrate siape 0008
   python manage.py migrate
 
-Não é necessário makemigrations — o 0001_initial.py já está no repositório.
+O aviso "have changes not yet reflected in a migration" depois de só o siape.0005
+é normal: os campos da carteira ligados ao contratos_v2 estão no 0007 e ainda
+não foram aplicados. Siga a ordem acima.
 
-Se existir linha siape.0006 em django_migrations (versão antiga), remova-a antes de migrar.
-
-Este clone local não tem banco; não rode migrate aqui.
+Não rode makemigrations na VPS, salvo se migrate acusar erro concreto de coluna.

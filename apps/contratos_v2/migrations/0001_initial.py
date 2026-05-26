@@ -391,7 +391,7 @@ class Migration(migrations.Migration):
                 ('etapa_operacional', models.CharField(db_index=True, default='DIGITACAO', max_length=20, verbose_name='Etapa operacional (nexos)')),
                 ('sub_status_operacional', models.CharField(db_index=True, default='DIG_AGUARDANDO', max_length=40, verbose_name='Sub-status operacional')),
                 ('portabilidade', models.BooleanField(db_index=True, default=False, verbose_name='Portabilidade (CIP/Refin manual)')),
-                ('nivel_risco_checagem_supervisor', models.CharField(blank=True, db_index=True, max_length=10, null=True, verbose_name='Nível de risco (checagem supervisor)')),
+                ('nivel_risco_checagem_supervisor', models.CharField(blank=True, choices=[('BAIXO', 'Baixo'), ('ALTO', 'Alto')], db_index=True, max_length=10, null=True, verbose_name='Nível de risco (checagem supervisor)')),
                 ('observacao_checagem_consultor', models.TextField(blank=True, null=True, verbose_name='Observação do consultor para checagem (+OBS)')),
                 ('pendencia_etapa_origem', models.CharField(blank=True, max_length=20, null=True, verbose_name='Pendência — etapa de origem')),
                 ('pendencia_sub_origem', models.CharField(blank=True, max_length=40, null=True, verbose_name='Pendência — sub-status de origem')),
@@ -424,7 +424,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name='contratoexecucao',
-            index=models.Index(fields=['etapa_operacional', 'sub_status_operacional'], name='contratos_v_contrat_8b0e0e_idx'),
+            index=models.Index(fields=['etapa_operacional', 'sub_status_operacional']),
         ),
         migrations.AddIndex(
             model_name='contratoexecucao',
@@ -559,11 +559,11 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name='pendencia',
-            index=models.Index(fields=['contrato_execucao', 'resolvido'], name='contratos_v_contrat_6a8f2a_idx'),
+            index=models.Index(fields=['contrato_execucao', 'resolvido']),
         ),
         migrations.AddIndex(
             model_name='pendencia',
-            index=models.Index(fields=['tipo', 'resolvido'], name='contratos_v_tipo_re_7c4b1d_idx'),
+            index=models.Index(fields=['tipo', 'resolvido']),
         ),
         migrations.CreateModel(
             name='EnvioComprovantePagamentoVendedor',
@@ -583,7 +583,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name='enviocomprovantepagamentovendedor',
-            index=models.Index(fields=['contrato_execucao', '-criado_em'], name='contratos_v_contrat_9e2f1c_idx'),
+            index=models.Index(fields=['contrato_execucao', '-criado_em']),
         ),
         migrations.CreateModel(
             name='ComprovanteTC',
