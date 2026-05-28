@@ -1,0 +1,59 @@
+/**
+ * Layout compartilhado — páginas Contratos v2 (padrão Capital Crédito / RH funcionários).
+ */
+
+.header-actions {
+    display: flex;
+    gap: 10px;
+    margin-left: auto;
+    flex-wrap: wrap;
+}
+
+.btn-gerenciar {
+    background: #D4AF37;
+    color: #2d2d2d;
+    padding: 10px 20px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.btn-gerenciar:hover {
+    background: #C9A961;
+    color: #2d2d2d;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(212, 175, 55, 0.35);
+}
+
+.btn-gerenciar--outline {
+    background: transparent;
+    color: #D4AF37;
+    border: 1px solid #D4AF37;
+}
+
+.btn-gerenciar--outline:hover {
+    background: rgba(212, 175, 55, 0.12);
+    color: #b8941f;
+}
+
+.contratos-v2-page .page-intro.card {
+    margin-bottom: 1.25rem;
+}
+
+.contratos-v2-page .page-intro .card-body {
+    padding: 0.85rem 1.25rem;
+}
+
+.contratos-v2-page .page-intro p {
+    margin: 0;
+    color: #6c757d;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}

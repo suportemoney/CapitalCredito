@@ -15,10 +15,10 @@
     --crm-radius-pill: 999px;
     --crm-shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.04);
     --crm-gap: 20px;
-    --crm-primary: #2563EB;
+    --crm-primary: #D4AF37;
     --crm-transition: all 0.2s ease;
 
-    --sim: #2563EB;
+    --sim: #b8941f;
     --dig: #0EA5E9;
     --form: #7C3AED;
     --anal: #D97706;
@@ -32,9 +32,7 @@
 
 #crm-container {
     width: 100%;
-    min-height: 100vh;
-    background: var(--crm-bg-page);
-    padding: 1.5rem 1.75rem 6rem;
+    padding: 0 0 5rem;
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
 }
 
@@ -113,7 +111,7 @@
     flex-shrink: 0;
 }
 
-.crm-kpi-card--blue .crm-kpi-icon { background: #DBEAFE; color: #2563EB; }
+.crm-kpi-card--blue .crm-kpi-icon { background: rgba(212, 175, 55, 0.15); color: #b8941f; }
 .crm-kpi-card--amber .crm-kpi-icon { background: #FEF3C7; color: #D97706; }
 .crm-kpi-card--purple .crm-kpi-icon { background: #EDE9FE; color: #7C3AED; }
 .crm-kpi-card--green .crm-kpi-icon { background: #DCFCE7; color: #16A34A; }

@@ -1,30 +1,41 @@
-{% extends "base-plus.html" %}
+{% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Esteira Operacional{% endblock %}
+{% block title %}Esteira Operacional - CapitalCredito{% endblock %}
 
 {% block header_title %}Esteira Operacional{% endblock %}
 
+{% block pre_content %}
+<div class="header-actions">
+    <a href="{% url 'contratos:config_v2' %}" class="btn-gerenciar btn-gerenciar--outline">
+        <i class='bx bx-cog'></i> Catálogos
+    </a>
+    <a href="{% url 'contratos:relatorio_cms' %}" class="btn-gerenciar btn-gerenciar--outline">
+        <i class='bx bx-spreadsheet'></i> Relatório CMS
+    </a>
+</div>
+{% endblock %}
+
 {% block addcss_extra %}
-<link rel="stylesheet" href="{% static 'contratos/css/crm_operacional.css' %}?v=20260522a">
+<link rel="stylesheet" href="{% static 'contratos/css/contratos_v2-base.css' %}">
+<link rel="stylesheet" href="{% static 'contratos/css/crm_operacional.css' %}?v=20260526a">
 {% endblock %}
 
 {% block content %}
+<div class="container-fluid contratos-v2-page">
+    <div class="row page-intro">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <p>Visão unificada do fluxo operacional: simulação, digitação, formalização, análise, CIP, REFIN, anuência, pagamento e pendências.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
 {# Tabulações operacionais: simulação, digitação, análise, etc. #}
 <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 <div id="crm-container" data-superuser="{{ user.is_superuser|yesno:'true,false' }}">
-
-    <header class="crm-page-header">
-        <div class="crm-page-header-inner">
-            <div class="crm-page-header-icon" aria-hidden="true">
-                <i class='bx bx-bar-chart-alt-2'></i>
-            </div>
-            <div>
-                <h1 class="crm-page-title">Esteira Operacional</h1>
-                <p class="crm-page-subtitle">Visão unificada do fluxo operacional: simulação, digitação, formalização, análise, CIP, REFIN, anuência, pagamento e pendências.</p>
-            </div>
-        </div>
-    </header>
 
     <section class="crm-kpi-grid" id="crmKpiGrid" aria-label="Resumo da esteira">
         <article class="crm-kpi-card crm-kpi-card--blue" data-kpi="em_andamento">
@@ -162,6 +173,7 @@
 
 </div><!-- /crm-container -->
 
+</div><!-- /.container-fluid.contratos-v2-page -->
 
 <!-- ═══════════════════════════════════════════════════════
      MODAIS

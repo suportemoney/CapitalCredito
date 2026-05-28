@@ -1,33 +1,42 @@
-{% extends "base-plus.html" %}
+{% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Catálogos{% endblock %}
+{% block title %}Catálogos - CapitalCredito{% endblock %}
+
+{% block header_title %}Catálogos{% endblock %}
+
+{% block pre_content %}
+<div class="header-actions">
+    <a href="{% url 'contratos:crm_operacional_v2' %}" class="btn-gerenciar btn-gerenciar--outline">
+        <i class='bx bx-grid-alt'></i> Esteira Operacional
+    </a>
+    <a href="{% url 'contratos:relatorio_cms' %}" class="btn-gerenciar btn-gerenciar--outline">
+        <i class='bx bx-spreadsheet'></i> Relatório CMS
+    </a>
+    <button type="button" class="btn-gerenciar" id="btnRefreshAll">
+        <i class='bx bx-refresh'></i> Atualizar
+    </button>
+</div>
+{% endblock %}
 
 {% block addcss_extra %}
+<link rel="stylesheet" href="{% static 'contratos/css/contratos_v2-base.css' %}">
 <link rel="stylesheet" href="{% static 'contratos/css/config.css' %}">
 {% endblock %}
 
 {% block content %}
-<div id="config-container" data-superuser="{{ user.is_superuser|yesno:'true,false' }}">
-
-    <!-- Cabeçalho da página -->
-    <div class="config-header">
-        <h1 class="main-title">
-            <i class='bx bx-cog'></i>
-            Catálogos
-        </h1>
-        <p class="main-subtitle">
-            Bancos, convênios, produtos e tabelas CMS usados nas propostas e digitação. Itens inativos ficam ocultos nas telas operacionais.
-        </p>
-        <div class="config-header-actions">
-            <a href="{% url 'contratos:crm_operacional_v2' %}" class="btn btn-sm btn-outline-secondary">
-                <i class='bx bx-grid-alt me-1'></i>CRM
-            </a>
-            <button type="button" class="btn btn-sm btn-outline-primary" id="btnRefreshAll">
-                <i class='bx bx-refresh me-1'></i>Atualizar
-            </button>
+<div class="container-fluid contratos-v2-page">
+    <div class="row page-intro">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <p>Bancos, convênios, produtos e tabelas CMS usados nas propostas e digitação. Itens inativos ficam ocultos nas telas operacionais.</p>
+                </div>
+            </div>
         </div>
     </div>
+
+    <div id="config-container" data-superuser="{{ user.is_superuser|yesno:'true,false' }}">
 
     <!-- Abas -->
     <ul class="nav nav-pills main-tabs" id="tabMain" role="tablist">
@@ -603,6 +612,8 @@
         </div>
     </div>
 </div>
+
+</div><!-- /.container-fluid.contratos-v2-page -->
 
 {% endblock %}
 
