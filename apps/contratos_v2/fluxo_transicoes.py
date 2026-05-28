@@ -1459,39 +1459,30 @@ def transicao_por_acao(ce, user, papel, acao, observacao='', extras=None):
     if acao == 'operacional_pago_cliente':
         if papel != PAPEL_OPERACIONAL:
             return False, 'Apenas operacional.'
-        if e != EtapaOperacional.PAGAMENTO:
+        from apps.contratos_v2.services.port_refin import (
+            ce_exige_fluxo_port_refin_pago_cliente,
+            persistir_valor_saldo_contrato,
+            processar_pago_cliente_port_refin_se_necessario,
+            validar_valor_saldo_obrigatorio,
+        )
+
+        if e != EtapaOperacional.PAGAMENTO and not ce_exige_fluxo_port_refin_pago_cliente(ce):
             return False, 'Não está em pagamento.'
         if contrato_exige_video_conscientizacao_para_pagamento(ce) and not ce.flag_video_enviado:
             return False, 'Envio do vídeo de conscientização obrigatório antes do Pago Cliente.'
-        from apps.contratos_v2.services.port_refin import (
-            contrato_port_ja_tem_refin,
-            contrato_exige_valor_saldo_pago_cliente,
-            criar_refin_apos_pago_cliente,
-            persistir_valor_saldo_contrato,
-            produto_exige_refin_no_pago_cliente,
-            validar_valor_saldo_obrigatorio,
-        )
 
         try:
             valor_saldo = validar_valor_saldo_obrigatorio(extras, ce)
         except ValueError as exc:
             return False, str(exc)
 
-        if produto_exige_refin_no_pago_cliente(ce) and not contrato_port_ja_tem_refin(ce):
-            refin_port = (extras or {}).get('refin_port')
-            if not refin_port:
-                return False, 'Informe os dados do contrato REFIN (Port + Refin).'
-            try:
-                criar_refin_apos_pago_cliente(
-                    ce,
-                    refin_port,
-                    user,
-                    observacao=observacao,
-                    valor_saldo=valor_saldo,
-                )
-            except ValueError as exc:
-                return False, str(exc)
-            return True, ''
+        try:
+            if processar_pago_cliente_port_refin_se_necessario(
+                ce, user, observacao=observacao, extras=extras
+            ):
+                return True, ''
+        except ValueError as exc:
+            return False, str(exc)
 
         if valor_saldo is not None:
             persistir_valor_saldo_contrato(ce, valor_saldo)
@@ -1953,19 +1944,15 @@ def transicoes_disponiveis_contrato_execucao(ce):
         re_tc = 'registermoney_tc' if _valor_tc_contrato(ce) > 0 else None
         if s == SubStatusOperacional.PG_AGUARDANDO_CLIENTE:
             requer_pago_cli = None
-            exige_saldo_port = False
-            try:
-                from apps.contratos_v2.services.port_refin import (
-                    contrato_exige_valor_saldo_pago_cliente,
-                    contrato_port_ja_tem_refin,
-                    produto_exige_refin_no_pago_cliente,
-                )
+            from apps.contratos_v2.services.port_refin import (
+                contrato_exige_valor_saldo_pago_cliente,
+                contrato_port_ja_tem_refin,
+                produto_exige_refin_no_pago_cliente,
+            )
 
-                exige_saldo_port = contrato_exige_valor_saldo_pago_cliente(ce)
-                if produto_exige_refin_no_pago_cliente(ce) and not contrato_port_ja_tem_refin(ce):
-                    requer_pago_cli = 'refin_port'
-            except Exception:
-                pass
+            exige_saldo_port = contrato_exige_valor_saldo_pago_cliente(ce)
+            if produto_exige_refin_no_pago_cliente(ce) and not contrato_port_ja_tem_refin(ce):
+                requer_pago_cli = 'refin_port'
             transicoes = [
                 {
                     'acao': 'operacional_pago_cliente',
@@ -2268,6 +2255,13 @@ def acoes_evoluir_contrato_permitidas(ce):
     base = {t['acao'] for t in transicoes_disponiveis_contrato_execucao(ce)}
     if contrato_permite_evolucao_livre(ce):
         base.add('operacional_definir_status')
+    try:
+        from apps.contratos_v2.services.port_refin import ce_exige_fluxo_port_refin_pago_cliente
+
+        if ce_exige_fluxo_port_refin_pago_cliente(ce):
+            base.add('operacional_pago_cliente')
+    except Exception:
+        pass
     # Paridade consultor (SCT16): mesmos estados do supervisor, com ações dedicadas no POST evoluir/.
     if 'supervisor_checado' in base:
         base.add('vendedor_checado_formalizacao')

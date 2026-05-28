@@ -8,9 +8,7 @@ from django.db import transaction
 from apps.contratos_v2.fluxo_constants import (
     EtapaOperacional,
     EstadoSolicitacaoDigitacao,
-    FaseContratoExecucao,
     SubStatusOperacional,
-    TagFinanceiraContrato,
 )
 from apps.contratos_v2.fluxo_transicoes import aplicar_etapa_sub, sincronizar_fase_legada
 from apps.contratos_v2.models import (
@@ -35,30 +33,141 @@ def titulo_produto_indica_port(titulo):
     return 'PORT' in (titulo or '').upper()
 
 
+def titulo_produto_indica_refin(titulo):
+    """True se o título do produto indicar refinanciamento (REFIN no nome)."""
+    return 'REFIN' in (titulo or '').upper()
+
+
+def produto_indica_portabilidade(prod):
+    """
+    True para ficha/PDF: produto PORT ou REFIN no título, tag Port+Refin ou Refin da Port.
+    """
+    if not prod:
+        return False
+    titulo = getattr(prod, 'titulo', None) or ''
+    if titulo_produto_indica_port(titulo) or titulo_produto_indica_refin(titulo):
+        return True
+    if getattr(prod, 'flag_port_mais_refin', False):
+        return True
+    if getattr(prod, 'flag_refin_da_port', False):
+        return True
+    return False
+
+
+def contrato_indica_portabilidade(ce):
+    """Portabilidade efetiva na ficha/PDF: flag manual do contrato ou produto PORT/REFIN."""
+    if getattr(ce, 'portabilidade', False):
+        return True
+    return any(produto_indica_portabilidade(p) for p in _iter_produtos_contrato(ce))
+
+
+def exibe_valor_saldo_ficha_produto(prod):
+    """
+    (exibir, rótulo) do valor saldo na ficha/PDF.
+    PORT no título ou produto Refin da Port (tag flag_refin_da_port).
+    """
+    if not prod:
+        return False, 'Valor Saldo'
+    if getattr(prod, 'flag_refin_da_port', False):
+        return True, 'Valor de saldo port'
+    if titulo_produto_indica_port(getattr(prod, 'titulo', None) or ''):
+        return True, 'Valor Saldo'
+    return False, 'Valor Saldo'
+
+
+def resolver_valor_saldo_exibicao_ce(ce, valor_saldo_local=None):
+    """
+    Valor saldo para exibição: snapshot do contrato ou, no REFIN vinculado, do PORT pai.
+    """
+    if valor_saldo_local is not None:
+        return str(valor_saldo_local)
+    port_id = getattr(ce, 'contrato_vinculo_port_id', None)
+    if not port_id:
+        return ''
+    try:
+        port_ce = ContratoExecucao.objects.select_related(
+            'dados_operacionais', 'proposta_dados'
+        ).get(pk=port_id)
+    except ContratoExecucao.DoesNotExist:
+        return ''
+    try:
+        vs = port_ce.dados_operacionais.valor_saldo
+        if vs is not None:
+            return str(vs)
+    except Exception:
+        pass
+    try:
+        vs = port_ce.proposta_dados.valor_saldo
+        if vs is not None:
+            return str(vs)
+    except Exception:
+        pass
+    return ''
+
+
 def _produto_do_contrato(ce):
-    try:
-        d = ce.dados_operacionais
-        if d and getattr(d, 'produto', None):
-            return d.produto
-    except Exception:
-        pass
-    try:
-        pd = ce.proposta_dados
-        if pd and getattr(pd, 'produto', None):
-            return pd.produto
-    except Exception:
-        pass
+    """Primeiro produto encontrado (operacional, depois proposta)."""
+    for prod in _iter_produtos_contrato(ce):
+        return prod
     return None
+
+
+def _iter_produtos_contrato(ce):
+    """Produtos do snapshot operacional e da proposta (sem duplicar por id)."""
+    produtos = []
+    vistos = set()
+    for attr in ('dados_operacionais', 'proposta_dados'):
+        try:
+            container = getattr(ce, attr, None)
+            if not container:
+                continue
+            prod = getattr(container, 'produto', None)
+            if not prod:
+                continue
+            pid = getattr(prod, 'pk', None) or getattr(prod, 'id', None)
+            if pid is not None:
+                if pid in vistos:
+                    continue
+                vistos.add(pid)
+            produtos.append(prod)
+        except Exception:
+            continue
+    return produtos
+
+
+def _diagnostico_produtos_port_refin(ce):
+    """Ids e flags dos produtos (suporte / API transicoes-disponiveis)."""
+    prod_op = None
+    prod_prop = None
+    try:
+        prod_op = ce.dados_operacionais.produto
+    except Exception:
+        pass
+    try:
+        if ce.proposta_dados_id:
+            prod_prop = ce.proposta_dados.produto
+    except Exception:
+        pass
+    return {
+        'produto_op_id': getattr(prod_op, 'pk', None) or getattr(prod_op, 'id', None),
+        'produto_prop_id': getattr(prod_prop, 'pk', None) or getattr(prod_prop, 'id', None),
+        'flag_port_mais_refin_op': bool(
+            prod_op and getattr(prod_op, 'flag_port_mais_refin', False)
+        ),
+        'flag_port_mais_refin_prop': bool(
+            prod_prop and getattr(prod_prop, 'flag_port_mais_refin', False)
+        ),
+    }
 
 
 def contrato_exige_valor_saldo_pago_cliente(ce):
     """Pago Cliente exige Valor Saldo: produto com PORT no título, exceto Refin da Port."""
-    prod = _produto_do_contrato(ce)
-    if not prod:
-        return False
-    if getattr(prod, 'flag_refin_da_port', False):
-        return False
-    return titulo_produto_indica_port(prod.titulo)
+    for prod in _iter_produtos_contrato(ce):
+        if getattr(prod, 'flag_refin_da_port', False):
+            continue
+        if titulo_produto_indica_port(prod.titulo):
+            return True
+    return False
 
 
 def extrair_valor_saldo_de_extras(extras):
@@ -96,14 +205,10 @@ def persistir_valor_saldo_contrato(ce, valor_saldo):
 
 
 def produto_exige_refin_no_pago_cliente(ce):
-    """True se o contrato PORT deve abrir modal REFIN ao confirmar Pago Cliente."""
-    try:
-        prod = ce.dados_operacionais.produto
-    except Exception:
-        prod = None
-    if not prod and ce.proposta_dados_id:
-        prod = ce.proposta_dados.produto
-    return bool(prod and getattr(prod, 'flag_port_mais_refin', False))
+    """True se qualquer produto do contrato tiver flag Port + Refin."""
+    return any(
+        getattr(prod, 'flag_port_mais_refin', False) for prod in _iter_produtos_contrato(ce)
+    )
 
 
 def contrato_port_ja_tem_refin(ce_port):
@@ -111,6 +216,43 @@ def contrato_port_ja_tem_refin(ce_port):
         contrato_vinculo_port_id=ce_port.pk,
         status=True,
     ).exists()
+
+
+def ce_exige_fluxo_port_refin_pago_cliente(ce):
+    """Port + Refin pendente ao tabular como Pago Cliente (qualquer etapa de origem)."""
+    return produto_exige_refin_no_pago_cliente(ce) and not contrato_port_ja_tem_refin(ce)
+
+
+def _resolver_solicitante_user_par_port(pd_port, sol_port, fallback_user):
+    """Mantém o mesmo solicitante (vendedor) do par PORT na proposta/solicitação REFIN."""
+    if pd_port and getattr(pd_port, 'criado_por_id', None):
+        return pd_port.criado_por
+    if sol_port and getattr(sol_port, 'criado_por_id', None):
+        return sol_port.criado_por
+    return fallback_user
+
+
+def processar_pago_cliente_port_refin_se_necessario(ce, user, observacao='', extras=None):
+    """
+    Se o contrato exige REFIN: valida payload, tabula PORT como Pago Cliente e cria o filho.
+    Retorna True se tratou; False para seguir fluxo normal de Pago Cliente.
+    Levanta ValueError em validação.
+    """
+    if not ce_exige_fluxo_port_refin_pago_cliente(ce):
+        return False
+    extras = extras or {}
+    refin_port = extras.get('refin_port')
+    if not refin_port:
+        raise ValueError('Informe os dados do contrato REFIN (Port + Refin).')
+    valor_saldo = validar_valor_saldo_obrigatorio(extras, ce)
+    criar_refin_apos_pago_cliente(
+        ce,
+        refin_port,
+        user,
+        observacao=observacao,
+        valor_saldo=valor_saldo,
+    )
+    return True
 
 
 def resolver_produto_refin_da_port():
@@ -235,6 +377,7 @@ def montar_defaults_refin_port(ce_port):
             'port_mais_refin': True,
             'refin_ja_existe': refin_existe,
             'erro_config': str(exc),
+            **_diagnostico_produtos_port_refin(ce_port),
         }
     try:
         d = ce_port.dados_operacionais
@@ -279,9 +422,11 @@ def montar_defaults_refin_port(ce_port):
                 'valor_parcela': str(cp.valor_parcela) if cp.valor_parcela is not None else '',
                 'valor_af': str(cp.valor_af) if cp.valor_af is not None else '',
             })
+    diag = _diagnostico_produtos_port_refin(ce_port)
     return {
         'port_mais_refin': True,
         'refin_ja_existe': refin_existe,
+        **diag,
         'produto_refin_id': prod_refin.id,
         'produto_refin_titulo': prod_refin.titulo,
         'banco_id': banco_id,
@@ -331,15 +476,11 @@ def vinculo_port_refin_dict(ce):
 @transaction.atomic
 def criar_refin_apos_pago_cliente(ce_port, refin_port, user, observacao='', valor_saldo=None):
     """
-    Confirma Pago Cliente no PORT e cria proposta + contrato REFIN em PG_PAGO_CLIENTE.
+    Confirma Pago Cliente no PORT e cria proposta + contrato REFIN em Digitação/Digitado.
     Retorna dict com ids/códigos ou levanta ValueError.
     """
     if not ce_port.status:
         raise ValueError('Contrato PORT inativo.')
-    if ce_port.etapa_operacional != EtapaOperacional.PAGAMENTO:
-        raise ValueError('Contrato não está em Pagamento.')
-    if ce_port.sub_status_operacional != SubStatusOperacional.PG_AGUARDANDO_CLIENTE:
-        raise ValueError('Exige sub-status Aguardando Pagamento Cliente.')
     if not produto_exige_refin_no_pago_cliente(ce_port):
         raise ValueError('Produto não exige geração de REFIN.')
     if contrato_port_ja_tem_refin(ce_port):
@@ -358,6 +499,7 @@ def criar_refin_apos_pago_cliente(ce_port, refin_port, user, observacao='', valo
         raise ValueError('Contrato PORT sem carteira vinculada.')
     carteira = sol_port.carteira_clientes
     pd_port = ce_port.proposta_dados
+    solicitante_user = _resolver_solicitante_user_par_port(pd_port, sol_port, user)
 
     ok, msg = aplicar_etapa_sub(
         ce_port,
@@ -387,7 +529,7 @@ def criar_refin_apos_pago_cliente(ce_port, refin_port, user, observacao='', valo
         valor_liberado=_dec_payload(prop.get('valor_liberado')),
         valor_saldo=valor_saldo,
         proposta_vinculo_port_id=pd_port.id,
-        criado_por=user,
+        criado_por=solicitante_user,
     )
     adicionar_proposta_operacional_na_carteira(carteira, pd_refin)
 
@@ -396,7 +538,7 @@ def criar_refin_apos_pago_cliente(ce_port, refin_port, user, observacao='', valo
         carteira_clientes=carteira,
         observacoes=f'REFIN gerado automaticamente a partir do contrato PORT {ce_port.codigo or ce_port.id}.',
         estado=EstadoSolicitacaoDigitacao.CONTRATO_GERADO,
-        criado_por=user,
+        criado_por=solicitante_user,
     )
     HistoricoEventoDigitacao.objects.create(
         solicitacao=sol_refin,
@@ -417,10 +559,8 @@ def criar_refin_apos_pago_cliente(ce_port, refin_port, user, observacao='', valo
         cliente_dados_pessoais_id=ce_port.cliente_dados_pessoais_id,
         solicitacao_digitacao=sol_refin,
         contrato_vinculo_port_id=ce_port.id,
-        etapa_operacional=EtapaOperacional.PAGAMENTO,
-        sub_status_operacional=SubStatusOperacional.PG_PAGO_CLIENTE,
-        fase=FaseContratoExecucao.CLIENTE_PAGO,
-        tag_financeira=TagFinanceiraContrato.PAGO_CLIENTE,
+        etapa_operacional=EtapaOperacional.DIGITACAO,
+        sub_status_operacional=SubStatusOperacional.DIG_DIGITADO,
         flag_video_enviado=bool(ce_port.flag_video_enviado),
         **snap_kw,
     )
@@ -444,8 +584,8 @@ def criar_refin_apos_pago_cliente(ce_port, refin_port, user, observacao='', valo
         contrato_execucao=ce_refin,
         etapa_anterior=EtapaOperacional.DIGITACAO,
         sub_anterior=SubStatusOperacional.DIG_AGUARDANDO,
-        etapa_nova=EtapaOperacional.PAGAMENTO,
-        sub_nova=SubStatusOperacional.PG_PAGO_CLIENTE,
+        etapa_nova=EtapaOperacional.DIGITACAO,
+        sub_nova=SubStatusOperacional.DIG_DIGITADO,
         usuario=user,
         observacao=f'REFIN criado vinculado ao PORT {ce_port.codigo or ce_port.id}.',
     )

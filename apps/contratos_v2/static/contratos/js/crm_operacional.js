@@ -1914,8 +1914,19 @@
         _syncEvoluirEnviosVendedorWrap();
     }
 
-    function _exigeValorSaldoPortEvoluir(acao, opt) {
-        if (acao !== 'operacional_pago_cliente') {
+    function _destinoEvolucaoPagoCliente(acao, etapaVal, subVal) {
+        if (acao === 'operacional_pago_cliente') {
+            return true;
+        }
+        return (
+            acao === 'operacional_definir_status'
+            && String(etapaVal || '') === 'PAGAMENTO'
+            && String(subVal || '') === 'PG_PAGO_CLIENTE'
+        );
+    }
+
+    function _exigeValorSaldoPortEvoluir(acao, opt, etapaVal, subVal) {
+        if (!_destinoEvolucaoPagoCliente(acao, etapaVal, subVal)) {
             return false;
         }
         if (opt && opt.getAttribute('data-exige-saldo') === '1') {
@@ -1924,12 +1935,84 @@
         return !!(_refinPortDefaults && _refinPortDefaults.exige_valor_saldo_port);
     }
 
-    function _abrirModalValorSaldoPort(tipo, id, observacao, needsRefin) {
+    /** Port + Refin: modal REFIN (requer_extra ou refin_port_defaults). */
+    function _exigeFluxoRefinPortPagoCliente(acao, opt, etapaVal, subVal) {
+        if (!_destinoEvolucaoPagoCliente(acao, etapaVal, subVal)) {
+            return false;
+        }
+        const requer = opt ? (opt.getAttribute('data-requer') || '') : '';
+        if (requer === 'refin_port') {
+            return true;
+        }
+        return !!(
+            _refinPortDefaults
+            && _refinPortDefaults.port_mais_refin
+            && !_refinPortDefaults.refin_ja_existe
+            && !_refinPortDefaults.erro_config
+        );
+    }
+
+    function _carregarRefinPortDefaultsSeNecessario(contratoId, cb) {
+        if (_refinPortDefaults !== null && _refinPortDefaults !== undefined) {
+            cb();
+            return;
+        }
+        getJson(base + 'contrato/' + encodeURIComponent(contratoId) + '/refin-port-defaults/')
+            .then(function (d) {
+                if (d && d.ok && d.port_mais_refin) {
+                    _refinPortDefaults = d;
+                }
+                cb();
+            })
+            .catch(function () {
+                cb();
+            });
+    }
+
+    function _montarPayloadPagoClienteEvoluir(pend, refinPort) {
+        const payload = {
+            tipo: pend.tipo,
+            id: pend.id,
+            observacao: pend.observacao || '',
+        };
+        if (refinPort) {
+            payload.refin_port = refinPort;
+            if (refinPort.valor_saldo && !payload.valor_saldo) {
+                payload.valor_saldo = refinPort.valor_saldo;
+            }
+        }
+        if (_valorSaldoPendente) {
+            payload.valor_saldo = _valorSaldoPendente;
+        }
+        const subDest = String(pend.sub || '').trim();
+        const etapaDest = String(pend.etapa || '').trim();
+        if (
+            subDest === 'PG_PAGO_CLIENTE'
+            || (
+                pend.acao === 'operacional_definir_status'
+                && etapaDest
+                && subDest
+            )
+        ) {
+            payload.acao = 'operacional_definir_status';
+            payload.etapa = etapaDest || 'PAGAMENTO';
+            payload.sub = subDest || 'PG_PAGO_CLIENTE';
+        } else {
+            payload.acao = 'operacional_pago_cliente';
+        }
+        return payload;
+    }
+
+    function _abrirModalValorSaldoPort(tipo, id, observacao, needsRefin, evoluirCtx) {
+        evoluirCtx = evoluirCtx || {};
         _evoluirPendenteSaldoPort = {
             tipo: tipo,
             id: id,
             observacao: observacao || '',
             needsRefin: !!needsRefin,
+            acao: evoluirCtx.acao || 'operacional_pago_cliente',
+            etapa: evoluirCtx.etapa || '',
+            sub: evoluirCtx.sub || '',
         };
         _valorSaldoPendente = null;
         const inp = document.getElementById('valorSaldoPortInput');
@@ -2842,7 +2925,15 @@
             alerta.className = 'alert alert-info small py-2 mb-0';
             alerta.textContent = 'Ao confirmar, abre o formulário para registrar, editar, incluir ou remover linhas de proposta.';
             alerta.classList.remove('d-none');
-        } else if (requer === 'refin_port') {
+        } else if (
+            requer === 'refin_port'
+            || _exigeFluxoRefinPortPagoCliente(
+                acao,
+                opt,
+                (document.getElementById('evoluirEtapa') || {}).value,
+                (document.getElementById('evoluirSub') || {}).value
+            )
+        ) {
             alerta.className = 'alert alert-info py-2 small mb-0';
             alerta.textContent =
                 'Ao confirmar, informe o Valor Saldo (PORT) e, em seguida, os dados do contrato REFIN (banco e convênio iguais ao PORT).';
@@ -2852,7 +2943,15 @@
                 alerta.textContent = _refinPortDefaults.erro_config;
                 if (btnConf) btnConf.disabled = true;
             }
-        } else if (_exigeValorSaldoPortEvoluir(acao, opt) && requer !== 'refin_port') {
+        } else if (
+            _exigeValorSaldoPortEvoluir(
+                acao,
+                opt,
+                (document.getElementById('evoluirEtapa') || {}).value,
+                (document.getElementById('evoluirSub') || {}).value
+            )
+            && requer !== 'refin_port'
+        ) {
             alerta.className = 'alert alert-info py-2 small mb-0';
             alerta.textContent =
                 'Produto PORT: ao confirmar, informe o Valor Saldo antes de concluir o Pago Cliente.';
@@ -3178,8 +3277,16 @@
         }
     }
 
-    function _abrirModalRefinPort(tipo, id, observacao) {
-        _evoluirPendenteRefinPort = { tipo: tipo, id: id, observacao: observacao || '' };
+    function _abrirModalRefinPort(tipo, id, observacao, evoluirCtx) {
+        evoluirCtx = evoluirCtx || {};
+        _evoluirPendenteRefinPort = {
+            tipo: tipo,
+            id: id,
+            observacao: observacao || '',
+            acao: evoluirCtx.acao || 'operacional_pago_cliente',
+            etapa: evoluirCtx.etapa || '',
+            sub: evoluirCtx.sub || '',
+        };
         const carregar = function (def) {
             _preencherModalRefinPort(def);
             const modalEv = bootstrap.Modal.getInstance(document.getElementById('modalEvoluir'));
@@ -3206,7 +3313,7 @@
     function _coletarPayloadRefinPort() {
         const num = String(document.getElementById('refinPortNumContrato').value || '').trim().toUpperCase();
         const tid = document.getElementById('refinPortTabelaCms').value;
-        return {
+        const out = {
             numero_contrato: num,
             tabela_cms_id: tid ? parseInt(tid, 10) : null,
             proposta: {
@@ -3217,6 +3324,14 @@
                 valor_liberado: document.getElementById('refinPortLiberado').value,
             },
         };
+        const inpSaldo = document.getElementById('refinPortValorSaldo');
+        const rawSaldo = inpSaldo ? String(inpSaldo.value || '').trim() : '';
+        if (rawSaldo) {
+            out.valor_saldo = rawSaldo;
+        } else if (_valorSaldoPendente) {
+            out.valor_saldo = _valorSaldoPendente;
+        }
+        return out;
     }
 
     document.getElementById('btnConfirmarValorSaldoPort').addEventListener('click', function () {
@@ -3238,20 +3353,18 @@
         }
         bootstrap.Modal.getInstance(document.getElementById('modalValorSaldoPort')).hide();
         if (pend.needsRefin) {
-            _abrirModalRefinPort(pend.tipo, pend.id, pend.observacao);
+            _abrirModalRefinPort(pend.tipo, pend.id, pend.observacao, {
+                acao: pend.acao,
+                etapa: pend.etapa,
+                sub: pend.sub,
+            });
             return;
         }
         const btn = document.getElementById('btnConfirmarValorSaldoPort');
         if (btn) {
             btn.disabled = true;
         }
-        postJson(base + 'evoluir/', {
-            tipo: pend.tipo,
-            id: pend.id,
-            acao: 'operacional_pago_cliente',
-            observacao: pend.observacao,
-            valor_saldo: _valorSaldoPendente,
-        }).then(function (r) {
+        postJson(base + 'evoluir/', _montarPayloadPagoClienteEvoluir(pend, null)).then(function (r) {
             if (btn) {
                 btn.disabled = false;
             }
@@ -3290,18 +3403,17 @@
             showToast('Selecione a tabela CMS do REFIN.', 'warning');
             return;
         }
-        if (!_valorSaldoPendente) {
+        if (
+            _exigeValorSaldoPortEvoluir(pend.acao, null, pend.etapa, pend.sub)
+            && !refinPort.valor_saldo
+        ) {
             showToast('Informe o Valor Saldo (PORT) antes de confirmar o REFIN.', 'warning');
             return;
         }
-        const payload = {
-            tipo: pend.tipo,
-            id: pend.id,
-            acao: 'operacional_pago_cliente',
-            observacao: pend.observacao,
-            refin_port: refinPort,
-            valor_saldo: _valorSaldoPendente,
-        };
+        if (refinPort.valor_saldo && !_valorSaldoPendente) {
+            _valorSaldoPendente = String(refinPort.valor_saldo);
+        }
+        const payload = _montarPayloadPagoClienteEvoluir(pend, refinPort);
         document.getElementById('btnConfirmarRefinPort').disabled = true;
         postJson(base + 'evoluir/', payload).then(function (r) {
             document.getElementById('btnConfirmarRefinPort').disabled = false;
@@ -3630,16 +3742,6 @@
             }
         }
 
-        if (acao === 'operacional_pago_cliente' && _exigeValorSaldoPortEvoluir(acao, opt)) {
-            _abrirModalValorSaldoPort(tipo, id, observacao, requer === 'refin_port');
-            return;
-        }
-
-        if (requer === 'refin_port' && acao === 'operacional_pago_cliente') {
-            _abrirModalRefinPort(tipo, id, observacao);
-            return;
-        }
-
         const payload = { tipo, id, acao, observacao };
         if (acao === 'operacional_definir_status' && tipo === 'contrato') {
             payload.etapa = etapaVal;
@@ -3685,51 +3787,78 @@
             payload.taxa_plastico_snapshot = gv('evoluirPcmsTaxaPla');
         }
 
-        document.getElementById('btnConfirmarEvolucao').disabled = true;
+        function _executarPostEvoluirContrato() {
+            document.getElementById('btnConfirmarEvolucao').disabled = true;
 
-        postJson(base + 'evoluir/', payload).then(function (r) {
-            const btnEv = document.getElementById('btnConfirmarEvolucao');
-            if (btnEv) btnEv.disabled = false;
-            if (requer === 'registermoney_tc' && _pagoTcModal && _pagoTcModalBloqueiaPorVideo(_pagoTcModal) && btnEv) {
-                btnEv.disabled = true;
-            }
-            if (!r.ok) {
-                showToast(r.erro || 'Erro ao evoluir registro.', 'danger');
+            postJson(base + 'evoluir/', payload).then(function (r) {
+                const btnEv = document.getElementById('btnConfirmarEvolucao');
+                if (btnEv) btnEv.disabled = false;
+                if (requer === 'registermoney_tc' && _pagoTcModal && _pagoTcModalBloqueiaPorVideo(_pagoTcModal) && btnEv) {
+                    btnEv.disabled = true;
+                }
+                if (!r.ok) {
+                    showToast(r.erro || 'Erro ao evoluir registro.', 'danger');
+                    return;
+                }
+                bootstrap.Modal.getInstance(document.getElementById('modalEvoluir')).hide();
+                let msgOk = 'Registro evoluído com sucesso.';
+                if (
+                    _destinoEvolucaoPagoCliente(acao, etapaVal, subVal)
+                    && r.contrato
+                    && r.contrato.contrato_refin_codigo
+                ) {
+                    msgOk += ' Contrato REFIN: ' + r.contrato.contrato_refin_codigo + '.';
+                }
+                showToast(msgOk, 'success');
+                if (
+                    tipo === 'contrato'
+                    && acao === 'supervisor_formalizado'
+                    && r.contrato
+                    && r.contrato.flag_video_enviado === false
+                    && r.contrato.exige_video_conscientizacao !== false
+                ) {
+                    const cidVid = r.contrato.id;
+                    const hid = document.getElementById('crmUpVidContratoId');
+                    const fin = document.getElementById('crmUpVidFile');
+                    if (hid) hid.value = String(cidVid);
+                    if (fin) fin.value = '';
+                    setTimeout(function () {
+                        const mEl = document.getElementById('modalCrmUploadVideo');
+                        if (mEl) bootstrap.Modal.getOrCreateInstance(mEl).show();
+                    }, 300);
+                }
+                safeReloadFilaUnificada();
+            }).catch(function () {
+                const btnEv = document.getElementById('btnConfirmarEvolucao');
+                if (btnEv) btnEv.disabled = false;
+                if (requer === 'registermoney_tc' && _pagoTcModal && _pagoTcModalBloqueiaPorVideo(_pagoTcModal) && btnEv) {
+                    btnEv.disabled = true;
+                }
+                showToast('Erro de comunicação com o servidor.', 'danger');
+            });
+        }
+
+        function _interceptarPortRefinAntesPost() {
+            if (tipo !== 'contrato' || !_destinoEvolucaoPagoCliente(acao, etapaVal, subVal)) {
+                _executarPostEvoluirContrato();
                 return;
             }
-            bootstrap.Modal.getInstance(document.getElementById('modalEvoluir')).hide();
-            let msgOk = 'Registro evoluído com sucesso.';
-            if (acao === 'operacional_pago_cliente' && r.contrato && r.contrato.contrato_refin_codigo) {
-                msgOk += ' Contrato REFIN: ' + r.contrato.contrato_refin_codigo + '.';
-            }
-            showToast(msgOk, 'success');
-            // Formalização → Formalizado: abre envio de vídeo na hora se ainda pendente (SCT189 / CRM operacional).
-            if (
-                tipo === 'contrato'
-                && acao === 'supervisor_formalizado'
-                && r.contrato
-                && r.contrato.flag_video_enviado === false
-                && r.contrato.exige_video_conscientizacao !== false
-            ) {
-                const cidVid = r.contrato.id;
-                const hid = document.getElementById('crmUpVidContratoId');
-                const fin = document.getElementById('crmUpVidFile');
-                if (hid) hid.value = String(cidVid);
-                if (fin) fin.value = '';
-                setTimeout(function () {
-                    const mEl = document.getElementById('modalCrmUploadVideo');
-                    if (mEl) bootstrap.Modal.getOrCreateInstance(mEl).show();
-                }, 300);
-            }
-            safeReloadFilaUnificada();
-        }).catch(function () {
-            const btnEv = document.getElementById('btnConfirmarEvolucao');
-            if (btnEv) btnEv.disabled = false;
-            if (requer === 'registermoney_tc' && _pagoTcModal && _pagoTcModalBloqueiaPorVideo(_pagoTcModal) && btnEv) {
-                btnEv.disabled = true;
-            }
-            showToast('Erro de comunicação com o servidor.', 'danger');
-        });
+            _carregarRefinPortDefaultsSeNecessario(id, function () {
+                const evoluirCtx = { acao: acao, etapa: etapaVal, sub: subVal };
+                const needsRefinPort = _exigeFluxoRefinPortPagoCliente(acao, opt, etapaVal, subVal);
+                if (_exigeValorSaldoPortEvoluir(acao, opt, etapaVal, subVal)) {
+                    _abrirModalValorSaldoPort(tipo, id, observacao, needsRefinPort, evoluirCtx);
+                    return;
+                }
+                if (needsRefinPort) {
+                    _abrirModalRefinPort(tipo, id, observacao, evoluirCtx);
+                    return;
+                }
+                _executarPostEvoluirContrato();
+            });
+        }
+
+        _interceptarPortRefinAntesPost();
     }
 
     /* ══════════════════════════════

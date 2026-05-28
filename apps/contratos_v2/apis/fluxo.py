@@ -288,6 +288,28 @@ def _extras_operacional_pago_cliente(data):
     return extras or None
 
 
+def _evoluir_contrato_acao_permitida(ce, acao, data):
+    """
+    Valida se a ação do POST evoluir/ é aceita para o contrato.
+    Port + Refin em Pago Cliente pode vir de qualquer etapa (salto livre ou operacional_pago_cliente).
+    """
+    if acao in acoes_evoluir_contrato_permitidas(ce):
+        return True
+    try:
+        from apps.contratos_v2.services.port_refin import ce_exige_fluxo_port_refin_pago_cliente
+
+        if not ce_exige_fluxo_port_refin_pago_cliente(ce):
+            return False
+        if acao == 'operacional_pago_cliente':
+            return True
+        sub = (data.get('sub') or data.get('sub_status') or '').strip()
+        if acao == 'operacional_definir_status' and sub == SubStatusOperacional.PG_PAGO_CLIENTE:
+            return True
+    except Exception:
+        return False
+    return False
+
+
 def _taxa_snapshot_ou_tabela(d, attr_snap, attr_tab):
     v = getattr(d, attr_snap, None)
     if v is not None:
@@ -3529,9 +3551,14 @@ def _contrato_portado_ficha_dict(cp):
 
 
 def _proposta_ficha_dict(p, solicitante_override=None):
-    from apps.contratos_v2.services.port_refin import titulo_produto_indica_port
+    from apps.contratos_v2.services.port_refin import (
+        exibe_valor_saldo_ficha_produto,
+        produto_indica_portabilidade,
+    )
 
-    titulo_prod = p.produto.titulo if p.produto_id else ''
+    prod = p.produto if p.produto_id else None
+    titulo_prod = prod.titulo if prod else ''
+    exibe_saldo, rotulo_saldo = exibe_valor_saldo_ficha_produto(prod)
     exige_port = _produto_exige_contrato_portado(titulo_prod)
     if exige_port:
         portados = [_contrato_portado_ficha_dict(cp) for cp in p.contratos_portados.all()]
@@ -3563,7 +3590,9 @@ def _proposta_ficha_dict(p, solicitante_override=None):
         'valor_tc': str(p.valor_tc) if p.valor_tc is not None else '',
         'valor_liberado': str(p.valor_liberado) if p.valor_liberado is not None else '',
         'valor_saldo': str(p.valor_saldo) if getattr(p, 'valor_saldo', None) is not None else '',
-        'exibe_valor_saldo': titulo_produto_indica_port(titulo_prod),
+        'exibe_valor_saldo': exibe_saldo,
+        'rotulo_valor_saldo': rotulo_saldo,
+        'portabilidade_produto': produto_indica_portabilidade(prod),
         'coeficiente': str(p.coeficiente) if getattr(p, 'coeficiente', None) is not None else '',
         'aceita_pelo_cliente': bool(p.aceita_pelo_cliente),
         'criado_por': (p.criado_por.get_full_name() or p.criado_por.username) if p.criado_por_id else '',
@@ -3784,10 +3813,18 @@ def _ficha_montar_payload(tipo, pk):
             titulo_tab = (op.tabela_cms_titulo_snapshot or '').strip() or (
                 op.tabela_cms.titulo if op.tabela_cms_id else ''
             )
-            titulo_prod_ctr = op.produto.titulo if op.produto_id else ''
-            from apps.contratos_v2.services.port_refin import titulo_produto_indica_port
+            prod_ctr = op.produto if op.produto_id else None
+            from apps.contratos_v2.services.port_refin import (
+                contrato_indica_portabilidade,
+                exibe_valor_saldo_ficha_produto,
+                resolver_valor_saldo_exibicao_ce,
+            )
 
-            exibe_saldo_ctr = titulo_produto_indica_port(titulo_prod_ctr)
+            exibe_saldo_ctr, rotulo_saldo_ctr = exibe_valor_saldo_ficha_produto(prod_ctr)
+            vs_local = op.valor_saldo if op.valor_saldo is not None else None
+            valor_saldo_ctr = resolver_valor_saldo_exibicao_ce(ce, vs_local) if exibe_saldo_ctr else ''
+            if not valor_saldo_ctr and vs_local is not None:
+                valor_saldo_ctr = str(vs_local)
             contrato_dict = {
                 **base_ctr,
                 'tabela_cms': titulo_tab or '—',
@@ -3800,10 +3837,14 @@ def _ficha_montar_payload(tipo, pk):
                 'valor_af': str(op.valor_af) if op.valor_af is not None else '',
                 'valor_tc': str(op.valor_tc) if op.valor_tc is not None else '',
                 'valor_liberado': str(op.valor_liberado) if op.valor_liberado is not None else '',
-                'valor_saldo': str(op.valor_saldo) if op.valor_saldo is not None else '',
+                'valor_saldo': valor_saldo_ctr,
                 'exibe_valor_saldo': exibe_saldo_ctr,
+                'rotulo_valor_saldo': rotulo_saldo_ctr,
+                'portabilidade_efetiva': contrato_indica_portabilidade(ce),
             }
         except Exception:
+            from apps.contratos_v2.services.port_refin import contrato_indica_portabilidade
+
             contrato_dict = {
                 **base_ctr,
                 'tabela_cms': '—',
@@ -3818,6 +3859,8 @@ def _ficha_montar_payload(tipo, pk):
                 'valor_liberado': '',
                 'valor_saldo': '',
                 'exibe_valor_saldo': False,
+                'rotulo_valor_saldo': 'Valor Saldo',
+                'portabilidade_efetiva': contrato_indica_portabilidade(ce),
             }
         if 'data_criacao' not in contrato_dict:
             contrato_dict['data_criacao'] = base_ctr.get('data_criacao', '')
@@ -4936,12 +4979,15 @@ def api_post_evoluir(request):
     if tipo == 'contrato':
         try:
             ce = ContratoExecucao.objects.select_related(
-                'dados_operacionais', 'dados_operacionais__tabela_cms'
+                'dados_operacionais',
+                'dados_operacionais__tabela_cms',
+                'dados_operacionais__produto',
+                'proposta_dados__produto',
             ).get(pk=pk, status=True)
         except ContratoExecucao.DoesNotExist:
             return JsonResponse({'ok': False, 'erro': 'Contrato não encontrado.'}, status=404)
 
-        if acao not in acoes_evoluir_contrato_permitidas(ce):
+        if not _evoluir_contrato_acao_permitida(ce, acao, data):
             return JsonResponse({'ok': False, 'erro': 'Transição não permitida para o estado atual.'}, status=400)
 
         if acao == 'operacional_definir_status':
@@ -4973,6 +5019,42 @@ def api_post_evoluir(request):
                 ce.link_formalizacao = link
                 ce.destaque_vendedor = True
                 ce.save(update_fields=['link_formalizacao', 'destaque_vendedor', 'data_ultima_atualizacao'])
+            if sub_dest == SubStatusOperacional.PG_PAGO_CLIENTE:
+                extras_pago = _extras_operacional_pago_cliente(data)
+                ok_pc, msg_pc = transicao_por_acao(
+                    ce,
+                    request.user,
+                    PAPEL_OPERACIONAL,
+                    'operacional_pago_cliente',
+                    observacao=observacao,
+                    extras=extras_pago,
+                )
+                if not ok_pc:
+                    return JsonResponse({'ok': False, 'erro': msg_pc}, status=400)
+                ce.refresh_from_db()
+                resp_ctr = {
+                    'id': ce.id,
+                    'codigo': ce.codigo,
+                    'etapa_operacional': ce.etapa_operacional,
+                    'sub_status_operacional': ce.sub_status_operacional,
+                }
+                try:
+                    from apps.contratos_v2.services.port_refin import vinculo_port_refin_dict
+
+                    filho = (
+                        ContratoExecucao.objects.filter(
+                            contrato_vinculo_port_id=ce.id, status=True
+                        )
+                        .order_by('-id')
+                        .first()
+                    )
+                    if filho:
+                        resp_ctr['contrato_refin_id'] = filho.id
+                        resp_ctr['contrato_refin_codigo'] = filho.codigo or ''
+                    resp_ctr['vinculo_port_refin'] = vinculo_port_refin_dict(ce)
+                except Exception:
+                    pass
+                return JsonResponse({'ok': True, 'contrato': resp_ctr})
             ok_dir, msg_dir = aplicar_etapa_sub(
                 ce, etapa_dest, sub_dest, request.user, observacao=observacao
             )
