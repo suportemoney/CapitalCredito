@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Sem Acesso - CapitalCredito{% endblock %}
+
+{% block header_title %}Sem Acesso{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Acesso não disponível</h4>
+                </div>
+                <div class="card-body">
+                    <p>Você está autenticado, mas não possui permissão para acessar nenhuma área do sistema.</p>
+                    <p>Entre em contato com o administrador para solicitar as permissões necessárias.</p>
+                    <a href="{% url 'usuarios:render_logout' %}" class="btn btn-secondary mt-3">Sair</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

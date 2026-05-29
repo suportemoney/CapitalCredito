@@ -8,6 +8,7 @@ urlpatterns = [
     path('', views.render_index, name='index'),
     path('login/', views.render_login, name='render_login'),
     path('logout/', views.render_logout, name='render_logout'),
+    path('sem-acesso/', views.render_sem_acesso, name='sem_acesso'),
     path('gerenciar/', views.render_gerenciar, name='gerenciar'),
     
     # APIs

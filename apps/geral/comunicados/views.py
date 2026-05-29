@@ -4,11 +4,12 @@ Views para renderizar templates (apenas renders)
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from apps.seguranca.permissoes.decorators import controle_acess
 from .models import Comunicado, CategoriaComunicado, VisualizacaoComunicado
 from django.utils import timezone
 from django.db.models import Case, When, IntegerField
 
-@login_required
+@controle_acess('SS14')
 def render_mural(request):
     """Renderiza o mural de comunicados - página inicial após login"""
     # Buscar comunicados ativos

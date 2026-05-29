@@ -5,7 +5,7 @@ from functools import wraps
 from django.shortcuts import redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from apps.seguranca.permissoes.utils import user_has_access, user_has_any_access
+from apps.seguranca.permissoes.utils import user_has_access, user_has_any_access, get_user_home_url
 
 def controle_acess(code):
     """
@@ -34,7 +34,7 @@ def controle_acess(code):
                 request, 
                 'Você não tem permissão para acessar esta página.'
             )
-            return redirect('siape:ranking')
+            return redirect(get_user_home_url(request.user))
         
         return _wrapped
     return decorator
@@ -48,7 +48,7 @@ def controle_acess_any(*codes):
             if user_has_any_access(request.user, list(codes)):
                 return view_func(request, *args, **kwargs)
             messages.error(request, 'Você não tem permissão para acessar esta página.')
-            return redirect('siape:ranking')
+            return redirect(get_user_home_url(request.user))
         return _wrapped
     return decorator
 

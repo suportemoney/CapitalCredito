@@ -8,6 +8,18 @@ def user_has_any_access(user: User, codes: list) -> bool:
     """Verifica se o usuário tem acesso a pelo menos um dos códigos."""
     return any(user_has_access(user, c) for c in codes)
 
+
+def get_user_home_url(user: User) -> str:
+    """
+    Retorna a rota inicial do usuário conforme suas permissões.
+    Prioridade: ranking SIAPE (SS24) > mural de comunicados (SS14) > sem acesso.
+    """
+    if user_has_access(user, 'SS24'):
+        return 'siape:ranking'
+    if user_has_access(user, 'SS14'):
+        return 'comunicados:mural'
+    return 'usuarios:sem_acesso'
+
 def user_has_access(user: User, code: str) -> bool:
     """
     Verifica se o usuário tem acesso ao código fornecido.
