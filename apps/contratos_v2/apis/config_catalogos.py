@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""APIs JSON para CRUD dos cat├ílogos (Banco, Conv├¬nio, Produto, Tabela CMS) ÔÇö permiss├úo SCT192."""
+"""APIs JSON para CRUD dos catálogos (Banco, Convênio, Produto, Tabela CMS) — permissão SS37."""
 import csv
 import io
 import json
@@ -149,7 +149,7 @@ def _tabela_cms_dict(o):
 
 
 @login_required
-@controle_acess('SCT192')
+@controle_acess('SS37')
 @require_GET
 def api_get_catalogo_dependencias(request):
     """Retorna quantas TabelaCms dependem de um Banco/Convenio/Produto.
@@ -177,7 +177,7 @@ def api_get_catalogo_dependencias(request):
 
 
 @login_required
-@controle_acess('SCT192')
+@controle_acess('SS37')
 @require_GET
 def api_get_config_resumo(request):
     """Lista completa dos cat├ílogos (inclui inativos) para a tela de configura├º├úo."""
@@ -198,7 +198,7 @@ def api_get_config_resumo(request):
 
 
 @login_required
-@controle_acess('SCT192')
+@controle_acess('SS37')
 @require_GET
 def api_get_config_logs(request):
     """Lista logs de auditoria do cat├ílogo ÔÇö somente superusu├írios."""
@@ -259,7 +259,7 @@ def _log_apos_patch(request, entidade, instance, antes):
 
 
 @login_required
-@controle_acess('SCT192')
+@controle_acess('SS37')
 @require_http_methods(['POST'])
 def api_post_banco(request):
     # Cria Banco com:
@@ -299,7 +299,7 @@ def api_post_banco(request):
 
 
 @login_required
-@controle_acess('SCT192')
+@controle_acess('SS37')
 @require_http_methods(['PATCH', 'DELETE'])
 def api_detail_banco(request, pk):
     o = get_object_or_404(Banco, pk=pk)
@@ -341,7 +341,7 @@ def api_detail_banco(request, pk):
 
 
 @login_required
-@controle_acess('SCT192')
+@controle_acess('SS37')
 @require_http_methods(['POST'])
 def api_post_convenio(request):
     # Mesma regra de guarda contra duplicata aplicada em api_post_produto.
@@ -371,7 +371,7 @@ def api_post_convenio(request):
 
 
 @login_required
-@controle_acess('SCT192')
+@controle_acess('SS37')
 @require_http_methods(['PATCH', 'DELETE'])
 def api_detail_convenio(request, pk):
     o = get_object_or_404(Convenio, pk=pk)
@@ -410,7 +410,7 @@ def api_detail_convenio(request, pk):
 
 
 @login_required
-@controle_acess('SCT192')
+@controle_acess('SS37')
 @require_http_methods(['POST'])
 def api_post_produto(request):
     data = _json_body(request)
@@ -457,7 +457,7 @@ def api_post_produto(request):
 
 
 @login_required
-@controle_acess('SCT192')
+@controle_acess('SS37')
 @require_http_methods(['PATCH', 'DELETE'])
 def api_detail_produto(request, pk):
     o = get_object_or_404(Produto, pk=pk)
@@ -499,7 +499,7 @@ def api_detail_produto(request, pk):
 
 
 @login_required
-@controle_acess('SCT192')
+@controle_acess('SS37')
 @require_http_methods(['POST'])
 def api_post_tabela_cms(request):
     data = _json_body(request)
@@ -546,10 +546,10 @@ def api_post_tabela_cms(request):
 
 
 @login_required
-@controle_acess('SCT192')
+@controle_acess('SS37')
 @require_http_methods(['DELETE'])
 def api_delete_banco(request, pk):
-    """Exclui Banco definitivamente (SCT192)."""
+    """Exclui Banco definitivamente (SS37)."""
     o = get_object_or_404(Banco, pk=pk)
     antes = audit.snapshot('banco', o)
     reg_id = o.id
@@ -571,10 +571,10 @@ def api_delete_banco(request, pk):
 
 
 @login_required
-@controle_acess('SCT192')
+@controle_acess('SS37')
 @require_http_methods(['DELETE'])
 def api_delete_convenio(request, pk):
-    """Exclui Conv├¬nio definitivamente (SCT192)."""
+    """Exclui Conv├¬nio definitivamente (SS37)."""
     o = get_object_or_404(Convenio, pk=pk)
     antes = audit.snapshot('convenio', o)
     reg_id = o.id
@@ -596,10 +596,10 @@ def api_delete_convenio(request, pk):
 
 
 @login_required
-@controle_acess('SCT192')
+@controle_acess('SS37')
 @require_http_methods(['DELETE'])
 def api_delete_produto(request, pk):
-    """Exclui Produto definitivamente (SCT192)."""
+    """Exclui Produto definitivamente (SS37)."""
     o = get_object_or_404(Produto, pk=pk)
     antes = audit.snapshot('produto', o)
     reg_id = o.id
@@ -621,7 +621,7 @@ def api_delete_produto(request, pk):
 
 
 @login_required
-@controle_acess('SCT192')
+@controle_acess('SS37')
 @require_http_methods(['POST'])
 def api_post_importar_csv(request):
     """Importa Bancos, Conv├¬nios ou Produtos a partir de arquivo CSV enviado via multipart.
@@ -741,7 +741,7 @@ def api_post_importar_csv(request):
 
 
 @login_required
-@controle_acess('SCT192')
+@controle_acess('SS37')
 @require_http_methods(['PATCH', 'DELETE'])
 def api_detail_tabela_cms(request, pk):
     o = get_object_or_404(TabelaCms.objects.select_related('banco', 'convenio', 'produto'), pk=pk)

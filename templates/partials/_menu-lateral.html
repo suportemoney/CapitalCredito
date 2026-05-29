@@ -424,19 +424,27 @@
                 <i class="bx bx-chevron-down subcategory-arrow"></i>
               </a>
               <ul class="options-menu">
-                {% if user|has_access:'SS35' or user|has_access:'SCT189' %}
+                {% if user|has_access:'SS35' %}
                 <li>
                   <a href="{% url 'contratos:crm_operacional_v2' %}">
                     <i class="bx bx-bar-chart-alt-2"></i>
-                    <span class="menu-label">CRM Operacional</span>
+                    <span class="menu-label">Esteira Operacional</span>
                   </a>
                 </li>
                 {% endif %}
-                {% if user|has_access:'SS38' or user|has_access:'SCT192' %}
+                {% if user|has_access:'SS37' %}
                 <li>
                   <a href="{% url 'contratos:config_v2' %}">
                     <i class="bx bx-cog"></i>
-                    <span class="menu-label">Configuração Catálogos</span>
+                    <span class="menu-label">Catálogos</span>
+                  </a>
+                </li>
+                {% endif %}
+                {% if user|has_access:'SS36' %}
+                <li>
+                  <a href="{% url 'contratos:relatorio_cms' %}">
+                    <i class="bx bx-spreadsheet"></i>
+                    <span class="menu-label">Relatório CMS</span>
                   </a>
                 </li>
                 {% endif %}

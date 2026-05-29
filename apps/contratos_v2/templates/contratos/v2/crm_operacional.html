@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load permissoes_tags %}
 
 {% block title %}Esteira Operacional - CapitalCredito{% endblock %}
 
@@ -7,12 +8,16 @@
 
 {% block pre_content %}
 <div class="header-actions">
+    {% if user|has_access:'SS37' %}
     <a href="{% url 'contratos:config_v2' %}" class="btn-gerenciar btn-gerenciar--outline">
         <i class='bx bx-cog'></i> Catálogos
     </a>
+    {% endif %}
+    {% if user|has_access:'SS36' %}
     <a href="{% url 'contratos:relatorio_cms' %}" class="btn-gerenciar btn-gerenciar--outline">
         <i class='bx bx-spreadsheet'></i> Relatório CMS
     </a>
+    {% endif %}
 </div>
 {% endblock %}
 
@@ -233,7 +238,7 @@
             </div>
             <div class="modal-footer border-0 pt-0 flex-wrap gap-2">
                 <button type="button" class="btn btn-light" data-bs-dismiss="modal">Fechar</button>
-                <button type="button" class="btn btn-warning btn-sm d-none" id="btnFichaPendencias" data-acess="SCT189" title="Pendências do contrato">
+                <button type="button" class="btn btn-warning btn-sm d-none" id="btnFichaPendencias" data-acess="SS35" title="Pendências do contrato">
                     <i class="bx bx-error-circle me-1"></i>Pendências
                 </button>
                 <button type="button" class="btn btn-outline-primary btn-sm d-none" id="btnFichaEditar">
@@ -848,7 +853,7 @@
                 <hr>
 
                 <!-- Form de criar pendência (restrito por permissão) -->
-                <div id="pendenciaForm" data-acess="SCT189">
+                <div id="pendenciaForm" data-acess="SS35">
                     <div class="fw-semibold small mb-1">Criar nova pendência</div>
                     <p class="small text-muted mb-2">Marque uma ou mais opções e descreva a observação.</p>
                     <div class="row g-2">
@@ -879,7 +884,7 @@
             </div>
             <div class="modal-footer border-0 pt-0">
                 <button type="button" class="btn btn-light" data-bs-dismiss="modal">Fechar</button>
-                <button type="button" class="btn btn-warning" id="btnSalvarPendencia" data-acess="SCT189">
+                <button type="button" class="btn btn-warning" id="btnSalvarPendencia" data-acess="SS35">
                     <i class="bx bx-save me-1"></i>Registrar pendência
                 </button>
             </div>

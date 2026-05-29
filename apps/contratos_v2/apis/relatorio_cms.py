@@ -56,8 +56,8 @@ def _loja_nome_contrato_relatorio(ce):
         pass
     return ''
 
-# Permissão 203 — OPERACIONAL | RELATÓRIO CMS (COD_SCT203)
-COD_ACESSO_RELATORIO_CMS = 'SCT203'
+# Permissão SS36 — OPERACIONAL | CONTRATOS | RELATÓRIO CMS
+COD_ACESSO_RELATORIO_CMS = 'SS36'
 
 # Sub-status exibidos no relatório: TC (parcial/total/legado) e trâmite CMS até empresa.
 RELATORIO_CMS_SUB_STATUS = (

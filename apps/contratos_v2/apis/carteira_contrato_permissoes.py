@@ -56,12 +56,12 @@ def pendencia_tipos_abertos(ce: ContratoExecucao):
 
 def pode_visualizar_contrato_ficha_ou_midia(user, ce: ContratoExecucao) -> bool:
     """
-    Leitura de ficha / lista de mídia-arquivos: CRM operacional (SCT189), supervisão (SCT201),
+    Leitura de ficha / lista de mídia-arquivos: esteira operacional (SS35), supervisão (SCT201),
     pendência na carteira do vendedor ou consultor SIAPE (SCT16) com contrato na própria carteira.
     """
     from apps.seguranca.permissoes.utils import user_has_access
 
-    if user_has_access(user, 'SCT189') or user_has_access(user, 'SCT201'):
+    if user_has_access(user, 'SS35') or user_has_access(user, 'SCT201'):
         return True
     if vendedor_pode_acesso_pendencia_contrato(user, ce):
         return True

@@ -805,7 +805,7 @@
             }
             if (it.tipo === 'contrato') {
                 acoes +=
-                    '<button type="button" class="btn crm-acao-btn crm-acao-pendencias me-1 btn-crm-pendencias" data-acess="SCT189" data-tipo="' +
+                    '<button type="button" class="btn crm-acao-btn crm-acao-pendencias me-1 btn-crm-pendencias" data-acess="SS35" data-tipo="' +
                     it.tipo +
                     '" data-id="' +
                     it.id +
@@ -4351,7 +4351,7 @@
                 '<div><span class="fw-semibold">' + esc(p.tipo_label || p.tipo) + '</span>' +
                 '<div class="text-muted mt-1">' + esc(p.observacao || '') + '</div>' +
                 '<div class="text-muted" style="font-size:0.75rem">Por ' + esc(p.criado_por || '') + ' · ' + esc(p.criado_em || '') + '</div></div>' +
-                '<button type="button" class="btn btn-sm btn-outline-secondary btn-pendencia-resolver flex-shrink-0" data-acess="SCT189" data-pendencia-id="' +
+                '<button type="button" class="btn btn-sm btn-outline-secondary btn-pendencia-resolver flex-shrink-0" data-acess="SS35" data-pendencia-id="' +
                 String(p.id) +
                 '">Resolver</button>';
             ul.appendChild(li);

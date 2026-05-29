@@ -460,8 +460,8 @@ def api_post_editar_dados_contrato(request):
     proposta da solicitação de digitação antes de existir contrato na esteira.
 
     Permissão: Operacional ou Supervisor (Cargo), qualquer usuário com acesso
-    SCT189 (mesmo critério da esteira CRM), ou vendedor em fluxo de pendências
-    (Validação [9]) — o ramo por solicitação exige operacional/SCT189.
+    SS35 (mesmo critério da esteira CRM), ou vendedor em fluxo de pendências
+    (Validação [9]) — o ramo por solicitação exige operacional/SS35.
     Registra entrada na timeline via `HistoricoTransicaoContrato`.
 
     Validações:
@@ -718,7 +718,7 @@ def api_post_editar_dados_contrato(request):
 # ============================================================================
 
 @login_required
-@controle_acess_multiplos('SCT189', 'SCT201')
+@controle_acess_multiplos('SS35', 'SCT201')
 @require_POST
 def api_post_excluir_cliente_arquivo(request):
     """Exclui um `ClienteArquivo` vinculado ao contrato (via cliente_dados_pessoais).
@@ -789,7 +789,7 @@ def api_post_criar_pendencia(request):
 
     Espera: {contrato_id, observacao, tipos: [..]} ou legado {contrato_id, tipo, observacao}.
     """
-    if not user_has_access(request.user, 'SCT189'):
+    if not user_has_access(request.user, 'SS35'):
         return JsonResponse({'ok': False, 'erro': 'Sem permissão.'}, status=403)
     data = _json(request)
     contrato_id = data.get('contrato_id')
@@ -874,7 +874,7 @@ def api_post_resolver_pendencia(request):
     papel_s = (papel or '')
     pode_supervisor_app = user_has_access(request.user, 'SCT201')
     pode_ops_crm = (
-        user_has_access(request.user, 'SCT189')
+        user_has_access(request.user, 'SS35')
         and papel_s in ('operacional', 'supervisor')
     )
     pode_vend = vendedor_pode_acesso_pendencia_contrato(request.user, ce)
@@ -925,7 +925,7 @@ def api_post_sanar_pendencias_contrato(request):
     papel_s = (papel or '')
     pode_supervisor_app = user_has_access(request.user, 'SCT201')
     pode_ops_crm = (
-        user_has_access(request.user, 'SCT189')
+        user_has_access(request.user, 'SS35')
         and papel_s in ('operacional', 'supervisor')
     )
     pode_vend = vendedor_pode_acesso_pendencia_contrato(request.user, ce)
@@ -982,7 +982,7 @@ def api_get_pendencias_contrato(request):
         except ContratoExecucao.DoesNotExist:
             return JsonResponse({'ok': False, 'erro': 'Contrato não encontrado.'}, status=404)
         pode = (
-            user_has_access(request.user, 'SCT189')
+            user_has_access(request.user, 'SS35')
             or user_has_access(request.user, 'SCT201')
             or vendedor_pode_acesso_pendencia_contrato(request.user, ce)
             or (
@@ -1234,9 +1234,9 @@ def api_post_comprovante_tc(request):
         contrato_id, valor, arquivo
         registermoney (JSON) — dados do modal Pago TC (obrigatório no 1º comprovante com TC > 0)
     """
-    if not user_has_access(request.user, 'SCT189'):
-        return JsonResponse({'ok': False, 'erro': 'Sem permissão de acesso (SCT189).'}, status=403)
-    # Permissão principal deste endpoint é SCT189. Não restringir por papel aqui,
+    if not user_has_access(request.user, 'SS35'):
+        return JsonResponse({'ok': False, 'erro': 'Sem permissão de acesso (SS35).'}, status=403)
+    # Permissão principal deste endpoint é SS35. Não restringir por papel aqui,
     # pois há cenários válidos com acesso ativo e cargo não mapeado no helper.
     try:
         contrato_id = int(request.POST.get('contrato_id') or 0)
@@ -1333,8 +1333,8 @@ def api_post_atualizar_tc_modal_pago(request):
     Logs (nível INFO) usam o prefixo ``[atualizar-tc-modal-pago]`` — aparecem no journalctl do Gunicorn
     se o ``LOGGING`` do Django incluir INFO para este módulo.
     """
-    if not user_has_access(request.user, 'SCT189'):
-        return JsonResponse({'ok': False, 'erro': 'Sem permissão de acesso (SCT189).'}, status=403)
+    if not user_has_access(request.user, 'SS35'):
+        return JsonResponse({'ok': False, 'erro': 'Sem permissão de acesso (SS35).'}, status=403)
     data = _json(request)
     try:
         contrato_id = int(data.get('contrato_id') or 0)
@@ -1605,8 +1605,8 @@ def api_post_salvar_dados_pago_tc_modal(request):
     Grava Valor TC, AF, classificador e loja do modal Pago TC sem exigir comprovante
     e sem evoluir o sub-status (use comprovante-tc / Confirmar para isso).
     """
-    if not user_has_access(request.user, 'SCT189'):
-        return JsonResponse({'ok': False, 'erro': 'Sem permissão de acesso (SCT189).'}, status=403)
+    if not user_has_access(request.user, 'SS35'):
+        return JsonResponse({'ok': False, 'erro': 'Sem permissão de acesso (SS35).'}, status=403)
     data = _json(request)
     try:
         contrato_id = int(data.get('contrato_id') or 0)
@@ -1742,8 +1742,8 @@ def _decrementar_acumulado_rm(ce, valor: Decimal):
 @require_POST
 def api_post_excluir_comprovante_tc(request):
     """Soft delete de ComprovanteTC; recalcula sub-status e acumulado do RegisterMoney."""
-    if not user_has_access(request.user, 'SCT189'):
-        return JsonResponse({'ok': False, 'erro': 'Sem permissão de acesso (SCT189).'}, status=403)
+    if not user_has_access(request.user, 'SS35'):
+        return JsonResponse({'ok': False, 'erro': 'Sem permissão de acesso (SS35).'}, status=403)
     data = _json(request)
     try:
         contrato_id = int(data.get('contrato_id') or 0)
@@ -1861,8 +1861,8 @@ def api_post_comprovante_tc_from_envio_vendedor(request):
     Converte envio do vendedor em ComprovanteTC (sem RegisterMoney).
     Params POST: contrato_id, envio_id, valor
     """
-    if not user_has_access(request.user, 'SCT189'):
-        return JsonResponse({'ok': False, 'erro': 'Sem permissão de acesso (SCT189).'}, status=403)
+    if not user_has_access(request.user, 'SS35'):
+        return JsonResponse({'ok': False, 'erro': 'Sem permissão de acesso (SS35).'}, status=403)
     try:
         contrato_id = int(request.POST.get('contrato_id') or 0)
         envio_id = int(request.POST.get('envio_id') or 0)
@@ -1940,8 +1940,8 @@ def api_post_comprovante_tc_from_envio_vendedor(request):
 @require_GET
 def api_get_comprovantes_tc(request):
     """Lista comprovantes de TC de um contrato."""
-    if not user_has_access(request.user, 'SCT189'):
-        return JsonResponse({'ok': False, 'erro': 'Sem permissão de acesso (SCT189).'}, status=403)
+    if not user_has_access(request.user, 'SS35'):
+        return JsonResponse({'ok': False, 'erro': 'Sem permissão de acesso (SS35).'}, status=403)
     contrato_id = request.GET.get('contrato_id')
     if not contrato_id:
         return JsonResponse({'ok': False, 'erro': 'contrato_id obrigatório.'}, status=400)

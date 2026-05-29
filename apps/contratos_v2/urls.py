@@ -71,7 +71,7 @@ urlpatterns = [
     path('api/v2/cliente-dados-pessoais/salvar/', fluxo.api_post_cliente_dados_pessoais_salvar, name='api_v2_cliente_dp_salvar'),
     path('api/v2/solicitar-simulacao/', fluxo.api_post_solicitar_simulacao, name='api_v2_solicitar_simulacao'),
     path('api/v2/solicitar-propostas/', fluxo.api_post_solicitar_propostas, name='api_v2_solicitar_propostas'),
-    # APIs config catálogos (SCT192)
+    # APIs config catálogos (SS37)
     path('api/v2/config/resumo/', config_catalogos.api_get_config_resumo, name='api_v2_config_resumo'),
     path('api/v2/config/dependencias/', config_catalogos.api_get_catalogo_dependencias, name='api_v2_config_dependencias'),
     path('api/v2/config/banco/', config_catalogos.api_post_banco, name='api_v2_config_banco_post'),
@@ -84,7 +84,7 @@ urlpatterns = [
     path('api/v2/config/tabela-cms/<int:pk>/', config_catalogos.api_detail_tabela_cms, name='api_v2_config_tabela_cms_detail'),
     path('api/v2/config/importar/', config_catalogos.api_post_importar_csv, name='api_v2_config_importar'),
     path('api/v2/config/logs/', config_catalogos.api_get_config_logs, name='api_v2_config_logs'),
-    # Exclusão definitiva (SCT192)
+    # Exclusão definitiva (SS37)
     path('api/v2/config/banco/<int:pk>/excluir/', config_catalogos.api_delete_banco, name='api_v2_config_banco_excluir'),
     path('api/v2/config/convenio/<int:pk>/excluir/', config_catalogos.api_delete_convenio, name='api_v2_config_convenio_excluir'),
     path('api/v2/config/produto/<int:pk>/excluir/', config_catalogos.api_delete_produto, name='api_v2_config_produto_excluir'),

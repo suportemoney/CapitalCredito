@@ -24,6 +24,7 @@ from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
 
+from apps.contratos_v2.permissoes_codigos import COD_SS_ESTEIRA
 from apps.seguranca.permissoes.decorators import controle_acess
 from apps.seguranca.permissoes.utils import user_has_access
 
@@ -140,8 +141,8 @@ _COD_VENDEDOR_ESTEIRA = '__VENDEDOR_ESTEIRA__'
 
 
 def _acesso_crm_operacional_ou_supervisao_siape(user):
-    """CRM operacional (SCT189) ou supervisão SIAPE (SCT201) — mesma tela de ficha/timeline."""
-    return user_has_access(user, 'SCT189') or user_has_access(user, COD_SIAPE_CRM_SUPERVISAO)
+    """CRM operacional (SS35) ou supervisão SIAPE (SCT201) — mesma tela de ficha/timeline."""
+    return user_has_access(user, COD_SS_ESTEIRA) or user_has_access(user, COD_SIAPE_CRM_SUPERVISAO)
 
 
 def controle_acess_multiplos(*codigos):
@@ -188,19 +189,19 @@ def _usuario_pode_executar_acao_transicao(usuario, acao, ce=None):
     if codigo == _COD_VENDEDOR_ESTEIRA:
         if _usuario_autorizado_acao_vendedor(usuario, acao):
             return True
-        # CRM operacional (SCT189): checado/formalizado na carteira própria sem SCT16 na permissão.
+        # CRM operacional (SS35): checado/formalizado na carteira própria sem SCT16 na permissão.
         if ce is not None and a in ('vendedor_checado_formalizacao', 'vendedor_formalizado_desde_link'):
-            if user_has_access(usuario, 'SCT189'):
+            if user_has_access(usuario, COD_SS_ESTEIRA):
                 from apps.contratos_v2.apis.carteira_contrato_permissoes import contrato_vinculado_carteiras_responsavel
 
                 return contrato_vinculado_carteiras_responsavel(usuario, ce)
         return False
-    # Paridade com api_post_evoluir (SCT189): checado/formalizado na esteira CRM operacional.
+    # Paridade com api_post_evoluir (SS35): checado/formalizado na esteira CRM operacional.
     if codigo == 'SCT201' and papel == PAPEL_SUPERVISOR and a in (
         'supervisor_checado',
         'supervisor_formalizado',
     ):
-        return user_has_access(usuario, codigo) or user_has_access(usuario, 'SCT189')
+        return user_has_access(usuario, codigo) or user_has_access(usuario, COD_SS_ESTEIRA)
     return user_has_access(usuario, codigo)
 
 
@@ -640,9 +641,9 @@ def _codigo_acesso_para_acao(acao):
         'operacional_cancelar_banco',
         'operacional_cancelar_reembolso',
     ):
-        return 'SCT189', PAPEL_OPERACIONAL
+        return COD_SS_ESTEIRA, PAPEL_OPERACIONAL
     if acao in ('pendencia_entrar', 'pendencia_corrigido') or (acao or '').startswith('operacional_'):
-        return 'SCT189', PAPEL_OPERACIONAL
+        return COD_SS_ESTEIRA, PAPEL_OPERACIONAL
     if (acao or '').startswith('supervisor_'):
         return 'SCT201', PAPEL_SUPERVISOR
     if (acao or '').startswith('vendedor_'):
@@ -666,7 +667,7 @@ def _filtrar_transicoes_por_permissao(usuario, transicoes, ce=None):
             if _usuario_autorizado_acao_vendedor(usuario, acao):
                 out.append(t)
         elif codigo == 'SCT201':
-            # Paridade com _usuario_pode_executar_acao_transicao: CRM operacional (SCT189)
+            # Paridade com _usuario_pode_executar_acao_transicao: CRM operacional (SS35)
             # vê «Checado» e «Formalizado» na formalização sem possuir SCT201.
             a = (acao or '').strip()
             if user_has_access(usuario, codigo):
@@ -674,7 +675,7 @@ def _filtrar_transicoes_por_permissao(usuario, transicoes, ce=None):
             elif (
                 ce is not None
                 and a in ('supervisor_formalizado', 'supervisor_checado')
-                and user_has_access(usuario, 'SCT189')
+                and user_has_access(usuario, COD_SS_ESTEIRA)
             ):
                 out.append(t)
         elif user_has_access(usuario, codigo):
@@ -684,7 +685,7 @@ def _filtrar_transicoes_por_permissao(usuario, transicoes, ce=None):
 
 @login_required
 @require_GET
-@controle_acess('SCT189')
+@controle_acess(COD_SS_ESTEIRA)
 def api_get_fila_operacional(request):
     """Filas para CRM operacional: solicitações digitação, contratos por etapa (nexos)."""
     fila = request.GET.get('fila', 'digitacao')
@@ -818,7 +819,7 @@ def _transicoes_disponiveis_solicitacao_digitacao(sol):
 
 @login_required
 @require_POST
-@controle_acess('SCT189')
+@controle_acess(COD_SS_ESTEIRA)
 def api_post_gerar_contrato_digitacao(request):
     """
     Operacional gera ContratoExecucao + ContratoDadosOperacionais a partir de uma solicitação de digitação.
@@ -913,7 +914,7 @@ def api_post_gerar_contrato_digitacao(request):
 
 @login_required
 @require_POST
-@controle_acess('SCT189')
+@controle_acess(COD_SS_ESTEIRA)
 def api_post_definir_link_formalizacao(request, contrato_id):
     """Operacional informa link de formalização e notifica vendedor."""
     data = _json_body(request)
@@ -1156,7 +1157,7 @@ def api_post_solicitacao_dig_correcao_concluida(request, solicitacao_id):
     """Devolve a solicitação à fila operacional após correção no modal (pré-contrato).
 
     Equivalente operacional: ``operacional_solicitacao_reabrir`` no evoluir.
-    Permissão alinhada a ``api_get_ficha`` com ``tipo=solicitacao_dig`` (SCT189 ou vendedor
+    Permissão alinhada a ``api_get_ficha`` com ``tipo=solicitacao_dig`` (SS35 ou vendedor
     da carteira/repasse/presença INSS em ``PENDENTE_CORRECAO``).
     """
     try:
@@ -1186,7 +1187,7 @@ def api_post_solicitacao_dig_correcao_concluida(request, solicitacao_id):
         )
 
     cart = sol.carteira_clientes
-    pode = user_has_access(request.user, 'SCT189')
+    pode = user_has_access(request.user, COD_SS_ESTEIRA)
     if not pode:
         pode = bool(
             cart is not None
@@ -1312,10 +1313,10 @@ def api_post_contrato_comprovante_pagamento_vendedor(request, contrato_id):
 def api_post_upload_video_contrato(request, contrato_id):
     """
     Envio de vídeo: quem tem Loja INSS ou Consulta SIAPE aplica transição (vendedor_video_enviado);
-    CRM (SCT189) apenas grava arquivo sem mudar etapa.
+    CRM (SS35) apenas grava arquivo sem mudar etapa.
     """
     pode_vend = _acesso_vendedor_loja_ou_consulta(request.user)
-    pode_crm = user_has_access(request.user, 'SCT189')
+    pode_crm = user_has_access(request.user, COD_SS_ESTEIRA)
     if not pode_vend and not pode_crm:
         return JsonResponse({'ok': False, 'erro': 'Sem permissão.'}, status=403)
     try:
@@ -1352,7 +1353,7 @@ def api_post_upload_video_contrato(request, contrato_id):
         ]
     )
     # Transição de vendedor (Formalizado→Análise / manter Análise): só para perfil vendedor sem papel CRM.
-    # Quem tem SCT189 usa o CRM (modal arquivos, Pago TC, etc.): upload só persiste vídeo e flag, sem mudar etapa.
+    # Quem tem SS35 usa o CRM (modal arquivos, Pago TC, etc.): upload só persiste vídeo e flag, sem mudar etapa.
     if pode_vend and not pode_crm:
         ce.refresh_from_db()
         e = ce.etapa_operacional
@@ -1644,7 +1645,7 @@ def api_post_solicitar_digitacao_sem_pdf(request):
 
 @login_required
 @require_POST
-@controle_acess('SCT189')
+@controle_acess(COD_SS_ESTEIRA)
 def api_post_responder_solicitacao_proposta(request):
     """
     Operacional responde solicitação inicial: inelegível ou lista de propostas (cria PropostaDados).
@@ -1868,7 +1869,7 @@ def _proposta_operacional_dict(p):
 
 @login_required
 @require_GET
-@controle_acess('SCT189')
+@controle_acess(COD_SS_ESTEIRA)
 def api_get_propostas_solicitacao_operacional(request, solicitacao_id):
     try:
         sol = SolicitacaoPropostaCliente.objects.get(pk=int(solicitacao_id))
@@ -2068,7 +2069,7 @@ def api_get_propostas_dados_por_carteira(request):
 
 @login_required
 @require_GET
-@controle_acess('SCT189')
+@controle_acess(COD_SS_ESTEIRA)
 def api_get_solicitacoes_pendentes_operacional(request):
     qs = SolicitacaoPropostaCliente.objects.filter(
         estado__in=[
@@ -2224,7 +2225,7 @@ def api_post_contrato_transicao(request, contrato_id):
 
 @login_required
 @require_GET
-@controle_acess('SCT189')
+@controle_acess(COD_SS_ESTEIRA)
 def api_get_tabelas_cms_por_solicitacao(request):
     """Retorna TabelaCms filtradas pelo banco e produto da proposta vinculada à solicitação de digitação."""
     sid = request.GET.get('solicitacao_digitacao_id')
@@ -2261,13 +2262,13 @@ def api_get_tabelas_cms_filtradas(request):
     envio de proposta. Retorna lista vazia quando não há correspondência
     (front exibe "---nenhuma tabela disponível---").
 
-    Permissão: consulta SIAPE (SCT16), loja INSS (SCT23), CRM operacional (SCT189)
+    Permissão: consulta SIAPE (SCT16), loja INSS (SCT23), CRM operacional (SS35)
     ou supervisão SIAPE (SCT201) — mesmo público do wizard de propostas em
     consulta_cliente/loja; resposta JSON 403 para AJAX (sem redirect).
     """
     if not (
         _acesso_vendedor_loja_ou_consulta(request.user)
-        or user_has_access(request.user, 'SCT189')
+        or user_has_access(request.user, COD_SS_ESTEIRA)
         or user_has_access(request.user, COD_SIAPE_CRM_SUPERVISAO)
     ):
         return JsonResponse({'ok': False, 'erro': 'Sem permissão.'}, status=403)
@@ -3416,7 +3417,7 @@ def _esteira_solicitantes_opcoes(itens):
 
 @login_required
 @require_GET
-@controle_acess('SCT189')
+@controle_acess(COD_SS_ESTEIRA)
 def api_get_fila_unificada(request):
     """Retorna simulações, solicitações de digitação pendentes e contratos em lista unificada."""
     filtros = _esteira_filtros_from_request(request)
@@ -3428,7 +3429,7 @@ def api_get_fila_unificada(request):
 
 @login_required
 @require_GET
-@controle_acess('SCT189')
+@controle_acess(COD_SS_ESTEIRA)
 def api_get_esteira_resumo(request):
     """KPIs da esteira operacional (totais + variação % vs mês anterior por criação)."""
     filtros = _esteira_filtros_from_request(request)
@@ -4590,7 +4591,7 @@ def _historico_digitacao_list(sol, data_fmt='%d/%m/%Y %H:%M'):
 
 @login_required
 @require_GET
-@controle_acess_multiplos('SCT189', COD_SIAPE_CRM_SUPERVISAO)
+@controle_acess_multiplos(COD_SS_ESTEIRA, COD_SIAPE_CRM_SUPERVISAO)
 def api_get_auditoria_fluxo(request):
     """Histórico de transições (timeline) para o modal de auditoria no CRM — payload enxuto."""
     tipo = request.GET.get('tipo')
@@ -4675,7 +4676,7 @@ def api_get_auditoria_fluxo(request):
 
 @login_required
 @require_GET
-@controle_acess_multiplos('SCT189', 'SCT147')
+@controle_acess_multiplos(COD_SS_ESTEIRA, 'SCT147')
 def api_get_transicoes_disponiveis(request):
     """Retorna as transições disponíveis para avançar o registro (nunca retrocedem)."""
     tipo = request.GET.get('tipo')
@@ -4756,7 +4757,7 @@ def api_get_transicoes_disponiveis(request):
 
 @login_required
 @require_POST
-@controle_acess_multiplos('SCT189', 'SCT147', 'SCT16', 'SCT201')
+@controle_acess_multiplos(COD_SS_ESTEIRA, 'SCT147', 'SCT16', 'SCT201')
 def api_post_evoluir(request):
     """Aplica a transição selecionada no modal Evoluir."""
     data = _json_body(request)
@@ -4827,7 +4828,7 @@ def api_post_evoluir(request):
             'operacional_solicitacao_cancelar',
             'operacional_solicitacao_reabrir',
         ):
-            if not user_has_access(request.user, 'SCT189'):
+            if not user_has_access(request.user, COD_SS_ESTEIRA):
                 return JsonResponse({'ok': False, 'erro': 'Sem permissão.'}, status=403)
 
         if acao in ('operacional_solicitacao_marcar_pendencia', 'operacional_solicitacao_cancelar'):
@@ -4993,7 +4994,7 @@ def api_post_evoluir(request):
         if acao == 'operacional_definir_status':
             if not contrato_permite_evolucao_livre(ce):
                 return JsonResponse({'ok': False, 'erro': 'Modo livre indisponível para este contrato.'}, status=400)
-            if not user_has_access(request.user, 'SCT189'):
+            if not user_has_access(request.user, COD_SS_ESTEIRA):
                 return JsonResponse({'ok': False, 'erro': 'Sem permissão operacional.'}, status=403)
             etapa_dest = (data.get('etapa') or '').strip()
             sub_dest = (data.get('sub') or data.get('sub_status') or '').strip()
@@ -5188,7 +5189,7 @@ def api_post_evoluir(request):
 
 @login_required
 @require_GET
-@controle_acess('SCT189')
+@controle_acess(COD_SS_ESTEIRA)
 def api_get_refin_port_defaults(request, contrato_id):
     """Defaults do modal REFIN (Port + Refin) para contrato em PG_AGUARDANDO_CLIENTE."""
     try:
@@ -5350,7 +5351,7 @@ def api_post_ranking_supervisor(request, contrato_id):
 
 @login_required
 @require_http_methods(['PATCH'])
-@controle_acess('SCT189')
+@controle_acess(COD_SS_ESTEIRA)
 def api_patch_contrato_dados_cms_snapshot(request, contrato_id):
     """Atualiza título/taxas snapshot em dados operacionais; preenche data_att_cms e user_att_cms."""
     data = _json_body(request)
@@ -5387,7 +5388,7 @@ def api_patch_contrato_dados_cms_snapshot(request, contrato_id):
 # ---------------------------------------------------------------------------
 
 @login_required
-@controle_acess('SCT189')
+@controle_acess(COD_SS_ESTEIRA)
 @require_http_methods(['DELETE'])
 def api_delete_solicitacao(request, pk):
     """Exclui SolicitacaoPropostaCliente definitivamente — apenas superusuários."""
@@ -5402,7 +5403,7 @@ def api_delete_solicitacao(request, pk):
 
 
 @login_required
-@controle_acess('SCT189')
+@controle_acess(COD_SS_ESTEIRA)
 @require_http_methods(['DELETE'])
 def api_delete_contrato(request, pk):
     """Exclui ContratoExecucao definitivamente — apenas superusuários."""
