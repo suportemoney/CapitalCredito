@@ -138,5 +138,8 @@
     window.consultaOperacionalAtualizarStatus = function (status) {
         window.__statusComercialAtual = status;
         setBotaoProposta();
+        if (typeof window.refreshContainerNovoContrato === 'function') {
+            window.refreshContainerNovoContrato();
+        }
     };
 })();

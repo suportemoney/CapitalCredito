@@ -1,0 +1,34 @@
+<div class="modal fade" id="modalNcFormalizar" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white py-2">
+                <h5 class="modal-title fs-6" id="nc-formalizar-titulo">
+                    <i class="bx bx-badge-check me-1"></i>Confirmar Formalização
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-2 fw-semibold small" id="nc-formalizar-nome"></p>
+                <div class="mb-2" id="nc-formalizar-link-wrap">
+                    <label class="form-label small text-muted mb-0">Link disponível</label>
+                    <div id="nc-formalizar-link" class="small text-break">—</div>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label small text-muted mb-0">Vídeo do cliente <span class="text-muted">(opcional)</span></label>
+                    <input type="file" class="form-control form-control-sm" id="nc-formalizar-video"
+                           accept=".mp4,.mov,.avi,video/mp4,video/quicktime,video/x-msvideo">
+                </div>
+                <div>
+                    <label class="form-label small text-muted mb-0">Observação <span class="text-muted">(opcional)</span></label>
+                    <textarea id="nc-formalizar-obs" class="form-control form-control-sm" rows="2"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success btn-sm" id="nc-btn-confirmar-formalizacao">
+                    <i class="bx bx-check me-1"></i>Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -163,8 +163,16 @@ def controle_acess_multiplos(*codigos):
 
 
 def _acesso_vendedor_loja_ou_consulta(usuario):
-    """True se o usuário tem acesso à consulta SIAPE (vendedor)."""
-    return user_has_access(usuario, COD_SIAPE_CONSULTA_CLIENTE)
+    """True se o usuário tem acesso à consulta SIAPE (vendedor) ou novo contrato (CX48)."""
+    return user_has_access(usuario, COD_SIAPE_CONSULTA_CLIENTE) or user_has_access(usuario, COD_CX_NOVO_CONTRATO)
+
+
+def _vendedor_cx48_carteira_contrato(usuario, ce):
+    """CX48 com contrato vinculado à carteira do vendedor."""
+    if not ce or not user_has_access(usuario, COD_CX_NOVO_CONTRATO):
+        return False
+    from apps.contratos_v2.apis.carteira_contrato_permissoes import contrato_vinculado_carteiras_responsavel
+    return contrato_vinculado_carteiras_responsavel(usuario, ce)
 
 
 def _usuario_autorizado_acao_vendedor(usuario, acao):
@@ -188,6 +196,8 @@ def _usuario_pode_executar_acao_transicao(usuario, acao, ce=None):
         return False
     if codigo == _COD_VENDEDOR_ESTEIRA:
         if _usuario_autorizado_acao_vendedor(usuario, acao):
+            return True
+        if _vendedor_cx48_carteira_contrato(usuario, ce):
             return True
         # CRM operacional (SS35): checado/formalizado na carteira própria sem SCT16 na permissão.
         if ce is not None and a in ('vendedor_checado_formalizacao', 'vendedor_formalizado_desde_link'):
@@ -1317,12 +1327,13 @@ def api_post_upload_video_contrato(request, contrato_id):
     """
     pode_vend = _acesso_vendedor_loja_ou_consulta(request.user)
     pode_crm = user_has_access(request.user, COD_SS_ESTEIRA)
-    if not pode_vend and not pode_crm:
-        return JsonResponse({'ok': False, 'erro': 'Sem permissão.'}, status=403)
     try:
         ce = ContratoExecucao.objects.get(pk=int(contrato_id), status=True)
     except (ValueError, ContratoExecucao.DoesNotExist):
         return JsonResponse({'ok': False, 'erro': 'Contrato não encontrado.'}, status=404)
+    pode_cx48 = _vendedor_cx48_carteira_contrato(request.user, ce)
+    if not pode_vend and not pode_crm and not pode_cx48:
+        return JsonResponse({'ok': False, 'erro': 'Sem permissão.'}, status=403)
     if ce.etapa_operacional == EtapaOperacional.CANCELADO:
         return JsonResponse({'ok': False, 'erro': 'Contrato cancelado: não é permitido alterar vídeo ou arquivos.'}, status=400)
     f = request.FILES.get('video') or request.FILES.get('arquivo')
@@ -1354,7 +1365,7 @@ def api_post_upload_video_contrato(request, contrato_id):
     )
     # Transição de vendedor (Formalizado→Análise / manter Análise): só para perfil vendedor sem papel CRM.
     # Quem tem SS35 usa o CRM (modal arquivos, Pago TC, etc.): upload só persiste vídeo e flag, sem mudar etapa.
-    if pode_vend and not pode_crm:
+    if (pode_vend or pode_cx48) and not pode_crm:
         ce.refresh_from_db()
         e = ce.etapa_operacional
         s = ce.sub_status_operacional
@@ -4685,7 +4696,7 @@ def api_get_auditoria_fluxo(request):
 
 @login_required
 @require_GET
-@controle_acess_multiplos(COD_SS_ESTEIRA, 'SCT147')
+@controle_acess_multiplos(COD_SS_ESTEIRA, 'SCT147', COD_SIAPE_CONSULTA_CLIENTE, COD_CX_NOVO_CONTRATO)
 def api_get_transicoes_disponiveis(request):
     """Retorna as transições disponíveis para avançar o registro (nunca retrocedem)."""
     tipo = request.GET.get('tipo')
@@ -4766,7 +4777,7 @@ def api_get_transicoes_disponiveis(request):
 
 @login_required
 @require_POST
-@controle_acess_multiplos(COD_SS_ESTEIRA, 'SCT147', 'SCT16', 'SCT201')
+@controle_acess_multiplos(COD_SS_ESTEIRA, 'SCT147', 'SCT16', 'SCT201', COD_CX_NOVO_CONTRATO)
 def api_post_evoluir(request):
     """Aplica a transição selecionada no modal Evoluir."""
     data = _json_body(request)

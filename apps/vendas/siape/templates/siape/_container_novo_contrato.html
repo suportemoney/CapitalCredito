@@ -1,0 +1,22 @@
+<div id="siape-container-novo-contrato" class="siape-container-nc card mb-3" style="display: none;" aria-live="polite">
+    <div class="card-body py-2 px-3">
+        <div class="siape-container-nc__header d-flex align-items-center justify-content-between mb-2">
+            <h6 class="siape-container-nc__title mb-0">
+                <i class='bx bx-cog'></i> Operacional
+            </h6>
+            <button type="button" class="btn btn-link btn-sm p-0 siape-container-nc__refresh" id="btn-nc-refresh" title="Atualizar">
+                <i class='bx bx-refresh'></i>
+            </button>
+        </div>
+        <div class="siape-container-nc__cliente small mb-1">
+            <strong id="nc-cliente-nome">—</strong>
+            <span class="text-muted mx-1">|</span>
+            <span id="nc-cliente-cpf">—</span>
+        </div>
+        <div class="siape-container-nc__status small text-muted mb-2" id="nc-carteira-status">—</div>
+        <div id="nc-itens-lista" class="siape-container-nc__itens"></div>
+        <div id="nc-itens-vazio" class="siape-container-nc__vazio small text-muted d-none">
+            Nenhuma proposta operacional sua nesta carteira.
+        </div>
+    </div>
+</div>

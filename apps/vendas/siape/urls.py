@@ -37,6 +37,7 @@ urlpatterns = [
     path('api/consulta/carteira-por-cpf/', apis_consulta_operacional.api_carteira_por_cpf, name='api_carteira_por_cpf'),
     path('api/consulta/simulacoes/', apis_consulta_operacional.api_get_simulacoes, name='api_get_simulacoes'),
     path('api/consulta/operacional/', apis_consulta_operacional.api_get_operacional, name='api_get_operacional'),
+    path('api/consulta/container-novo-contrato/', apis_consulta_operacional.api_get_container_novo_contrato, name='api_container_novo_contrato'),
     
     # APIs CRM
     path('api/crm/adicionar-esteira/', apis_crm.api_adicionar_esteira, name='api_adicionar_esteira'),

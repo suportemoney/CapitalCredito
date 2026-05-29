@@ -92,6 +92,9 @@ function buscarClientePorCPF() {
             }
         },
         error: function(xhr) {
+            if (typeof window.esconderContainerNovoContrato === 'function') {
+                window.esconderContainerNovoContrato();
+            }
             const response = xhr.responseJSON || {};
             if (xhr.status === 404) {
                 alert('Cliente não encontrado');
@@ -167,6 +170,9 @@ function exibirDetalhesCliente(dados) {
             dp.cpf,
             dp.nome
         );
+    }
+    if (typeof window.carregarContainerNovoContrato === 'function') {
+        window.carregarContainerNovoContrato(dados.carteira_id);
     }
 }
 

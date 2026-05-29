@@ -43,6 +43,10 @@
         </div>
     </div>
 
+    {% if user|has_access:'CX48' %}
+    <div id="mount-container-nc-filter"></div>
+    {% endif %}
+
     <div id="area-resultados" class="siape-resultados" style="display: none;">
         <div id="detalhes-cliente-container" style="display: none;">
             <div class="row g-4">
@@ -273,6 +277,9 @@
                 </div>
 
                 <div class="col-lg-3 siape-sidebar order-1 order-lg-2">
+                    {% if user|has_access:'CX48' %}
+                    <div id="mount-container-nc-sidebar"></div>
+                    {% endif %}
                     <div class="siape-sidebar-card card mb-3">
                         <div class="card-body">
                             <h6 class="siape-sidebar-title">Resumo do Cliente</h6>
@@ -638,6 +645,11 @@
 </div>
 {% if user|has_access:'CX48' %}
 {% include 'siape/_modal_enviar_propostas.html' %}
+{% include 'siape/_container_novo_contrato.html' %}
+{% include 'siape/_modal_formalizar_consulta.html' %}
+{% include 'siape/_modal_enviar_video_consulta.html' %}
+{% include 'siape/_modal_arquivos_consulta.html' %}
+{% include 'siape/_modal_sanar_pendencia_consulta.html' %}
 {% endif %}
 
 {% endblock %}
@@ -649,6 +661,7 @@
 {% block addjs_extra %}
 <script src="{% static 'siape/js/consulta.js' %}"></script>
 <script src="{% static 'siape/js/consulta_operacional.js' %}"></script>
+<script src="{% static 'siape/js/consulta_container_novo_contrato.js' %}"></script>
 <script src="{% static 'siape/js/consulta_proposta_wizard.js' %}"></script>
 <script>
     window.podeNovoContrato = {% if user|has_access:'CX48' %}true{% else %}false{% endif %};

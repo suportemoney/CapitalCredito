@@ -1,0 +1,22 @@
+<div class="modal fade" id="modalNcEnviarVideo" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white py-2">
+                <h5 class="modal-title fs-6"><i class="bx bx-video me-1"></i>Enviar Vídeo</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-2 fw-semibold small" id="nc-video-nome"></p>
+                <input type="file" class="form-control form-control-sm" id="nc-video-arquivo" required
+                       accept=".mp4,.mov,.avi,video/mp4,video/quicktime,video/x-msvideo">
+                <div class="form-text">Formatos: .mp4, .mov, .avi</div>
+            </div>
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary btn-sm" id="nc-btn-enviar-video">
+                    <i class="bx bx-upload me-1"></i>Enviar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -543,3 +543,54 @@
 .prop-dyn-row .prop-btn-remove-row {
     margin-bottom: 0.15rem;
 }
+
+/* Container operacional CX48 */
+.siape-container-nc {
+    border: 1px solid rgba(212, 175, 55, 0.45);
+    border-radius: var(--siape-radius);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    background: #fff;
+}
+
+.siape-container-nc__title {
+    font-weight: 600;
+    color: var(--siape-dark);
+    font-size: 0.85rem;
+}
+
+.siape-container-nc__title i {
+    color: var(--siape-gold);
+}
+
+.siape-container-nc__item {
+    border-top: 1px solid #eee;
+    padding-top: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.siape-container-nc__item:first-child {
+    border-top: none;
+    padding-top: 0;
+    margin-top: 0;
+}
+
+.siape-container-nc__item-meta {
+    font-size: 0.75rem;
+    color: var(--siape-text-muted);
+}
+
+.siape-container-nc__item-btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin-top: 0.35rem;
+}
+
+.siape-container-nc__item-btns .btn {
+    font-size: 0.7rem;
+    padding: 0.15rem 0.45rem;
+}
+
+#mount-container-nc-filter .siape-container-nc {
+    margin-bottom: 1rem;
+}

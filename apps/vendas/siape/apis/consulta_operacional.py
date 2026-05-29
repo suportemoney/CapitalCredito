@@ -9,8 +9,11 @@ from django.views.decorators.http import require_GET
 
 from apps.contratos_v2.fluxo_constants import EstadoSolicitacaoProposta
 from apps.contratos_v2.models import PropostaDados, SolicitacaoPropostaCliente
+from apps.contratos_v2.permissoes_codigos import COD_CX_NOVO_CONTRATO
+from apps.seguranca.permissoes.utils import user_has_access
 from apps.vendas.siape.models import CarteiraClientes, Cliente
 from apps.vendas.siape.services.carteira_operacional import get_or_create_carteira
+from apps.vendas.siape.services.container_novo_contrato import montar_container_novo_contrato
 
 
 def _norm_cpf(cpf):
@@ -107,3 +110,23 @@ def api_get_operacional(request):
             'data_criacao': pd.data_criacao.isoformat() if pd.data_criacao else '',
         })
     return JsonResponse({'status': 'sucesso', 'itens': itens})
+
+
+@login_required
+@require_GET
+def api_get_container_novo_contrato(request):
+    """Container compacto operacional na consulta SIAPE (CX48)."""
+    if not user_has_access(request.user, COD_CX_NOVO_CONTRATO):
+        return JsonResponse({'ok': False, 'erro': 'Sem permissão (CX48).'}, status=403)
+    try:
+        cid = int(request.GET.get('carteira_id') or 0)
+    except (TypeError, ValueError):
+        return JsonResponse({'ok': False, 'erro': 'carteira_id inválido.'}, status=400)
+    if not cid:
+        return JsonResponse({'ok': False, 'erro': 'carteira_id obrigatório.'}, status=400)
+    carteira = CarteiraClientes.objects.filter(
+        pk=cid, user_responsavel=request.user
+    ).select_related('cliente').first()
+    if not carteira:
+        return JsonResponse({'ok': False, 'erro': 'Carteira não encontrada.'}, status=404)
+    return JsonResponse(montar_container_novo_contrato(carteira, request.user))

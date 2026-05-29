@@ -60,8 +60,11 @@ def pode_visualizar_contrato_ficha_ou_midia(user, ce: ContratoExecucao) -> bool:
     pendência na carteira do vendedor ou consultor SIAPE (SCT16) com contrato na própria carteira.
     """
     from apps.seguranca.permissoes.utils import user_has_access
+    from apps.contratos_v2.permissoes_codigos import COD_CX_NOVO_CONTRATO
 
     if user_has_access(user, 'SS35') or user_has_access(user, 'SCT201'):
+        return True
+    if user_has_access(user, COD_CX_NOVO_CONTRATO) and contrato_vinculado_carteiras_responsavel(user, ce):
         return True
     if vendedor_pode_acesso_pendencia_contrato(user, ce):
         return True
