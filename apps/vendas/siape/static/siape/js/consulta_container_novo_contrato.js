@@ -61,7 +61,14 @@
         if (vazio) vazio.classList.add('d-none');
         var html = '';
         itens.forEach(function (it) {
-            html += '<div class="siape-container-nc__item" data-proposta-id="' + escHtml(it.proposta_id) + '">';
+            var cpfLimpo = String(it.cliente_cpf || '').replace(/\D/g, '');
+            var cpfAttr = cpfLimpo.length === 11
+                ? ' data-cliente-cpf="' + escHtml(cpfLimpo) + '"'
+                : '';
+            var clsClick = cpfLimpo.length === 11 ? ' siape-container-nc__item--clicavel' : '';
+            html += '<div class="siape-container-nc__item' + clsClick + '" data-proposta-id="' +
+                escHtml(it.proposta_id) + '"' + cpfAttr +
+                ' title="' + (cpfLimpo.length === 11 ? 'Clique para abrir a ficha do cliente' : '') + '">';
             if (modo === 'todas' && (it.cliente_nome || it.cliente_cpf)) {
                 html += '<div class="siape-container-nc__item-cliente small fw-semibold">' +
                     escHtml(it.cliente_nome || '—') +
@@ -128,7 +135,7 @@
                 el('nc-cliente-cpf').textContent = qtd + (qtd === 1 ? ' proposta' : ' propostas');
             }
             if (el('nc-carteira-status')) {
-                el('nc-carteira-status').textContent = 'Busque um CPF para filtrar por cliente';
+                el('nc-carteira-status').textContent = 'Clique em uma proposta para abrir a ficha do cliente';
             }
         } else {
             if (el('nc-cliente-nome')) el('nc-cliente-nome').textContent = data.cliente_nome || '—';
@@ -256,6 +263,18 @@
         }
 
         document.addEventListener('click', function (e) {
+            if (e.target.closest('.siape-container-nc__item-btns')) {
+                return;
+            }
+            var itemProposta = e.target.closest('.siape-container-nc__item--clicavel');
+            if (itemProposta) {
+                var cpfItem = itemProposta.getAttribute('data-cliente-cpf') || '';
+                if (cpfItem && typeof window.consultaBuscarPorCpf === 'function') {
+                    window.consultaBuscarPorCpf(cpfItem);
+                }
+                return;
+            }
+
             var t = e.target.closest('.btn-nc-copiar-link');
             if (t) {
                 var link = t.getAttribute('data-link') || '';

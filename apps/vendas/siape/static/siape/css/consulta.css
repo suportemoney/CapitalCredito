@@ -596,6 +596,19 @@
     margin-bottom: 0.15rem;
 }
 
+.siape-container-nc__item--clicavel {
+    cursor: pointer;
+    border-radius: 0.35rem;
+    padding: 0.35rem 0.25rem;
+    margin-left: -0.25rem;
+    margin-right: -0.25rem;
+    transition: background-color 0.15s ease;
+}
+
+.siape-container-nc__item--clicavel:hover {
+    background-color: rgba(212, 175, 55, 0.08);
+}
+
 #mount-container-nc-filter .siape-container-nc {
     margin-bottom: 1rem;
 }

@@ -105,6 +105,21 @@ function buscarClientePorCPF() {
     });
 }
 
+/** Busca cliente pelo CPF (usado pelo container operacional ao clicar na proposta). */
+window.consultaBuscarPorCpf = function (cpf) {
+    const cpfLimpo = String(cpf || '').replace(/\D/g, '');
+    if (cpfLimpo.length !== 11) {
+        alert('CPF inválido para abrir a ficha.');
+        return;
+    }
+    $('#buscaCliente').val(cpfLimpo);
+    buscarClientePorCPF();
+    const area = document.getElementById('area-resultados');
+    if (area) {
+        area.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+};
+
 function selecionarCliente(clienteId) {
     $.ajax({
         url: `/api/consulta/detalhes/${clienteId}/`,

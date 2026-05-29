@@ -167,7 +167,11 @@ def montar_container_novo_contrato(carteira: CarteiraClientes, user: User) -> di
     itens = []
     for pd in propostas:
         contrato, solicitacao = _resolver_contrato_solicitacao(carteira, pd)
-        itens.append(_montar_item_proposta(user, carteira, pd, contrato, solicitacao))
+        item = _montar_item_proposta(user, carteira, pd, contrato, solicitacao)
+        item['cliente_nome'] = cliente_nome
+        item['cliente_cpf'] = cliente_cpf
+        item['carteira_id'] = carteira.id
+        itens.append(item)
 
     tabulacao = (carteira.tabulacao_operacional or '').strip()
     tag_status = (carteira.tag_status_operacional or '').strip()
