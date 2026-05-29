@@ -18,7 +18,7 @@
     ];
 
     function setBotaoProposta() {
-        if (!window.isSuperUser) return;
+        if (!window.podeNovoContrato) return;
 
         const btnProp = document.getElementById('btn-proposta-consulta');
         if (!btnProp) return;
@@ -99,7 +99,7 @@
     }
 
     window.abrirModalPropostas = function () {
-        if (!window.isSuperUser) return;
+        if (!window.podeNovoContrato) return;
         if (!window.__carteiraIdAtual) {
             alert('Carteira não encontrada. Busque o cliente novamente.');
             return;

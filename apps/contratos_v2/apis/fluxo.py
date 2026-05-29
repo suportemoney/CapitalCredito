@@ -24,7 +24,7 @@ from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
 
-from apps.contratos_v2.permissoes_codigos import COD_SS_ESTEIRA
+from apps.contratos_v2.permissoes_codigos import COD_CX_NOVO_CONTRATO, COD_SS_ESTEIRA
 from apps.seguranca.permissoes.decorators import controle_acess
 from apps.seguranca.permissoes.utils import user_has_access
 
@@ -2255,6 +2255,15 @@ def api_get_tabelas_cms_por_solicitacao(request):
     })
 
 
+def _usuario_pode_novo_contrato(user):
+    """Consulta SIAPE: enviar proposta para a esteira operacional (CX48)."""
+    return user_has_access(user, COD_CX_NOVO_CONTRATO)
+
+
+def _negar_novo_contrato_json():
+    return JsonResponse({'ok': False, 'erro': 'Sem permissão para novo contrato (CX48).'}, status=403)
+
+
 @login_required
 @require_GET
 def api_get_tabelas_cms_filtradas(request):
@@ -2262,16 +2271,10 @@ def api_get_tabelas_cms_filtradas(request):
     envio de proposta. Retorna lista vazia quando não há correspondência
     (front exibe "---nenhuma tabela disponível---").
 
-    Permissão: consulta SIAPE (SCT16), loja INSS (SCT23), CRM operacional (SS35)
-    ou supervisão SIAPE (SCT201) — mesmo público do wizard de propostas em
-    consulta_cliente/loja; resposta JSON 403 para AJAX (sem redirect).
+    Permissão: CX48 (novo contrato na consulta SIAPE).
     """
-    if not (
-        _acesso_vendedor_loja_ou_consulta(request.user)
-        or user_has_access(request.user, COD_SS_ESTEIRA)
-        or user_has_access(request.user, COD_SIAPE_CRM_SUPERVISAO)
-    ):
-        return JsonResponse({'ok': False, 'erro': 'Sem permissão.'}, status=403)
+    if not _usuario_pode_novo_contrato(request.user):
+        return _negar_novo_contrato_json()
     try:
         banco_id = int(request.GET.get('banco_id') or 0) or None
         convenio_id = int(request.GET.get('convenio_id') or 0) or None
@@ -2322,6 +2325,8 @@ def api_get_catalogos_contrato(request):
 @require_GET
 def api_get_cliente_dados_pessoais_lookup(request):
     """Busca ClienteDadosPessoais por CPF e retorna todos os sub-modelos para auto-popular formulário."""
+    if not _usuario_pode_novo_contrato(request.user):
+        return _negar_novo_contrato_json()
     cpf        = _norm_cpf(request.GET.get('cpf', ''))
     carteira_id = request.GET.get('carteira_id')
 
@@ -2410,6 +2415,8 @@ def api_get_cliente_dados_pessoais_lookup(request):
 @transaction.atomic
 def api_post_cliente_dados_pessoais_salvar(request):
     """Cria ou atualiza ClienteDadosPessoais e sub-modelos (Contato, Endereço, Bancário, Representante)."""
+    if not _usuario_pode_novo_contrato(request.user):
+        return _negar_novo_contrato_json()
     # Aceita tanto JSON body quanto FormData com campo 'payload'
     if request.POST.get('payload'):
         try:
@@ -2592,6 +2599,8 @@ def api_post_solicitar_simulacao(request):
 def api_post_solicitar_propostas(request):
     """Finaliza o fluxo de Propostas: salva arquivos, cria PropostaDados, ContratoPortado e tabula a carteira.
     Cada item em POST `propostas` (JSON) pode incluir `contratos_portados`: lista de dicts para aquela linha."""
+    if not _usuario_pode_novo_contrato(request.user):
+        return _negar_novo_contrato_json()
     carteira_id = request.POST.get('carteira_id') or ''
     cliente_dp_id = request.POST.get('cliente_dados_pessoais_id') or ''
     observacao = (request.POST.get('observacao') or '').strip()

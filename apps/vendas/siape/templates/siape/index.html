@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load permissoes_tags %}
 
 {% block title %}Consulta Cliente - SIAPE - CapitalCredito{% endblock %}
 
@@ -87,7 +88,7 @@
                             <button type="button" class="btn siape-btn-outline-gold btn-sm" onclick="abrirModalCalculadoras()">
                                 <i class='bx bx-calculator'></i> Calculadoras
                             </button>
-                            {% if user.is_superuser %}
+                            {% if user|has_access:'CX48' %}
                             <button type="button" class="btn siape-btn-gold btn-sm" id="btn-proposta-consulta"
                                     style="display: none;" disabled onclick="abrirModalPropostas()"
                                     title="Enviar propostas para digitação">
@@ -635,7 +636,7 @@
         </div>
     </div>
 </div>
-{% if user.is_superuser %}
+{% if user|has_access:'CX48' %}
 {% include 'siape/_modal_enviar_propostas.html' %}
 {% endif %}
 
@@ -650,7 +651,7 @@
 <script src="{% static 'siape/js/consulta_operacional.js' %}"></script>
 <script src="{% static 'siape/js/consulta_proposta_wizard.js' %}"></script>
 <script>
-    window.isSuperUser = {% if user.is_superuser %}true{% else %}false{% endif %};
+    window.podeNovoContrato = {% if user|has_access:'CX48' %}true{% else %}false{% endif %};
 </script>
 {% endblock %}
 
