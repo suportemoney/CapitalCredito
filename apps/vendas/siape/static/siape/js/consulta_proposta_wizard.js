@@ -20,6 +20,71 @@
         return String(v || '').replace(/\D/g, '');
     }
 
+    /** Lê decimal não negativo de um input; retorna null se vazio/inválido. */
+    function lerNumInput(id) {
+        var field = el(id);
+        if (!field) return null;
+        var raw = String(field.value || '').trim();
+        if (raw === '') return null;
+        var n = parseFloat(raw.replace(/\./g, '').replace(',', '.'));
+        if (isNaN(n) || n < 0) return null;
+        return n;
+    }
+
+    /** Escreve decimal formatado sem disparar loop desnecessário. */
+    function escreverNumInput(id, valor, casas) {
+        if (valor === null || typeof valor === 'undefined' || isNaN(valor)) return;
+        var dec = (typeof casas === 'number') ? casas : 2;
+        var txt = (Math.round(valor * Math.pow(10, dec)) / Math.pow(10, dec)).toFixed(dec);
+        var field = el(id);
+        if (field && field.value !== txt) {
+            field.value = txt.replace('.', ',');
+        }
+    }
+
+    /** Recalcula AF / Coef / Liberado conforme campo editado (espelho MoneyConsig). */
+    function recalcularFinanceiroProposta(fonte) {
+        var parcela = lerNumInput('prop_valor_parcela');
+        var coef = lerNumInput('prop_coeficiente');
+        var af = lerNumInput('prop_valor_af');
+        var tc = lerNumInput('prop_valor_tc');
+
+        function seguro(n) {
+            return typeof n === 'number' && isFinite(n) && n > 0;
+        }
+
+        if (fonte === 'coeficiente') {
+            if (seguro(parcela) && seguro(coef)) {
+                af = parcela / coef;
+                escreverNumInput('prop_valor_af', af, 2);
+            }
+        } else if (fonte === 'af') {
+            if (seguro(parcela) && seguro(af)) {
+                coef = parcela / af;
+                escreverNumInput('prop_coeficiente', coef, 6);
+            }
+        } else if (fonte === 'parcela') {
+            if (seguro(parcela) && seguro(coef)) {
+                af = parcela / coef;
+                escreverNumInput('prop_valor_af', af, 2);
+            } else if (seguro(parcela) && seguro(af)) {
+                coef = parcela / af;
+                escreverNumInput('prop_coeficiente', coef, 6);
+            }
+        }
+
+        af = lerNumInput('prop_valor_af');
+        tc = lerNumInput('prop_valor_tc');
+        if (typeof af === 'number' && af >= 0 && isFinite(af)) {
+            var tcEff = (typeof tc === 'number' && tc > 0) ? tc : 0;
+            var liberado = af - tcEff;
+            if (liberado < 0) liberado = 0;
+            escreverNumInput('prop_valor_liberado', liberado, 2);
+        } else if (el('prop_valor_liberado')) {
+            el('prop_valor_liberado').value = '';
+        }
+    }
+
     function formatarCpfExibicao(cpf) {
         const d = normCpf(cpf);
         if (d.length === 11) {
@@ -266,7 +331,7 @@
         if (el('prop_arquivos')) el('prop_arquivos').value = '';
         if (el('prop-lista-arquivos-preview')) el('prop-lista-arquivos-preview').innerHTML = '';
         if (el('prop_observacao')) el('prop_observacao').value = '';
-        ['prop_valor_af', 'prop_valor_tc', 'prop_valor_parcela', 'prop_prazo'].forEach(function (id) {
+        ['prop_valor_af', 'prop_valor_tc', 'prop_valor_parcela', 'prop_coeficiente', 'prop_valor_liberado', 'prop_prazo'].forEach(function (id) {
             const f = el(id);
             if (f) f.value = '';
         });
@@ -470,6 +535,8 @@
             valor_af: el('prop_valor_af').value,
             valor_tc: el('prop_valor_tc').value,
             valor_parcela: el('prop_valor_parcela').value,
+            coeficiente: el('prop_coeficiente').value,
+            valor_liberado: el('prop_valor_liberado').value,
             prazo: el('prop_prazo').value,
             tabela_cms_id: el('prop_tabela_cms_id').value || null,
         };
@@ -575,6 +642,21 @@
         if (btnEnviar) {
             btnEnviar.addEventListener('click', enviarPropostas);
         }
+
+        var mapCalc = {
+            prop_valor_parcela: 'parcela',
+            prop_coeficiente: 'coeficiente',
+            prop_valor_af: 'af',
+            prop_valor_tc: 'tc',
+        };
+        Object.keys(mapCalc).forEach(function (id) {
+            var inp = el(id);
+            if (inp) {
+                inp.addEventListener('input', function () {
+                    recalcularFinanceiroProposta(mapCalc[id]);
+                });
+            }
+        });
 
         const modal = el('modalEnviarPropostas');
         if (modal) {

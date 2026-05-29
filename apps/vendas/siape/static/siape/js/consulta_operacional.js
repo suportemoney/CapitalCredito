@@ -83,19 +83,48 @@
         const p = document.getElementById('prop_produto_id');
         const tcm = document.getElementById('prop_tabela_cms_id');
         if (!b || !c || !p || !tcm) return;
+
+        if (!b.value || !c.value || !p.value) {
+            tcm.disabled = true;
+            tcm.innerHTML = '<option value="">Selecione Banco + Convênio + Produto...</option>';
+            return;
+        }
+
+        tcm.disabled = true;
+        tcm.innerHTML = '<option value="">Carregando tabelas...</option>';
+
         const q = '?banco_id=' + encodeURIComponent(b.value) +
             '&convenio_id=' + encodeURIComponent(c.value) +
             '&produto_id=' + encodeURIComponent(p.value);
         fetch('/contratos/api/v2/tabelas-cms-filtradas/' + q, { credentials: 'same-origin' })
             .then((r) => r.json())
             .then((data) => {
-                tcm.innerHTML = '<option value="">—</option>';
-                if (data.ok && data.tabelas) {
-                    data.tabelas.forEach((t) => {
-                        tcm.innerHTML += '<option value="' + t.id + '">' + (t.titulo || '') + '</option>';
-                    });
+                const tabelas = (data.ok && data.tabelas) ? data.tabelas : [];
+                if (!tabelas.length) {
+                    tcm.innerHTML = '<option value="" disabled selected>---nenhuma tabela disponível---</option>';
+                    tcm.disabled = true;
+                    return;
                 }
+                const labelClassif = { M1: ' [M1 - 100%]', M2: ' [M2 - 50%]', M3: ' [M3 - 0%]' };
+                let html = '<option value="">Selecione a Tabela CMS...</option>';
+                tabelas.forEach((t) => {
+                    const cls = String(t.classificador_banco || '').toUpperCase();
+                    const sufixo = labelClassif[cls] || '';
+                    html += '<option value="' + t.id + '">' + (t.titulo || '') + sufixo + '</option>';
+                });
+                tcm.innerHTML = html;
+                tcm.disabled = false;
+            })
+            .catch(function () {
+                tcm.innerHTML = '<option value="" disabled selected>---nenhuma tabela disponível---</option>';
+                tcm.disabled = true;
             });
+    }
+
+    function extrairPrazoTituloCms(titulo) {
+        const m = String(titulo || '').match(/(\d{1,3})\s*[xX]\b/);
+        if (m) return parseInt(m[1], 10);
+        return null;
     }
 
     window.abrirModalPropostas = function () {
@@ -133,6 +162,19 @@
             const el = document.getElementById(id);
             if (el) el.addEventListener('change', atualizarTabelasCms);
         });
+
+        const tcm = document.getElementById('prop_tabela_cms_id');
+        if (tcm) {
+            tcm.addEventListener('change', function () {
+                const opt = tcm.options[tcm.selectedIndex];
+                if (!opt || !opt.value) return;
+                const prazo = extrairPrazoTituloCms(opt.textContent);
+                const prazoInp = document.getElementById('prop_prazo');
+                if (prazo && prazoInp && !prazoInp.value) {
+                    prazoInp.value = String(prazo);
+                }
+            });
+        }
     });
 
     window.consultaOperacionalAtualizarStatus = function (status) {

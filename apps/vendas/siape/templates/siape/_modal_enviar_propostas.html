@@ -228,26 +228,40 @@
                 </div>
               </div>
               <div class="row g-2 mb-3">
-                <div class="col-md-3">
-                  <label class="form-label">Valor AF</label>
-                  <input type="text" class="form-control" id="prop_valor_af" placeholder="0,00">
+                <div class="col-12">
+                  <label class="form-label">Tabela CMS</label>
+                  <select class="form-select" id="prop_tabela_cms_id" disabled>
+                    <option value="">Selecione Banco + Convênio + Produto...</option>
+                  </select>
                 </div>
-                <div class="col-md-3">
-                  <label class="form-label">Valor TC</label>
-                  <input type="text" class="form-control" id="prop_valor_tc" placeholder="0,00">
-                </div>
+              </div>
+              <div class="row g-2 mb-3">
                 <div class="col-md-3">
                   <label class="form-label">Parcela</label>
-                  <input type="text" class="form-control" id="prop_valor_parcela" placeholder="0,00">
+                  <input type="text" class="form-control prop-calc-financeiro" id="prop_valor_parcela" placeholder="0,00" inputmode="decimal">
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">Coeficiente</label>
+                  <input type="text" class="form-control prop-calc-financeiro" id="prop_coeficiente" placeholder="0,000000" inputmode="decimal">
                 </div>
                 <div class="col-md-3">
                   <label class="form-label">Prazo</label>
                   <input type="number" class="form-control" id="prop_prazo" min="1">
                 </div>
+                <div class="col-md-3">
+                  <label class="form-label">Valor AF</label>
+                  <input type="text" class="form-control prop-calc-financeiro" id="prop_valor_af" placeholder="0,00" inputmode="decimal">
+                </div>
               </div>
-              <div class="mb-3">
-                <label class="form-label">Tabela CMS</label>
-                <select class="form-select" id="prop_tabela_cms_id"><option value="">—</option></select>
+              <div class="row g-2 mb-3">
+                <div class="col-md-4">
+                  <label class="form-label">Valor TC</label>
+                  <input type="text" class="form-control prop-calc-financeiro" id="prop_valor_tc" placeholder="0,00" inputmode="decimal">
+                </div>
+                <div class="col-md-8">
+                  <label class="form-label">Valor liberado <span class="text-muted fw-normal">(calculado)</span></label>
+                  <input type="text" class="form-control bg-light" id="prop_valor_liberado" placeholder="0,00" readonly title="Calculado automaticamente: AF - TC">
+                </div>
               </div>
               <div class="mb-0">
                 <label class="form-label">Observação</label>
