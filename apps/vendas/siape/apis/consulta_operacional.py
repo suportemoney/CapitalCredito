@@ -13,7 +13,10 @@ from apps.contratos_v2.permissoes_codigos import COD_CX_NOVO_CONTRATO
 from apps.seguranca.permissoes.utils import user_has_access
 from apps.vendas.siape.models import CarteiraClientes, Cliente
 from apps.vendas.siape.services.carteira_operacional import get_or_create_carteira
-from apps.vendas.siape.services.container_novo_contrato import montar_container_novo_contrato
+from apps.vendas.siape.services.container_novo_contrato import (
+    montar_container_novo_contrato,
+    montar_container_todas_propostas,
+)
 
 
 def _norm_cpf(cpf):
@@ -118,12 +121,15 @@ def api_get_container_novo_contrato(request):
     """Container compacto operacional na consulta SIAPE (CX48)."""
     if not user_has_access(request.user, COD_CX_NOVO_CONTRATO):
         return JsonResponse({'ok': False, 'erro': 'Sem permissão (CX48).'}, status=403)
+    raw_cid = (request.GET.get('carteira_id') or '').strip()
+    if not raw_cid:
+        return JsonResponse(montar_container_todas_propostas(request.user))
     try:
-        cid = int(request.GET.get('carteira_id') or 0)
+        cid = int(raw_cid)
     except (TypeError, ValueError):
         return JsonResponse({'ok': False, 'erro': 'carteira_id inválido.'}, status=400)
     if not cid:
-        return JsonResponse({'ok': False, 'erro': 'carteira_id obrigatório.'}, status=400)
+        return JsonResponse(montar_container_todas_propostas(request.user))
     carteira = CarteiraClientes.objects.filter(
         pk=cid, user_responsavel=request.user
     ).select_related('cliente').first()

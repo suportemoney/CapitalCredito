@@ -5,6 +5,7 @@
     'use strict';
 
     var carteiraIdAtual = null;
+    var modoAtual = 'todas';
     var ctxModal = {};
 
     function el(id) {
@@ -43,23 +44,37 @@
         }
     }
 
-    function renderItens(itens) {
+    function renderItens(itens, modo) {
         var lista = el('nc-itens-lista');
         var vazio = el('nc-itens-vazio');
         if (!lista) return;
         if (!itens || !itens.length) {
             lista.innerHTML = '';
-            if (vazio) vazio.classList.remove('d-none');
+            if (vazio) {
+                vazio.classList.remove('d-none');
+                vazio.textContent = modo === 'carteira'
+                    ? 'Nenhuma proposta operacional sua nesta carteira.'
+                    : 'Nenhuma proposta operacional em andamento.';
+            }
             return;
         }
         if (vazio) vazio.classList.add('d-none');
         var html = '';
         itens.forEach(function (it) {
             html += '<div class="siape-container-nc__item" data-proposta-id="' + escHtml(it.proposta_id) + '">';
+            if (modo === 'todas' && (it.cliente_nome || it.cliente_cpf)) {
+                html += '<div class="siape-container-nc__item-cliente small fw-semibold">' +
+                    escHtml(it.cliente_nome || '—') +
+                    (it.cliente_cpf ? ' <span class="text-muted fw-normal">· ' + formatCpf(it.cliente_cpf) + '</span>' : '') +
+                    '</div>';
+            }
             html += '<div class="fw-semibold small">' + escHtml(it.proposta_codigo || 'Proposta') +
                 (it.contrato_codigo ? ' · ' + escHtml(it.contrato_codigo) : '') + '</div>';
             html += '<div class="siape-container-nc__item-meta">' +
                 escHtml(it.banco) + (it.produto ? ' · ' + escHtml(it.produto) : '') + '</div>';
+            if (modo === 'todas' && it.carteira_status) {
+                html += '<div class="siape-container-nc__item-meta">' + escHtml(it.carteira_status) + '</div>';
+            }
             html += '<div class="siape-container-nc__item-meta">' + escHtml(it.status_linha) + '</div>';
             html += '<div class="siape-container-nc__item-btns">';
             if (it.link_formalizacao) {
@@ -72,11 +87,12 @@
                     escHtml(it.acao_evoluir_checagem) + '"><i class="bx bx-check"></i> Checagem</button>';
             }
             if (it.exibir_botao_formalizar_checado) {
+                var nomeFormal = it.cliente_nome || (el('nc-cliente-nome') ? el('nc-cliente-nome').textContent : '');
                 html += '<button type="button" class="btn btn-success btn-sm btn-nc-formalizar" ' +
                     'data-contrato-id="' + escHtml(it.contrato_id) + '" data-acao="' +
                     escHtml(it.acao_evoluir_formalizado) + '" data-link="' +
                     escHtml(it.link_formalizacao) + '" data-nome="' +
-                    escHtml(el('nc-cliente-nome') ? el('nc-cliente-nome').textContent : '') + '">' +
+                    escHtml(nomeFormal) + '">' +
                     '<i class="bx bx-badge-check"></i> Formalizar</button>';
             }
             if (it.exibir_botao_enviar_video) {
@@ -104,28 +120,44 @@
             if (box) box.style.display = 'none';
             return;
         }
-        if (el('nc-cliente-nome')) el('nc-cliente-nome').textContent = data.cliente_nome || '—';
-        if (el('nc-cliente-cpf')) el('nc-cliente-cpf').textContent = formatCpf(data.cliente_cpf);
-        var statusParts = [];
-        if (data.tabulacao_operacional) statusParts.push(data.tabulacao_operacional);
-        if (data.tag_status_operacional) statusParts.push(data.tag_status_operacional);
-        if (data.status_comercial) statusParts.push(data.status_comercial);
-        if (el('nc-carteira-status')) {
-            el('nc-carteira-status').textContent = statusParts.length ? statusParts.join(' · ') : '—';
+        modoAtual = data.modo || (data.carteira_id ? 'carteira' : 'todas');
+        if (modoAtual === 'todas') {
+            if (el('nc-cliente-nome')) el('nc-cliente-nome').textContent = 'Minhas propostas';
+            if (el('nc-cliente-cpf')) {
+                var qtd = (data.itens || []).length;
+                el('nc-cliente-cpf').textContent = qtd + (qtd === 1 ? ' proposta' : ' propostas');
+            }
+            if (el('nc-carteira-status')) {
+                el('nc-carteira-status').textContent = 'Busque um CPF para filtrar por cliente';
+            }
+        } else {
+            if (el('nc-cliente-nome')) el('nc-cliente-nome').textContent = data.cliente_nome || '—';
+            if (el('nc-cliente-cpf')) el('nc-cliente-cpf').textContent = formatCpf(data.cliente_cpf);
+            var statusParts = [];
+            if (data.tabulacao_operacional) statusParts.push(data.tabulacao_operacional);
+            if (data.tag_status_operacional) statusParts.push(data.tag_status_operacional);
+            if (data.status_comercial) statusParts.push(data.status_comercial);
+            if (el('nc-carteira-status')) {
+                el('nc-carteira-status').textContent = statusParts.length ? statusParts.join(' · ') : '—';
+            }
         }
-        renderItens(data.itens || []);
+        renderItens(data.itens || [], modoAtual);
         reparentContainer();
         box.style.display = 'block';
     }
 
     function carregarContainer(carteiraId) {
-        if (!window.podeNovoContrato || !carteiraId) {
+        if (!window.podeNovoContrato) {
             var box = el('siape-container-novo-contrato');
             if (box) box.style.display = 'none';
             return Promise.resolve();
         }
-        carteiraIdAtual = carteiraId;
-        return fetch('/api/consulta/container-novo-contrato/?carteira_id=' + encodeURIComponent(carteiraId), {
+        carteiraIdAtual = carteiraId || null;
+        var url = '/api/consulta/container-novo-contrato/';
+        if (carteiraId) {
+            url += '?carteira_id=' + encodeURIComponent(carteiraId);
+        }
+        return fetch(url, {
             credentials: 'same-origin',
         })
             .then(function (r) { return r.json(); })
@@ -205,13 +237,12 @@
     window.carregarContainerNovoContrato = carregarContainer;
     window.refreshContainerNovoContrato = function () {
         var cid = carteiraIdAtual || window.__carteiraIdAtual;
-        if (cid) return carregarContainer(cid);
-        return Promise.resolve();
+        return carregarContainer(cid || null);
     };
     window.esconderContainerNovoContrato = function () {
         carteiraIdAtual = null;
-        var box = el('siape-container-novo-contrato');
-        if (box) box.style.display = 'none';
+        window.__carteiraIdAtual = null;
+        return carregarContainer(null);
     };
 
     document.addEventListener('DOMContentLoaded', function () {
@@ -454,5 +485,8 @@
         }
 
         window.addEventListener('resize', reparentContainer);
+
+        // Carrega todas as propostas do vendedor ao abrir a consulta (sem CPF)
+        carregarContainer(null);
     });
 })();

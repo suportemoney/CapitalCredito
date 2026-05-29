@@ -591,6 +591,11 @@
     padding: 0.15rem 0.45rem;
 }
 
+.siape-container-nc__item-cliente {
+    color: var(--siape-text, #333);
+    margin-bottom: 0.15rem;
+}
+
 #mount-container-nc-filter .siape-container-nc {
     margin-bottom: 1rem;
 }

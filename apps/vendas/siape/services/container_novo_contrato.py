@@ -101,6 +101,54 @@ def _montar_item_proposta(user, carteira, pd, contrato, solicitacao):
     }
 
 
+def _resolver_contrato_solicitacao(carteira, pd):
+    contrato = (
+        ContratoExecucao.objects.filter(proposta_dados=pd, status=True)
+        .order_by('-data_ultima_atualizacao')
+        .first()
+    )
+    solicitacao = None
+    if not contrato:
+        solicitacao = (
+            SolicitacaoDigitacao.objects.filter(
+                proposta_dados=pd,
+                carteira_clientes=carteira,
+            )
+            .exclude(estado__in=(
+                EstadoSolicitacaoDigitacao.CANCELADA,
+                EstadoSolicitacaoDigitacao.CONTRATO_GERADO,
+            ))
+            .order_by('-data_criacao')
+            .first()
+        )
+    return contrato, solicitacao
+
+
+def _nome_cpf_cliente_carteira(carteira, pd):
+    cliente = carteira.cliente if carteira else None
+    nome = (cliente.nome if cliente else '') or ''
+    cpf = (cliente.cpf if cliente else '') or ''
+    if not nome and pd.cliente_dados_pessoais_id:
+        dp = pd.cliente_dados_pessoais
+        nome = (dp.nome_completo or '') if dp else nome
+        cpf = (dp.cpf or '') if dp else cpf
+    return nome, cpf
+
+
+def _status_carteira_resumo(carteira):
+    parts = []
+    tab = (carteira.tabulacao_operacional or '').strip()
+    tag = (carteira.tag_status_operacional or '').strip()
+    st = (carteira.status_comercial or '').strip()
+    if tab:
+        parts.append(tab)
+    if tag:
+        parts.append(tag)
+    if st:
+        parts.append(st)
+    return ' · '.join(parts) if parts else ''
+
+
 def montar_container_novo_contrato(carteira: CarteiraClientes, user: User) -> dict:
     """Retorna payload JSON do container para a carteira do vendedor logado."""
     cliente = carteira.cliente
@@ -118,25 +166,7 @@ def montar_container_novo_contrato(carteira: CarteiraClientes, user: User) -> di
 
     itens = []
     for pd in propostas:
-        contrato = (
-            ContratoExecucao.objects.filter(proposta_dados=pd, status=True)
-            .order_by('-data_ultima_atualizacao')
-            .first()
-        )
-        solicitacao = None
-        if not contrato:
-            solicitacao = (
-                SolicitacaoDigitacao.objects.filter(
-                    proposta_dados=pd,
-                    carteira_clientes=carteira,
-                )
-                .exclude(estado__in=(
-                    EstadoSolicitacaoDigitacao.CANCELADA,
-                    EstadoSolicitacaoDigitacao.CONTRATO_GERADO,
-                ))
-                .order_by('-data_criacao')
-                .first()
-            )
+        contrato, solicitacao = _resolver_contrato_solicitacao(carteira, pd)
         itens.append(_montar_item_proposta(user, carteira, pd, contrato, solicitacao))
 
     tabulacao = (carteira.tabulacao_operacional or '').strip()
@@ -145,6 +175,7 @@ def montar_container_novo_contrato(carteira: CarteiraClientes, user: User) -> di
 
     return {
         'ok': True,
+        'modo': 'carteira',
         'carteira_id': carteira.id,
         'cliente_nome': cliente_nome,
         'cliente_cpf': cliente_cpf,
@@ -153,5 +184,54 @@ def montar_container_novo_contrato(carteira: CarteiraClientes, user: User) -> di
         'status_comercial': status_comercial,
         'tag_proposta_container': (carteira.tag_proposta_container or '').strip(),
         'sub_status_propostas_comercial': (carteira.sub_status_propostas_comercial or '').strip(),
+        'itens': itens,
+    }
+
+
+def montar_container_todas_propostas(user: User, limite: int = 100) -> dict:
+    """Lista todas as propostas do vendedor logado (sem filtro de cliente)."""
+    propostas = (
+        PropostaDados.objects.filter(
+            criado_por=user,
+            carteiras_siape_propostas__user_responsavel=user,
+        )
+        .select_related('banco', 'produto', 'convenio', 'cliente_dados_pessoais')
+        .distinct()
+        .order_by('-data_criacao')[:limite]
+    )
+
+    itens = []
+    for pd in propostas:
+        carteira = (
+            CarteiraClientes.objects.filter(
+                user_responsavel=user,
+                propostas_operacionais=pd,
+            )
+            .select_related('cliente')
+            .order_by('-id')
+            .first()
+        )
+        if not carteira:
+            continue
+        contrato, solicitacao = _resolver_contrato_solicitacao(carteira, pd)
+        item = _montar_item_proposta(user, carteira, pd, contrato, solicitacao)
+        nome, cpf = _nome_cpf_cliente_carteira(carteira, pd)
+        item['cliente_nome'] = nome
+        item['cliente_cpf'] = cpf
+        item['carteira_id'] = carteira.id
+        item['carteira_status'] = _status_carteira_resumo(carteira)
+        itens.append(item)
+
+    return {
+        'ok': True,
+        'modo': 'todas',
+        'carteira_id': None,
+        'cliente_nome': '',
+        'cliente_cpf': '',
+        'tabulacao_operacional': '',
+        'tag_status_operacional': '',
+        'status_comercial': '',
+        'tag_proposta_container': '',
+        'sub_status_propostas_comercial': '',
         'itens': itens,
     }
