@@ -571,6 +571,9 @@
                     if (typeof window.consultaOperacionalAtualizarStatus === 'function') {
                         window.consultaOperacionalAtualizarStatus('OPERACIONAL');
                     }
+                    if (typeof window.carregarContainerNovoContrato === 'function' && window.__carteiraIdAtual) {
+                        window.carregarContainerNovoContrato(window.__carteiraIdAtual);
+                    }
                     const m = el('modalEnviarPropostas');
                     if (m && typeof bootstrap !== 'undefined') {
                         bootstrap.Modal.getInstance(m)?.hide();

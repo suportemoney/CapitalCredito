@@ -125,7 +125,7 @@
             return Promise.resolve();
         }
         carteiraIdAtual = carteiraId;
-        return fetch('/siape/api/consulta/container-novo-contrato/?carteira_id=' + encodeURIComponent(carteiraId), {
+        return fetch('/api/consulta/container-novo-contrato/?carteira_id=' + encodeURIComponent(carteiraId), {
             credentials: 'same-origin',
         })
             .then(function (r) { return r.json(); })
@@ -133,6 +133,9 @@
             .catch(function () {
                 var box = el('siape-container-novo-contrato');
                 if (box) box.style.display = 'none';
+                if (typeof console !== 'undefined') {
+                    console.warn('Container operacional: falha ao carregar /api/consulta/container-novo-contrato/');
+                }
             });
     }
 
@@ -201,7 +204,8 @@
 
     window.carregarContainerNovoContrato = carregarContainer;
     window.refreshContainerNovoContrato = function () {
-        if (carteiraIdAtual) return carregarContainer(carteiraIdAtual);
+        var cid = carteiraIdAtual || window.__carteiraIdAtual;
+        if (cid) return carregarContainer(cid);
         return Promise.resolve();
     };
     window.esconderContainerNovoContrato = function () {
