@@ -108,6 +108,40 @@
     font-weight: 500;
 }
 
+.btn-toggle-status {
+    border: none;
+    border-radius: 4px;
+    padding: 6px 14px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: #fff;
+}
+
+.btn-toggle-status.ativo {
+    background: #28a745;
+}
+
+.btn-toggle-status.ativo:hover:not(:disabled) {
+    background: #218838;
+    transform: translateY(-1px);
+}
+
+.btn-toggle-status.inativo {
+    background: #dc3545;
+}
+
+.btn-toggle-status.inativo:hover:not(:disabled) {
+    background: #c82333;
+    transform: translateY(-1px);
+}
+
+.btn-toggle-status:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
 .btn-sm {
     padding: 5px 10px;
     margin: 0 2px;

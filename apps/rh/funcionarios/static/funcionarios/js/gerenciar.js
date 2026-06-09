@@ -73,7 +73,7 @@ function atualizarTabela(dados) {
                 <td>${escapeHtml(func.equipe)}</td>
                 <td>${escapeHtml(func.cargo)}</td>
                 <td>${escapeHtml(func.horario)}</td>
-                <td>${func.status ? '<span class="badge bg-success">Ativo</span>' : '<span class="badge bg-danger">Inativo</span>'}</td>
+                <td>${renderBotaoStatus(func)}</td>
                 <td>${func.data_criacao}</td>
                 <td>
                     <button class="btn btn-sm btn-warning" onclick="editarFuncionario(${func.id})" title="Editar">
@@ -94,6 +94,47 @@ function formatarCPF(cpf) {
         return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
     }
     return cpf;
+}
+
+function renderBotaoStatus(func) {
+    const classe = func.status ? 'ativo' : 'inativo';
+    const texto = func.status ? 'Ativo' : 'Inativo';
+    return `<button type="button" class="btn-toggle-status ${classe}" onclick="alternarStatusFuncionario(${func.id}, this)" title="Clique para alternar status">${texto}</button>`;
+}
+
+function getCookie(name) {
+    const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+    return match ? match[2] : '';
+}
+
+function alternarStatusFuncionario(funcionarioId, btn) {
+    if (!confirm('Deseja alterar o status deste funcionário?')) {
+        return;
+    }
+
+    const $btn = $(btn);
+    $btn.prop('disabled', true);
+
+    $.ajax({
+        url: `/rh/funcionarios/api/gerenciar/toggle-status/${funcionarioId}/`,
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        success: function(response) {
+            if (response.success) {
+                aplicarFiltros();
+            } else {
+                alert('Erro: ' + (response.message || 'Erro desconhecido'));
+                $btn.prop('disabled', false);
+            }
+        },
+        error: function(xhr) {
+            const response = xhr.responseJSON || {};
+            alert('Erro ao alternar status: ' + (response.message || 'Erro desconhecido'));
+            $btn.prop('disabled', false);
+        }
+    });
 }
 
 function escapeHtml(text) {

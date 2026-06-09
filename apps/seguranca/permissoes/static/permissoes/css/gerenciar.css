@@ -178,6 +178,17 @@ code {
     margin-bottom: 0;
 }
 
+/* Funcionário/usuário inativado — nome em vermelho (padrão do sistema) */
+#lote .lote-usuario-inativo .form-check-label {
+    color: #dc3545;
+    font-weight: 500;
+}
+
+#lote .lote-usuario-inativo .lote-usuario-inativo-nome {
+    color: #dc3545 !important;
+    opacity: 0.85;
+}
+
 .lote-permissao-item.hidden,
 .lote-usuario-item.hidden {
     display: none;

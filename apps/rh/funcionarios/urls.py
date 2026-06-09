@@ -15,6 +15,7 @@ urlpatterns = [
     path('api/gerenciar/listar/', apis_gerenciar.api_listar_funcionarios, name='api_listar_funcionarios'),
     path('api/gerenciar/buscar/<int:funcionario_id>/', apis_gerenciar.api_buscar_funcionario, name='api_buscar_funcionario'),
     path('api/gerenciar/editar/<int:funcionario_id>/', apis_gerenciar.api_editar_funcionario, name='api_editar_funcionario'),
+    path('api/gerenciar/toggle-status/<int:funcionario_id>/', apis_gerenciar.api_toggle_status, name='api_toggle_status'),
     path('api/gerenciar/documentos/<int:funcionario_id>/', apis_gerenciar.api_get_documentos_funcionario, name='api_get_documentos_funcionario'),
     path('api/gerenciar/documentos/adicionar/', apis_gerenciar.api_post_adicionar_documento, name='api_post_adicionar_documento'),
     path('api/gerenciar/documentos/deletar/<int:documento_id>/', apis_gerenciar.api_post_deletar_documento, name='api_post_deletar_documento'),

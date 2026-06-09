@@ -185,12 +185,12 @@
                                             <input type="text" class="form-control form-control-sm mb-2" id="search-lote-usuarios" placeholder="Pesquisar usuário..." autocomplete="off">
                                             <div id="lote-usuarios-container" class="lote-checkbox-container">
                                                 {% for usuario in usuarios %}
-                                                <div class="form-check lote-usuario-item" data-username="{{ usuario.username|lower }}">
+                                                <div class="form-check lote-usuario-item{% if not usuario.is_active or usuario.funcionario_profile and not usuario.funcionario_profile.status %} lote-usuario-inativo{% endif %}" data-username="{{ usuario.username|lower }}">
                                                     <input class="form-check-input lote-usuario-cb" type="checkbox" value="{{ usuario.id }}" id="lote-user-{{ usuario.id }}">
                                                     <label class="form-check-label" for="lote-user-{{ usuario.id }}">
                                                         {{ usuario.username }}
                                                         {% if usuario.first_name or usuario.last_name %}
-                                                        <small class="text-muted">({{ usuario.first_name }} {{ usuario.last_name }})</small>
+                                                        <small class="{% if not usuario.is_active or usuario.funcionario_profile and not usuario.funcionario_profile.status %}lote-usuario-inativo-nome{% else %}text-muted{% endif %}">({{ usuario.first_name }} {{ usuario.last_name }})</small>
                                                         {% endif %}
                                                     </label>
                                                 </div>

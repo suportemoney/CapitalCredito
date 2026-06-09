@@ -4,6 +4,7 @@ APIs para gerenciar funcionários (listar com filtros, buscar completo, editar)
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from django.db import transaction
 from django.conf import settings
@@ -468,3 +469,22 @@ def api_post_deletar_documento(request, documento_id):
         return JsonResponse({'success': False, 'message': 'Documento não encontrado'}, status=404)
     except Exception as e:
         return JsonResponse({'success': False, 'message': f'Erro ao deletar documento: {str(e)}'}, status=500)
+
+@login_required
+@controle_acess('SS18')
+@require_http_methods(["POST"])
+def api_toggle_status(request, funcionario_id):
+    """API POST para alternar status do funcionário (ativo/inativo)"""
+    try:
+        funcionario = get_object_or_404(Funcionario, id=funcionario_id)
+        funcionario.status = not funcionario.status
+        funcionario.save(update_fields=['status'])
+
+        status_text = 'ativado' if funcionario.status else 'desativado'
+        return JsonResponse({
+            'success': True,
+            'message': f'Funcionário {status_text} com sucesso!',
+            'status': funcionario.status,
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': f'Erro ao alternar status: {str(e)}'}, status=500)

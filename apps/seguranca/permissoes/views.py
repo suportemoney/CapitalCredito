@@ -11,7 +11,7 @@ from .decorators import controle_acess
 @controle_acess('SS20')  # Requer permissão para gerenciar permissões
 def render_index(request):
     """Lista todos os usuários e suas permissões"""
-    usuarios = User.objects.all().order_by('username')
+    usuarios = User.objects.select_related('funcionario_profile').all().order_by('username')
     grupos = GroupsAcessos.objects.filter(status=True).order_by('titulo')
     
     # Buscar permissões de cada usuário
@@ -95,7 +95,7 @@ def render_editar_usuario(request, user_id):
 @controle_acess('SS20')
 def render_gerenciar(request):
     """Página principal de gerenciamento de permissões com tabs"""
-    usuarios = User.objects.all().order_by('username')
+    usuarios = User.objects.select_related('funcionario_profile').all().order_by('username')
     grupos = GroupsAcessos.objects.filter(status=True).order_by('titulo')
     acessos = Acesso.objects.filter(status=True).order_by('tipo', 'nome')
     
