@@ -122,9 +122,30 @@ code {
 }
 
 #checkboxes-permissoes-grupo,
-#permissoes-usuario-container {
+#permissoes-usuario-container,
+.lote-checkbox-container {
     max-height: 400px;
     overflow-y: auto;
+}
+
+.lote-checkbox-container .form-check {
+    padding: 6px 8px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.lote-checkbox-container .form-check:hover {
+    background-color: #f8f9fa;
+}
+
+.lote-permissao-item.hidden,
+.lote-usuario-item.hidden {
+    display: none;
+}
+
+#lote .card-header h6 {
+    color: #D4AF37;
+    font-weight: 600;
 }
 
 #checkboxes-permissoes-grupo .mb-3 {

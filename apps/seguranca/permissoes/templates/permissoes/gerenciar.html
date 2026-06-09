@@ -28,6 +28,11 @@
                                 <i class='bx bx-user'></i> Usuários
                             </button>
                         </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="lote-tab" data-bs-toggle="tab" data-bs-target="#lote" type="button" role="tab">
+                                <i class='bx bx-layer-plus'></i> Em Lote
+                            </button>
+                        </li>
                     </ul>
                 </div>
                 <div class="card-body">
@@ -144,6 +149,76 @@
                             <div id="mensagem-sem-usuario" class="alert alert-info">
                                 <i class='bx bx-info-circle'></i> Selecione um usuário para gerenciar suas permissões
                             </div>
+                        </div>
+
+                        <!-- TAB 4: Permissões em Lote -->
+                        <div class="tab-pane fade" id="lote" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5>Adicionar Permissões em Lote</h5>
+                                <div>
+                                    <button class="btn btn-success btn-sm me-2" onclick="aplicarPermissoesLote('adicionar')">
+                                        <i class='bx bx-plus-circle'></i> Adicionar Selecionadas
+                                    </button>
+                                    <button class="btn btn-danger btn-sm" onclick="aplicarPermissoesLote('remover')">
+                                        <i class='bx bx-minus-circle'></i> Remover Selecionadas
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-info mb-3">
+                                <i class='bx bx-info-circle'></i>
+                                Selecione vários usuários e várias permissões para aplicar a todos de uma vez.
+                                A ação de <strong>adicionar</strong> mantém as permissões já existentes de cada usuário.
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-5">
+                                    <div class="card h-100">
+                                        <div class="card-header d-flex justify-content-between align-items-center py-2">
+                                            <h6 class="mb-0">Usuários</h6>
+                                            <div>
+                                                <button type="button" class="btn btn-outline-light btn-sm" onclick="selecionarTodosLote('usuarios', true)">Todos</button>
+                                                <button type="button" class="btn btn-outline-light btn-sm" onclick="selecionarTodosLote('usuarios', false)">Nenhum</button>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <input type="text" class="form-control form-control-sm mb-2" id="search-lote-usuarios" placeholder="Pesquisar usuário..." autocomplete="off">
+                                            <div id="lote-usuarios-container" class="lote-checkbox-container">
+                                                {% for usuario in usuarios %}
+                                                <div class="form-check lote-usuario-item" data-username="{{ usuario.username|lower }}">
+                                                    <input class="form-check-input lote-usuario-cb" type="checkbox" value="{{ usuario.id }}" id="lote-user-{{ usuario.id }}">
+                                                    <label class="form-check-label" for="lote-user-{{ usuario.id }}">
+                                                        {{ usuario.username }}
+                                                        {% if usuario.first_name or usuario.last_name %}
+                                                        <small class="text-muted">({{ usuario.first_name }} {{ usuario.last_name }})</small>
+                                                        {% endif %}
+                                                    </label>
+                                                </div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-7">
+                                    <div class="card h-100">
+                                        <div class="card-header d-flex justify-content-between align-items-center py-2">
+                                            <h6 class="mb-0">Permissões</h6>
+                                            <div>
+                                                <button type="button" class="btn btn-outline-light btn-sm" onclick="selecionarTodosLote('permissoes', true)">Todas</button>
+                                                <button type="button" class="btn btn-outline-light btn-sm" onclick="selecionarTodosLote('permissoes', false)">Nenhuma</button>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <input type="text" class="form-control form-control-sm mb-2" id="search-lote-permissoes" placeholder="Pesquisar por nome ou código..." autocomplete="off">
+                                            <div id="lote-permissoes-container" class="lote-checkbox-container">
+                                                <!-- Preenchido via JavaScript -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="lote-resumo" class="mt-3 text-muted small" style="display: none;"></div>
                         </div>
                     </div>
                 </div>

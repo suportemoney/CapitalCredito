@@ -27,6 +27,11 @@ $(document).ready(function() {
             carregarPermissoesUsuario();
         }
     });
+
+    $('#lote-tab').on('shown.bs.tab', function() {
+        carregarPermissoesLote();
+        atualizarResumoLote();
+    });
     
     // Carregar acessos e grupos na primeira vez
     carregarAcessos();
@@ -35,6 +40,10 @@ $(document).ready(function() {
     // Filtro em tempo real
     $('#search-acessos').on('input', aplicarFiltroAcessos);
     $('#search-grupos').on('input', aplicarFiltroGrupos);
+    $('#search-lote-usuarios').on('input', aplicarFiltroLoteUsuarios);
+    $('#search-lote-permissoes').on('input', aplicarFiltroLotePermissoes);
+
+    $(document).on('change', '.lote-usuario-cb, .lote-permissao-cb', atualizarResumoLote);
 });
 
 function aplicarFiltroAcessos() {
@@ -550,6 +559,176 @@ function atualizarSeletorGrupos() {
         },
         error: function() {
             console.error('Erro ao atualizar seletor de grupos');
+        }
+    });
+}
+
+// ========== TAB 4: Permissões em Lote ==========
+
+function carregarPermissoesLote() {
+    const container = $('#lote-permissoes-container');
+
+    if (todosAcessos.length === 0) {
+        $.ajax({
+            url: '/seguranca/permissoes/api/gerenciar/acessos/listar/',
+            method: 'GET',
+            success: function(dados) {
+                todosAcessos = dados;
+                renderizarPermissoesLote(dados);
+            },
+            error: function() {
+                container.html('<p class="text-danger text-center">Erro ao carregar permissões</p>');
+            }
+        });
+    } else {
+        renderizarPermissoesLote(todosAcessos);
+    }
+}
+
+function renderizarPermissoesLote(acessos) {
+    const container = $('#lote-permissoes-container');
+    const ativos = acessos.filter(function(a) { return a.status; });
+
+    if (ativos.length === 0) {
+        container.html('<p class="text-center text-muted">Nenhuma permissão disponível</p>');
+        return;
+    }
+
+    const porTipo = {};
+    ativos.forEach(function(acesso) {
+        if (!porTipo[acesso.tipo]) {
+            porTipo[acesso.tipo] = [];
+        }
+        porTipo[acesso.tipo].push(acesso);
+    });
+
+    let html = '';
+    Object.keys(porTipo).forEach(function(tipo) {
+        html += '<div class="mb-3 lote-tipo-grupo"><strong>' + escapeHtml(porTipo[tipo][0].tipo_display) + ':</strong><br>';
+        porTipo[tipo].forEach(function(acesso) {
+            const busca = ((acesso.nome || '') + ' ' + (acesso.codigo || '')).toLowerCase();
+            html += `
+                <div class="form-check lote-permissao-item" data-busca="${escapeHtml(busca)}">
+                    <input class="form-check-input lote-permissao-cb" type="checkbox" value="${acesso.id}" id="lote-perm-${acesso.id}">
+                    <label class="form-check-label" for="lote-perm-${acesso.id}">
+                        ${escapeHtml(acesso.nome)} (<code>${escapeHtml(acesso.codigo)}</code>)
+                    </label>
+                </div>
+            `;
+        });
+        html += '</div>';
+    });
+
+    container.html(html);
+    aplicarFiltroLotePermissoes();
+    atualizarResumoLote();
+}
+
+function aplicarFiltroLoteUsuarios() {
+    const termo = ($('#search-lote-usuarios').val() || '').trim().toLowerCase();
+    $('.lote-usuario-item').each(function() {
+        const username = $(this).data('username') || '';
+        const texto = $(this).text().toLowerCase();
+        const visivel = termo === '' || username.indexOf(termo) !== -1 || texto.indexOf(termo) !== -1;
+        $(this).toggleClass('hidden', !visivel);
+    });
+}
+
+function aplicarFiltroLotePermissoes() {
+    const termo = ($('#search-lote-permissoes').val() || '').trim().toLowerCase();
+    $('.lote-permissao-item').each(function() {
+        const busca = ($(this).data('busca') || '').toString();
+        const visivel = termo === '' || busca.indexOf(termo) !== -1;
+        $(this).toggleClass('hidden', !visivel);
+    });
+}
+
+function selecionarTodosLote(tipo, selecionar) {
+    if (tipo === 'usuarios') {
+        $('.lote-usuario-item:not(.hidden) .lote-usuario-cb').prop('checked', selecionar);
+    } else {
+        $('.lote-permissao-item:not(.hidden) .lote-permissao-cb').prop('checked', selecionar);
+    }
+    atualizarResumoLote();
+}
+
+function atualizarResumoLote() {
+    const qtdUsuarios = $('.lote-usuario-cb:checked').length;
+    const qtdPermissoes = $('.lote-permissao-cb:checked').length;
+    const resumo = $('#lote-resumo');
+
+    if (qtdUsuarios === 0 && qtdPermissoes === 0) {
+        resumo.hide();
+        return;
+    }
+
+    resumo.html(
+        '<i class="bx bx-check-square"></i> ' +
+        qtdUsuarios + ' usuário(s) e ' + qtdPermissoes + ' permissão(ões) selecionado(s)'
+    ).show();
+}
+
+function aplicarPermissoesLote(acao) {
+    const usuariosSelecionados = [];
+    const permissoesSelecionadas = [];
+
+    $('.lote-usuario-cb:checked').each(function() {
+        usuariosSelecionados.push($(this).val());
+    });
+
+    $('.lote-permissao-cb:checked').each(function() {
+        permissoesSelecionadas.push($(this).val());
+    });
+
+    if (usuariosSelecionados.length === 0) {
+        alert('Selecione pelo menos um usuário');
+        return;
+    }
+
+    if (permissoesSelecionadas.length === 0) {
+        alert('Selecione pelo menos uma permissão');
+        return;
+    }
+
+    const verbo = acao === 'adicionar' ? 'adicionar' : 'remover';
+    const msg = 'Deseja ' + verbo + ' ' + permissoesSelecionadas.length +
+        ' permissão(ões) para ' + usuariosSelecionados.length + ' usuário(s)?';
+
+    if (acao === 'remover' && !confirm(msg + '\n\nAs demais permissões de cada usuário serão mantidas.')) {
+        return;
+    }
+
+    if (acao === 'adicionar' && !confirm(msg + '\n\nAs permissões já existentes de cada usuário serão mantidas.')) {
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('acao', acao);
+    usuariosSelecionados.forEach(function(id) {
+        formData.append('usuarios[]', id);
+    });
+    permissoesSelecionadas.forEach(function(id) {
+        formData.append('acessos[]', id);
+    });
+
+    $.ajax({
+        url: '/seguranca/permissoes/api/gerenciar/lote/aplicar/',
+        method: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(response) {
+            if (response.success) {
+                alert(response.message);
+                $('.lote-usuario-cb, .lote-permissao-cb').prop('checked', false);
+                atualizarResumoLote();
+            } else {
+                alert('Erro: ' + response.message);
+            }
+        },
+        error: function(xhr) {
+            const response = xhr.responseJSON || {};
+            alert('Erro: ' + (response.message || 'Erro ao aplicar permissões em lote'));
         }
     });
 }

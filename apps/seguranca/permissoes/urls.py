@@ -34,4 +34,7 @@ urlpatterns = [
     path('api/gerenciar/usuarios/get-controle/<int:user_id>/', apis_gerenciar.api_get_controle_usuario, name='api_get_controle_usuario'),
     path('api/gerenciar/usuarios/salvar/<int:user_id>/', apis_gerenciar.api_salvar_permissoes_usuario, name='api_salvar_permissoes_usuario'),
     path('api/gerenciar/usuarios/deletar/<int:controle_id>/', apis_gerenciar.api_deletar_controle, name='api_deletar_controle'),
+
+    # APIs - gerenciar.html (Tab 4: Em Lote)
+    path('api/gerenciar/lote/aplicar/', apis_gerenciar.api_aplicar_lote, name='api_aplicar_lote'),
 ]

@@ -340,6 +340,72 @@ def api_salvar_permissoes_usuario(request, user_id):
     except Exception as e:
         return JsonResponse({'success': False, 'message': str(e)}, status=500)
 
+# ========== TAB 4: Permissões em Lote ==========
+
+@login_required
+@controle_acess('SS20')
+@require_http_methods(["POST"])
+def api_aplicar_lote(request):
+    """API POST para adicionar ou remover permissões em vários usuários de uma vez"""
+    try:
+        usuarios_ids = request.POST.getlist('usuarios[]')
+        acessos_ids = request.POST.getlist('acessos[]')
+        acao = request.POST.get('acao', 'adicionar').strip().lower()
+
+        if not usuarios_ids:
+            return JsonResponse({'success': False, 'message': 'Selecione pelo menos um usuário'})
+
+        if not acessos_ids:
+            return JsonResponse({'success': False, 'message': 'Selecione pelo menos uma permissão'})
+
+        if acao not in ('adicionar', 'remover'):
+            return JsonResponse({'success': False, 'message': 'Ação inválida'})
+
+        usuarios = User.objects.filter(id__in=usuarios_ids, is_active=True)
+        acessos = Acesso.objects.filter(id__in=acessos_ids, status=True)
+
+        if not usuarios.exists():
+            return JsonResponse({'success': False, 'message': 'Nenhum usuário válido encontrado'})
+
+        if not acessos.exists():
+            return JsonResponse({'success': False, 'message': 'Nenhuma permissão válida encontrada'})
+
+        usuarios_processados = 0
+
+        with transaction.atomic():
+            for usuario in usuarios:
+                controle, _ = ControleAcessos.objects.get_or_create(
+                    user=usuario,
+                    defaults={'status': True}
+                )
+
+                if not controle.status:
+                    controle.status = True
+                    controle.save(update_fields=['status'])
+
+                if acao == 'adicionar':
+                    controle.acessos.add(*acessos)
+                else:
+                    controle.acessos.remove(*acessos)
+
+                usuarios_processados += 1
+
+        verbo = 'adicionada(s)' if acao == 'adicionar' else 'removida(s)'
+        return JsonResponse({
+            'success': True,
+            'message': (
+                f'{acessos.count()} permissão(ões) {verbo} para '
+                f'{usuarios_processados} usuário(s) com sucesso!'
+            ),
+            'data': {
+                'usuarios': usuarios_processados,
+                'permissoes': acessos.count(),
+                'acao': acao
+            }
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
 @login_required
 @controle_acess('SS20')
 @require_http_methods(["POST"])
