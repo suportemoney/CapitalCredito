@@ -122,20 +122,60 @@ code {
 }
 
 #checkboxes-permissoes-grupo,
-#permissoes-usuario-container,
-.lote-checkbox-container {
+#permissoes-usuario-container {
     max-height: 400px;
     overflow-y: auto;
 }
 
-.lote-checkbox-container .form-check {
-    padding: 6px 8px;
-    border-radius: 4px;
-    transition: background-color 0.2s ease;
+/* Container da aba lote: flex evita corte do checkbox (Bootstrap usa margin-left negativo) */
+#lote .lote-checkbox-container {
+    max-height: 400px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 4px 8px 4px 4px;
 }
 
-.lote-checkbox-container .form-check:hover {
+#lote .lote-checkbox-container .form-check {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 10px;
+    padding-left: 10px;
+    margin-bottom: 2px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+    min-height: auto;
+}
+
+#lote .lote-checkbox-container .form-check-input {
+    float: none;
+    margin-left: 0;
+    margin-top: 0.15em;
+    flex-shrink: 0;
+    width: 1.1em;
+    height: 1.1em;
+    position: static;
+}
+
+#lote .lote-checkbox-container .form-check-label {
+    margin-left: 0;
+    flex: 1;
+    line-height: 1.4;
+}
+
+#lote .lote-checkbox-container .form-check:hover {
     background-color: #f8f9fa;
+}
+
+#lote .lote-tipo-grupo {
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 10px;
+    margin-bottom: 12px;
+}
+
+#lote .lote-tipo-grupo:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
 }
 
 .lote-permissao-item.hidden,
