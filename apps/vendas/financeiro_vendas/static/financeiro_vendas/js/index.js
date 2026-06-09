@@ -1,4 +1,4 @@
-let statusAtual = 'A_PAGAR';
+let statusAtual = 'PAGO';
 
 function filtroDatasDisponivel() {
     return $('#filtroDataInicio').length > 0 && $('#filtroDataFim').length > 0;
@@ -37,6 +37,48 @@ function getFiltroDatas() {
     }
 
     return { data_inicio: dataInicio, data_fim: dataFim };
+}
+
+function getFiltrosGerenciador() {
+    const filtros = {};
+
+    const userId = $('#filtroVendedor').val();
+    if (userId) filtros.user_id = userId;
+
+    const setorId = $('#filtroSetor').val();
+    if (setorId) filtros.setor_id = setorId;
+
+    const produtoId = $('#filtroProduto').val();
+    if (produtoId) filtros.produto_id = produtoId;
+
+    const classificadorId = $('#filtroClassificador').val();
+    if (classificadorId) filtros.classificador_id = classificadorId;
+
+    const cliente = $('#filtroCliente').val().trim();
+    if (cliente) filtros.cliente = cliente;
+
+    const cpf = $('#filtroCpf').val().trim();
+    if (cpf) filtros.cpf = cpf;
+
+    const banco = $('#filtroBanco').val().trim();
+    if (banco) filtros.banco = banco;
+
+    const ponta = $('#filtroPonta').val();
+    if (ponta !== '') filtros.ponta = ponta;
+
+    return filtros;
+}
+
+function limparFiltrosGerenciador() {
+    $('#filtroVendedor').val('');
+    $('#filtroSetor').val('');
+    $('#filtroProduto').val('');
+    $('#filtroClassificador').val('');
+    $('#filtroCliente').val('');
+    $('#filtroCpf').val('');
+    $('#filtroBanco').val('');
+    $('#filtroPonta').val('');
+    carregarTabela(statusAtual);
 }
 
 function aplicarFiltros() {
@@ -79,17 +121,29 @@ function carregarResumo() {
 $(document).ready(function() {
     inicializarFiltroDatasMesAtual();
     aplicarFiltros();
-    
-    $('#novo-status').on('change', function() {
-        if ($(this).val() === 'PAGO') {
-            $('#novo-data-pagamento').prop('required', true);
-        } else {
-            $('#novo-data-pagamento').prop('required', false);
+
+    $('#filtroVendedor, #filtroSetor, #filtroProduto, #filtroClassificador, #filtroPonta').on('change', function() {
+        carregarTabela(statusAtual);
+    });
+
+    $('#filtroCliente, #filtroCpf, #filtroBanco').on('keyup', function(e) {
+        if (e.key === 'Enter') {
+            carregarTabela(statusAtual);
         }
     });
     
-    const hoje = new Date().toISOString().split('T')[0];
-    $('#novo-data-contrato').val(hoje);
+    if (window.podeGerenciar) {
+        $('#novo-status').on('change', function() {
+            if ($(this).val() === 'PAGO') {
+                $('#novo-data-pagamento').prop('required', true);
+            } else {
+                $('#novo-data-pagamento').prop('required', false);
+            }
+        });
+
+        const hoje = new Date().toISOString().split('T')[0];
+        $('#novo-data-contrato').val(hoje);
+    }
 });
 
 function carregarTabela(status) {
@@ -105,6 +159,7 @@ function carregarTabela(status) {
         params.data_inicio = filtros.data_inicio;
         params.data_fim = filtros.data_fim;
     }
+    Object.assign(params, getFiltrosGerenciador());
     
     $.ajax({
         url: '/vendas/financeiro/api/contratos/listar/',
@@ -127,16 +182,21 @@ function carregarTabela(status) {
 function exibirTabela(status, contratos) {
     let tbodyId = '';
     let colunas = [];
+    const incluirAcoes = !!window.podeGerenciar;
     
     if (status === 'A_PAGAR') {
         tbodyId = 'tabela-a-pagar';
-        colunas = ['funcionario', 'cliente', 'cpf', 'produto', 'banco', 'af', 'repasse', 'ponta', 'classificador', 'acoes'];
+        colunas = ['funcionario', 'cliente', 'cpf', 'produto', 'banco', 'af', 'repasse', 'ponta', 'classificador'];
     } else if (status === 'PAGO') {
         tbodyId = 'tabela-pago';
-        colunas = ['funcionario', 'cliente', 'cpf', 'produto', 'banco', 'af', 'repasse', 'ponta', 'classificador', 'data_pagamento', 'acoes'];
+        colunas = ['funcionario', 'cliente', 'cpf', 'produto', 'banco', 'af', 'repasse', 'ponta', 'classificador', 'data_pagamento'];
     } else if (status === 'NAO_PAGO') {
         tbodyId = 'tabela-nao-pago';
-        colunas = ['funcionario', 'cliente', 'cpf', 'produto', 'banco', 'af', 'repasse', 'ponta', 'classificador', 'acoes'];
+        colunas = ['funcionario', 'cliente', 'cpf', 'produto', 'banco', 'af', 'repasse', 'ponta', 'classificador'];
+    }
+
+    if (incluirAcoes) {
+        colunas.push('acoes');
     }
     
     const tbody = $(`#${tbodyId}`);
@@ -202,11 +262,13 @@ function gerarLinhaTabela(contrato, status) {
         html += `<td>${contrato.data_pagamento ? formatarData(contrato.data_pagamento) : '-'}</td>`;
     }
     
-    html += `<td>
-        <button type="button" class="btn btn-sm btn-danger" onclick="inativarContrato(${contrato.id})" title="Inativar">
-            <i class='bx bx-trash'></i>
-        </button>
-    </td>`;
+    if (window.podeGerenciar) {
+        html += `<td>
+            <button type="button" class="btn btn-sm btn-danger" onclick="inativarContrato(${contrato.id})" title="Inativar">
+                <i class='bx bx-trash'></i>
+            </button>
+        </td>`;
+    }
     html += '</tr>';
     
     return html;

@@ -71,20 +71,89 @@
                 <div class="card-header">
                     <div class="d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">Gerenciador de Contratos</h5>
+                        {% if pode_gerenciar %}
                         <button type="button" class="btn btn-primary btn-sm" onclick="abrirModalNovoContrato()">
                             <i class='bx bx-plus'></i> Adicionar Contrato
                         </button>
+                        {% endif %}
                     </div>
                 </div>
                 <div class="card-body">
+                    <div class="filtros-gerenciador mb-3 p-3 border rounded">
+                        <h6 class="mb-3 text-muted">Filtros do Gerenciador</h6>
+                        <div class="row align-items-end g-2">
+                            <div class="col-md-3 col-lg-2">
+                                <label class="form-label" for="filtroVendedor">Vendedor</label>
+                                <select class="form-select form-select-sm" id="filtroVendedor">
+                                    <option value="">Todos</option>
+                                    {% for usuario in usuarios %}
+                                    <option value="{{ usuario.id }}">
+                                        {% if usuario.funcionario_profile %}
+                                            {{ usuario.funcionario_profile.nome_completo }}
+                                        {% else %}
+                                            {{ usuario.username }}
+                                        {% endif %}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3 col-lg-2">
+                                <label class="form-label" for="filtroSetor">Setor</label>
+                                <select class="form-select form-select-sm" id="filtroSetor">
+                                    <option value="">Todos</option>
+                                    {% for setor in setores %}
+                                    <option value="{{ setor.id }}">{{ setor.nome }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3 col-lg-2">
+                                <label class="form-label" for="filtroProduto">Produto</label>
+                                <select class="form-select form-select-sm" id="filtroProduto">
+                                    <option value="">Todos</option>
+                                    {% for produto in produtos %}
+                                    <option value="{{ produto.id }}">{{ produto.nome }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3 col-lg-2">
+                                <label class="form-label" for="filtroClassificador">Classificador</label>
+                                <select class="form-select form-select-sm" id="filtroClassificador">
+                                    <option value="">Todos</option>
+                                    {% for classificador in classificadores %}
+                                    <option value="{{ classificador.id }}">{{ classificador.titulo }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3 col-lg-2">
+                                <label class="form-label" for="filtroCliente">Cliente</label>
+                                <input type="text" class="form-control form-control-sm" id="filtroCliente" placeholder="Nome do cliente">
+                            </div>
+                            <div class="col-md-3 col-lg-2">
+                                <label class="form-label" for="filtroCpf">CPF</label>
+                                <input type="text" class="form-control form-control-sm" id="filtroCpf" placeholder="000.000.000-00">
+                            </div>
+                            <div class="col-md-3 col-lg-2">
+                                <label class="form-label" for="filtroBanco">Banco</label>
+                                <input type="text" class="form-control form-control-sm" id="filtroBanco" placeholder="Nome do banco">
+                            </div>
+                            <div class="col-md-3 col-lg-2">
+                                <label class="form-label" for="filtroPonta">Ponta</label>
+                                <select class="form-select form-select-sm" id="filtroPonta">
+                                    <option value="">Todos</option>
+                                    <option value="1">Sim</option>
+                                    <option value="0">Não</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 col-lg-2">
+                                <button type="button" class="btn btn-outline-secondary btn-sm w-100" onclick="limparFiltrosGerenciador()">
+                                    <i class='bx bx-x'></i> Limpar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                     <ul class="nav nav-tabs" id="tabsContratos" role="tablist">
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="a-pagar-tab" data-bs-toggle="tab" data-bs-target="#a-pagar" type="button" role="tab" onclick="carregarTabela('A_PAGAR')">
-                                A Pagar
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="pago-tab" data-bs-toggle="tab" data-bs-target="#pago" type="button" role="tab" onclick="carregarTabela('PAGO')">
+                            <button class="nav-link active" id="pago-tab" data-bs-toggle="tab" data-bs-target="#pago" type="button" role="tab" onclick="carregarTabela('PAGO')">
                                 Pagos
                             </button>
                         </li>
@@ -93,33 +162,15 @@
                                 Não Pagos
                             </button>
                         </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="a-pagar-tab" data-bs-toggle="tab" data-bs-target="#a-pagar" type="button" role="tab" onclick="carregarTabela('A_PAGAR')">
+                                A Pagar
+                            </button>
+                        </li>
                     </ul>
                     <div class="tab-content mt-3" id="tabsContratosContent">
-                        <!-- Tab A Pagar -->
-                        <div class="tab-pane fade show active" id="a-pagar" role="tabpanel">
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Funcionário</th>
-                                            <th>Cliente</th>
-                                            <th>CPF</th>
-                                            <th>Produto</th>
-                                            <th>Banco</th>
-                                            <th>AF (R$)</th>
-                                            <th>Repasse (R$)</th>
-                                            <th>Ponta</th>
-                                            <th>Classificador</th>
-                                            <th>Ações</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="tabela-a-pagar">
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
                         <!-- Tab Pagos -->
-                        <div class="tab-pane fade" id="pago" role="tabpanel">
+                        <div class="tab-pane fade show active" id="pago" role="tabpanel">
                             <div class="table-responsive">
                                 <table class="table table-hover">
                                     <thead>
@@ -134,7 +185,7 @@
                                             <th>Ponta</th>
                                             <th>Classificador</th>
                                             <th>Data Pagamento</th>
-                                            <th>Ações</th>
+                                            {% if pode_gerenciar %}<th>Ações</th>{% endif %}
                                         </tr>
                                     </thead>
                                     <tbody id="tabela-pago">
@@ -157,10 +208,33 @@
                                             <th>Repasse (R$)</th>
                                             <th>Ponta</th>
                                             <th>Classificador</th>
-                                            <th>Ações</th>
+                                            {% if pode_gerenciar %}<th>Ações</th>{% endif %}
                                         </tr>
                                     </thead>
                                     <tbody id="tabela-nao-pago">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <!-- Tab A Pagar -->
+                        <div class="tab-pane fade" id="a-pagar" role="tabpanel">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Funcionário</th>
+                                            <th>Cliente</th>
+                                            <th>CPF</th>
+                                            <th>Produto</th>
+                                            <th>Banco</th>
+                                            <th>AF (R$)</th>
+                                            <th>Repasse (R$)</th>
+                                            <th>Ponta</th>
+                                            <th>Classificador</th>
+                                            {% if pode_gerenciar %}<th>Ações</th>{% endif %}
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tabela-a-pagar">
                                     </tbody>
                                 </table>
                             </div>
@@ -173,6 +247,7 @@
 </div>
 
 <!-- Modal Novo Contrato -->
+{% if pode_gerenciar %}
 <div class="modal fade" id="modalNovoContrato" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -283,6 +358,7 @@
         </div>
     </div>
 </div>
+{% endif %}
 {% endblock %}
 
 {% block addcss_extra %}
@@ -295,6 +371,7 @@
     try {
         window.produtos = {{ produtos_json|safe }};
         window.classificadores = {{ classificadores_json|safe }};
+        window.podeGerenciar = {{ pode_gerenciar|yesno:"true,false" }};
         
         // Debug: verificar se os dados foram carregados
         console.log('Produtos carregados:', window.produtos);
@@ -303,6 +380,7 @@
         console.error('Erro ao carregar dados:', e);
         window.produtos = [];
         window.classificadores = [];
+        window.podeGerenciar = false;
     }
 </script>
 <script src="{% static 'financeiro_vendas/js/index.js' %}"></script>

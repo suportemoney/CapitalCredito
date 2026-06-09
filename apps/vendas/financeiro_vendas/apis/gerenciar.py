@@ -45,6 +45,52 @@ def _filtrar_por_data_pagamento(queryset, data_inicio, data_fim):
     )
 
 
+def _usuario_pode_gerenciar(user):
+    """Superusuário ou membro da equipe (staff) pode criar/editar/inativar contratos."""
+    return user.is_superuser or user.is_staff
+
+
+def _aplicar_filtros_gerenciador(queryset, request):
+    """Aplica filtros opcionais do gerenciador de contratos."""
+    user_id = request.GET.get('user_id', '').strip()
+    if user_id:
+        queryset = queryset.filter(user_id=user_id)
+
+    setor_id = request.GET.get('setor_id', '').strip()
+    if setor_id:
+        queryset = queryset.filter(setor_id=setor_id)
+
+    produto_id = request.GET.get('produto_id', '').strip()
+    if produto_id:
+        queryset = queryset.filter(produto_id=produto_id)
+
+    classificador_id = request.GET.get('classificador_id', '').strip()
+    if classificador_id:
+        queryset = queryset.filter(classificador_id=classificador_id)
+
+    cpf = request.GET.get('cpf', '').strip()
+    if cpf:
+        cpf_limpo = re.sub(r'\D', '', cpf)
+        if cpf_limpo:
+            queryset = queryset.filter(cliente_cpf__icontains=cpf_limpo)
+
+    cliente = request.GET.get('cliente', '').strip()
+    if cliente:
+        queryset = queryset.filter(cliente_nome__icontains=cliente.upper())
+
+    banco = request.GET.get('banco', '').strip()
+    if banco:
+        queryset = queryset.filter(banco__icontains=banco.upper())
+
+    ponta = request.GET.get('ponta', '').strip()
+    if ponta in ('1', 'true', 'sim'):
+        queryset = queryset.filter(flg_ponta=True)
+    elif ponta in ('0', 'false', 'nao'):
+        queryset = queryset.filter(flg_ponta=False)
+
+    return queryset
+
+
 @login_required
 @controle_acess('SS27')
 @require_http_methods(["GET"])
@@ -110,7 +156,8 @@ def api_listar_contratos(request):
             contratos = contratos.filter(status='PAGO')
         elif status == 'NAO_PAGO':
             contratos = contratos.filter(status='NAO_PAGO')
-        
+
+        contratos = _aplicar_filtros_gerenciador(contratos, request)
         contratos = contratos.order_by('-data_contrato', '-data_criacao')
         
         data = []
@@ -204,6 +251,9 @@ def api_get_setor_funcionario(request, user_id):
 def api_criar_contrato(request):
     """API POST para criar novo contrato"""
     try:
+        if not _usuario_pode_gerenciar(request.user):
+            return JsonResponse({'success': False, 'message': 'Sem permissão para criar contratos'}, status=403)
+
         user_id = request.POST.get('user_id')
         setor_id = request.POST.get('setor_id')
         cliente_cpf = request.POST.get('cliente_cpf', '').strip()
@@ -308,6 +358,9 @@ def api_criar_contrato(request):
 def api_editar_campo(request, contrato_id):
     """API POST para editar um campo específico do contrato"""
     try:
+        if not _usuario_pode_gerenciar(request.user):
+            return JsonResponse({'success': False, 'message': 'Sem permissão para editar contratos'}, status=403)
+
         campo = request.POST.get('campo')
         valor = request.POST.get('valor', '').strip()
         
@@ -357,6 +410,9 @@ def api_editar_campo(request, contrato_id):
 def api_inativar_contrato(request, contrato_id):
     """API POST para inativar contrato"""
     try:
+        if not _usuario_pode_gerenciar(request.user):
+            return JsonResponse({'success': False, 'message': 'Sem permissão para inativar contratos'}, status=403)
+
         contrato = ContratoPagamento.objects.get(id=contrato_id, status_ativo=True)
         contrato.status_ativo = False
         contrato.save()

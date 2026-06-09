@@ -32,6 +32,7 @@ def render_index(request):
         'usuarios': usuarios,
         'produtos_json': produtos_json,
         'classificadores_json': classificadores_json,
+        'pode_gerenciar': request.user.is_superuser or request.user.is_staff,
     }
     return render(request, 'financeiro_vendas/index.html', context)
 
