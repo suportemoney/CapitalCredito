@@ -2,13 +2,14 @@
 from django.urls import path
 
 from . import views
-from .apis import acoes_crm, bancos_logos, config_catalogos, fluxo, relatorio_cms
+from .apis import acoes_crm, bancos_logos, config_catalogos, dashboard_operacional, fluxo, relatorio_cms
 
 app_name = 'contratos'
 
 urlpatterns = [
     path('', views.render_contratos_index, name='index'),
     path('crm-operacional/', views.render_crm_operacional_v2, name='crm_operacional_v2'),
+    path('dashboard-operacional/', views.render_dashboard_operacional_v2, name='dashboard_operacional_v2'),
     path('config/', views.render_config_contratos_v2, name='config_v2'),
     # APIs fluxo v2
     path('api/v2/fila-operacional/', fluxo.api_get_fila_operacional, name='api_v2_fila_operacional'),
@@ -26,6 +27,10 @@ urlpatterns = [
     path('api/v2/tabelas-cms/', fluxo.api_get_tabelas_cms_por_solicitacao, name='api_v2_tabelas_cms_por_solicitacao'),
     path('api/v2/fila-unificada/', fluxo.api_get_fila_unificada, name='api_v2_fila_unificada'),
     path('api/v2/esteira-resumo/', fluxo.api_get_esteira_resumo, name='api_v2_esteira_resumo'),
+    path('api/v2/dashboard/visao-geral/', dashboard_operacional.api_dashboard_visao_geral, name='api_v2_dashboard_visao_geral'),
+    path('api/v2/dashboard/esteira/', dashboard_operacional.api_dashboard_esteira, name='api_v2_dashboard_esteira'),
+    path('api/v2/dashboard/producao/', dashboard_operacional.api_dashboard_producao, name='api_v2_dashboard_producao'),
+    path('api/v2/dashboard/pendencias/', dashboard_operacional.api_dashboard_pendencias, name='api_v2_dashboard_pendencias'),
     path('api/v2/auditoria-fluxo/', fluxo.api_get_auditoria_fluxo, name='api_v2_auditoria_fluxo'),
     path('api/v2/ficha/', fluxo.api_get_ficha, name='api_v2_ficha'),
     path('api/v2/ficha/pdf/', fluxo.api_get_ficha_pdf, name='api_v2_ficha_pdf'),
