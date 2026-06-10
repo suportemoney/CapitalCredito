@@ -10,7 +10,7 @@ from apps.seguranca.permissoes.decorators import controle_acess, controle_acess_
 from apps.tesouraria.bonificacoes.models import (
     BonificacaoRegra, BonificacaoGatilho, BonificacaoFuncionarioRegra,
     BonificacaoCalculada, ReducaoBonificacaoFuncionario, ReducaoBonificacaoRegra,
-    TipoRegraChoices, CampoValorChoices
+    TipoRegraChoices
 )
 from apps.rh.funcionarios.models import Funcionario
 from apps.vendas.financeiro_vendas.models import ContratoPagamento, ComprovanteTC
@@ -23,22 +23,26 @@ def _obter_tc_acumulado_contrato(contrato):
     return contrato.valor_tc_acumulado or Decimal('0')
 
 def _calcular_repasse_contrato(contrato):
-    """Coluna repasse do financeiro: valor_tc_acumulado × percentual do classificador."""
+    """
+    Quanto do TC vale para o funcionário conforme o classificador do contrato.
+    Ex.: TC R$ 1.000 com M2 (50%) → repasse R$ 500.
+    """
     tc_acumulado = _obter_tc_acumulado_contrato(contrato)
+    if tc_acumulado <= 0:
+        return Decimal('0.00')
     pct = Decimal('0')
     if contrato.classificador_id and contrato.classificador:
         pct = contrato.classificador.percentual or Decimal('0')
-    return tc_acumulado * pct / Decimal('100')
+    return (tc_acumulado * pct / Decimal('100')).quantize(Decimal('0.01'))
 
 def _obter_valor_base_funcionario(funcionario, periodo_inicio, periodo_fim, regra=None):
     """
-    Valor base = soma do repasse de cada contrato PAGO no período.
-    Repasse = valor_tc_acumulado × classificador%; a bonificação usa esse total.
+    Valor base = soma do repasse (TC válido) de cada contrato PAGO no período.
+    Cada contrato: valor_tc_acumulado × (classificador% ÷ 100).
     """
     user = getattr(funcionario, 'usuario', None)
     if not user:
         return Decimal('0.00')
-    campo = regra.campo_valor if regra else CampoValorChoices.VALOR_REPASSE
     comps_prefetch = Prefetch(
         'comprovantes_tc',
         queryset=ComprovanteTC.objects.filter(status=True),
@@ -53,10 +57,7 @@ def _obter_valor_base_funcionario(funcionario, periodo_inicio, periodo_fim, regr
     ).select_related('classificador').prefetch_related(comps_prefetch)
     total = Decimal('0.00')
     for contrato in contratos:
-        if campo == CampoValorChoices.VALOR_AF:
-            total += contrato.valor_af or Decimal('0')
-        else:
-            total += _calcular_repasse_contrato(contrato)
+        total += _calcular_repasse_contrato(contrato)
     return total
 
 def _calcular_bonificacao_regra(regra, valor_base, gatilho_aplicado=None):
