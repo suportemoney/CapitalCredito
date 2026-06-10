@@ -62,13 +62,16 @@ def api_listar_comprovantes_tc(request):
     )
     soma = sum((c.valor for c in comps), Decimal('0'))
 
+    # Exibição: acumulado = soma dos comprovantes (ignora valor legado da migration sem anexo)
+    valor_acumulado_exibir = float(soma)
+
     return JsonResponse({
         'success': True,
         'data': {
             'comprovantes': [_serializar_comprovante(request, c) for c in comps],
-            'soma': float(soma),
+            'soma': valor_acumulado_exibir,
             'valor_tc': float(cp.valor_tc or 0),
-            'valor_tc_acumulado': float(cp.valor_tc_acumulado or 0),
+            'valor_tc_acumulado': valor_acumulado_exibir,
         },
     })
 
@@ -112,10 +115,13 @@ def api_upload_comprovante_tc(request):
                 arquivo=arquivo,
                 criado_por=request.user,
             )
+            # Recarrega e sobrescreve acumulado legado com a soma dos comprovantes
+            cp = ContratoPagamento.objects.get(pk=cp.pk)
             cp.recalcular_tc_acumulado()
     except Exception as e:
         return JsonResponse({'success': False, 'message': f'Erro ao salvar comprovante: {str(e)}'}, status=500)
 
+    cp.refresh_from_db()
     return JsonResponse({
         'success': True,
         'message': 'Comprovante registrado com sucesso!',

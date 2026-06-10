@@ -119,7 +119,11 @@ def api_listar_contratos(request):
             if hasattr(contrato.user, 'funcionario_profile') and contrato.user.funcionario_profile:
                 funcionario = contrato.user.funcionario_profile.nome_completo
 
-            qtd_comprovantes = contrato.comprovantes_tc.filter(status=True).count()
+            comps_ativos = contrato.comprovantes_tc.filter(status=True)
+            qtd_comprovantes = comps_ativos.count()
+            soma_comprovantes = sum((c.valor for c in comps_ativos), 0)
+            # Com comprovantes: acumulado = soma; sem comprovantes: mantém legado (migration)
+            valor_tc_acumulado = float(soma_comprovantes) if qtd_comprovantes else float(contrato.valor_tc_acumulado or 0)
             data.append({
                 'id': contrato.id,
                 'funcionario': funcionario or contrato.user.username,
@@ -131,7 +135,7 @@ def api_listar_contratos(request):
                 'valor_af': float(contrato.valor_af),
                 'valor_repasse': float(contrato.valor_repasse),
                 'valor_tc': float(contrato.valor_tc or 0),
-                'valor_tc_acumulado': float(contrato.valor_tc_acumulado or 0),
+                'valor_tc_acumulado': valor_tc_acumulado,
                 'flg_ponta': contrato.flg_ponta,
                 'classificador_id': contrato.classificador.id,
                 'classificador_nome': contrato.classificador.titulo,

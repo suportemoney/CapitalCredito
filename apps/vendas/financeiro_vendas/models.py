@@ -79,23 +79,32 @@ class ContratoPagamento(models.Model):
     data_atualizacao = models.DateTimeField(auto_now=True, verbose_name="Data de Atualização")
 
     def recalcular_tc_acumulado(self, save=True):
-        """Recalcula valor_tc_acumulado e status a partir dos comprovantes ativos."""
-        agg = self.comprovantes_tc.filter(status=True).aggregate(total=Sum('valor'))
-        total = agg['total'] or Decimal('0')
+        """Sobrescreve valor_tc_acumulado com a soma dos ComprovanteTC ativos (nunca incrementa)."""
+        total = (
+            ComprovanteTC.objects.filter(contrato_pagamento_id=self.pk, status=True)
+            .aggregate(total=Sum('valor'))['total']
+            or Decimal('0')
+        )
         self.valor_tc_acumulado = total
 
         ultimo = (
-            self.comprovantes_tc.filter(status=True)
+            ComprovanteTC.objects.filter(contrato_pagamento_id=self.pk, status=True)
             .order_by('-criado_em')
             .first()
         )
         if ultimo and ultimo.criado_em:
             self.data_pagamento = ultimo.criado_em.date()
+        elif total <= 0:
+            self.data_pagamento = None
 
         valor_meta = self.valor_tc or Decimal('0')
-        if valor_meta > 0 and total >= valor_meta:
+        if self.status == 'NAO_PAGO':
+            pass
+        elif valor_meta > 0 and total >= valor_meta:
             self.status = 'PAGO'
-        elif total > 0 and self.status == 'PAGO' and total < valor_meta:
+        elif total > 0:
+            self.status = 'A_PAGAR'
+        elif total <= 0 and self.status == 'PAGO':
             self.status = 'A_PAGAR'
 
         if save:

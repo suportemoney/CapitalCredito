@@ -580,8 +580,9 @@ function carregarComprovantesTc(contratoId) {
 function renderizarListaComprovantes(data) {
     const tbody = $('#comp-tabela-lista');
     tbody.empty();
+    const acumulado = data.soma !== undefined ? data.soma : data.valor_tc_acumulado;
     $('#comp-resumo-tc').text(
-        formatarMoeda(data.valor_tc_acumulado) + ' / ' + formatarMoeda(data.valor_tc)
+        formatarMoeda(acumulado) + ' / ' + formatarMoeda(data.valor_tc)
     );
 
     const lista = data.comprovantes || [];
