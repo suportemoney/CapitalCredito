@@ -1,4 +1,4 @@
-let statusAtual = 'PAGO';
+let statusAtual = 'A_PAGAR';
 
 function filtroDatasDisponivel() {
     return $('#filtroDataInicio').length > 0 && $('#filtroDataFim').length > 0;
@@ -37,48 +37,6 @@ function getFiltroDatas() {
     }
 
     return { data_inicio: dataInicio, data_fim: dataFim };
-}
-
-function getFiltrosGerenciador() {
-    const filtros = {};
-
-    const userId = $('#filtroVendedor').val();
-    if (userId) filtros.user_id = userId;
-
-    const setorId = $('#filtroSetor').val();
-    if (setorId) filtros.setor_id = setorId;
-
-    const produtoId = $('#filtroProduto').val();
-    if (produtoId) filtros.produto_id = produtoId;
-
-    const classificadorId = $('#filtroClassificador').val();
-    if (classificadorId) filtros.classificador_id = classificadorId;
-
-    const cliente = $('#filtroCliente').val().trim();
-    if (cliente) filtros.cliente = cliente;
-
-    const cpf = $('#filtroCpf').val().trim();
-    if (cpf) filtros.cpf = cpf;
-
-    const banco = $('#filtroBanco').val().trim();
-    if (banco) filtros.banco = banco;
-
-    const ponta = $('#filtroPonta').val();
-    if (ponta !== '') filtros.ponta = ponta;
-
-    return filtros;
-}
-
-function limparFiltrosGerenciador() {
-    $('#filtroVendedor').val('');
-    $('#filtroSetor').val('');
-    $('#filtroProduto').val('');
-    $('#filtroClassificador').val('');
-    $('#filtroCliente').val('');
-    $('#filtroCpf').val('');
-    $('#filtroBanco').val('');
-    $('#filtroPonta').val('');
-    carregarTabela(statusAtual);
 }
 
 function aplicarFiltros() {
@@ -121,29 +79,29 @@ function carregarResumo() {
 $(document).ready(function() {
     inicializarFiltroDatasMesAtual();
     aplicarFiltros();
-
-    $('#filtroVendedor, #filtroSetor, #filtroProduto, #filtroClassificador, #filtroPonta').on('change', function() {
-        carregarTabela(statusAtual);
-    });
-
-    $('#filtroCliente, #filtroCpf, #filtroBanco').on('keyup', function(e) {
-        if (e.key === 'Enter') {
-            carregarTabela(statusAtual);
+    
+    $('#novo-status').on('change', function() {
+        if ($(this).val() === 'PAGO') {
+            $('#novo-data-pagamento').prop('required', true);
+        } else {
+            $('#novo-data-pagamento').prop('required', false);
         }
     });
     
-    if (window.podeGerenciar) {
-        $('#novo-status').on('change', function() {
-            if ($(this).val() === 'PAGO') {
-                $('#novo-data-pagamento').prop('required', true);
-            } else {
-                $('#novo-data-pagamento').prop('required', false);
-            }
-        });
+    const hoje = new Date().toISOString().split('T')[0];
+    $('#novo-data-contrato').val(hoje);
 
-        const hoje = new Date().toISOString().split('T')[0];
-        $('#novo-data-contrato').val(hoje);
-    }
+    $('#novo-valor-repasse').on('input blur', function() {
+        if (!$('#novo-valor-tc').val()) {
+            $('#novo-valor-tc').val($(this).val());
+        }
+    });
+    $('#novo-valor-comprovante, #comp-valor').on('input', function() {
+        const fmt = formatarValorComprovanteDigitos($(this).val());
+        if (fmt !== $(this).val()) {
+            $(this).val(fmt);
+        }
+    });
 });
 
 function carregarTabela(status) {
@@ -159,7 +117,6 @@ function carregarTabela(status) {
         params.data_inicio = filtros.data_inicio;
         params.data_fim = filtros.data_fim;
     }
-    Object.assign(params, getFiltrosGerenciador());
     
     $.ajax({
         url: '/vendas/financeiro/api/contratos/listar/',
@@ -182,21 +139,16 @@ function carregarTabela(status) {
 function exibirTabela(status, contratos) {
     let tbodyId = '';
     let colunas = [];
-    const incluirAcoes = !!window.podeGerenciar;
     
     if (status === 'A_PAGAR') {
         tbodyId = 'tabela-a-pagar';
-        colunas = ['funcionario', 'cliente', 'cpf', 'produto', 'banco', 'af', 'repasse', 'ponta', 'classificador'];
+        colunas = ['funcionario', 'cliente', 'cpf', 'produto', 'banco', 'af', 'repasse', 'tc', 'tc_pago', 'ponta', 'classificador', 'comprovante', 'acoes'];
     } else if (status === 'PAGO') {
         tbodyId = 'tabela-pago';
-        colunas = ['funcionario', 'cliente', 'cpf', 'produto', 'banco', 'af', 'repasse', 'ponta', 'classificador', 'data_pagamento'];
+        colunas = ['funcionario', 'cliente', 'cpf', 'produto', 'banco', 'af', 'repasse', 'tc', 'tc_pago', 'ponta', 'classificador', 'data_pagamento', 'comprovante', 'acoes'];
     } else if (status === 'NAO_PAGO') {
         tbodyId = 'tabela-nao-pago';
-        colunas = ['funcionario', 'cliente', 'cpf', 'produto', 'banco', 'af', 'repasse', 'ponta', 'classificador'];
-    }
-
-    if (incluirAcoes) {
-        colunas.push('acoes');
+        colunas = ['funcionario', 'cliente', 'cpf', 'produto', 'banco', 'af', 'repasse', 'tc', 'tc_pago', 'ponta', 'classificador', 'comprovante', 'acoes'];
     }
     
     const tbody = $(`#${tbodyId}`);
@@ -247,6 +199,14 @@ function gerarLinhaTabela(contrato, status) {
         <small class="text-muted">${repasseFormatado}</small>
     </td>`;
     html += `<td>
+        <input type="number" class="form-control form-control-sm campo-editavel" value="${contrato.valor_tc || 0}" step="0.01" min="0"
+               data-contrato-id="${contrato.id}" data-campo="valor_tc"
+               onblur="editarCampo(${contrato.id}, 'valor_tc', this.value)">
+    </td>`;
+    html += `<td>
+        <span class="badge ${badgeTcClasse(contrato)}">${formatarMoeda(contrato.valor_tc_acumulado || 0)} / ${formatarMoeda(contrato.valor_tc || 0)}</span>
+    </td>`;
+    html += `<td>
         <input type="checkbox" class="form-check-input campo-editavel" ${pontaChecked} 
                data-contrato-id="${contrato.id}" data-campo="flg_ponta" 
                onchange="editarCampo(${contrato.id}, 'flg_ponta', this.checked)">
@@ -261,14 +221,19 @@ function gerarLinhaTabela(contrato, status) {
     if (status === 'PAGO') {
         html += `<td>${contrato.data_pagamento ? formatarData(contrato.data_pagamento) : '-'}</td>`;
     }
+
+    const qtdComp = contrato.qtd_comprovantes || 0;
+    html += `<td>
+        <button type="button" class="btn btn-sm btn-outline-primary" onclick="abrirModalComprovantes(${contrato.id}, ${contrato.contrato_execucao_id || 'null'})" title="Comprovantes TC">
+            <i class='bx bx-receipt'></i> ${qtdComp > 0 ? qtdComp : '+'}
+        </button>
+    </td>`;
     
-    if (window.podeGerenciar) {
-        html += `<td>
-            <button type="button" class="btn btn-sm btn-danger" onclick="inativarContrato(${contrato.id})" title="Inativar">
-                <i class='bx bx-trash'></i>
-            </button>
-        </td>`;
-    }
+    html += `<td>
+        <button type="button" class="btn btn-sm btn-danger" onclick="inativarContrato(${contrato.id})" title="Inativar">
+            <i class='bx bx-trash'></i>
+        </button>
+    </td>`;
     html += '</tr>';
     
     return html;
@@ -331,6 +296,31 @@ function limparFormNovoContrato() {
     $('#novo-data-contrato').val(hoje);
     $('#novo-status').val('A_PAGAR');
     $('#novo-data-pagamento').prop('required', false);
+    $('#novo-valor-comprovante').val('');
+    $('#novo-arquivo-comprovante').val('');
+}
+
+function badgeTcClasse(contrato) {
+    const acum = parseFloat(contrato.valor_tc_acumulado || 0);
+    const meta = parseFloat(contrato.valor_tc || 0);
+    if (meta > 0 && acum >= meta) return 'bg-success';
+    if (acum > 0) return 'bg-warning text-dark';
+    return 'bg-secondary';
+}
+
+function parseValorComprovanteCampo(raw) {
+    const d = String(raw || '').replace(/\D/g, '');
+    if (!d) return 0;
+    return parseInt(d, 10) / 100;
+}
+
+function formatarValorComprovanteDigitos(digitsRaw) {
+    const d = String(digitsRaw || '').replace(/\D/g, '');
+    if (!d) return '';
+    let cent = parseInt(d, 10);
+    if (!isFinite(cent) || cent < 0) return '';
+    const reais = cent / 100;
+    return reais.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 function carregarSetorFuncionario(userId) {
@@ -381,26 +371,40 @@ function buscarClientePorCPF() {
 }
 
 function salvarNovoContrato() {
-    const formData = {
-        user_id: $('#novo-user').val(),
-        setor_id: $('#novo-setor').val(),
-        cliente_cpf: $('#novo-cpf').val(),
-        cliente_nome: $('#novo-cliente-nome').val(),
-        produto_id: $('#novo-produto').val(),
-        banco: $('#novo-banco').val(),
-        valor_af: $('#novo-valor-af').val(),
-        valor_repasse: $('#novo-valor-repasse').val(),
-        flg_ponta: $('#novo-flg-ponta').is(':checked'),
-        classificador_id: $('#novo-classificador').val(),
-        data_contrato: $('#novo-data-contrato').val(),
-        status: $('#novo-status').val(),
-        data_pagamento: $('#novo-data-pagamento').val(),
-        csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val()
-    };
-    
-    if (!formData.user_id || !formData.setor_id || !formData.cliente_cpf || !formData.cliente_nome || 
-        !formData.produto_id || !formData.banco || !formData.valor_af || !formData.valor_repasse || 
-        !formData.classificador_id || !formData.data_contrato || !formData.status) {
+    const valorTc = $('#novo-valor-tc').val() || $('#novo-valor-repasse').val();
+    const arquivoComp = document.getElementById('novo-arquivo-comprovante');
+    const valorCompRaw = $('#novo-valor-comprovante').val();
+    const valorComp = parseValorComprovanteCampo(valorCompRaw);
+
+    const formData = new FormData();
+    formData.append('user_id', $('#novo-user').val());
+    formData.append('setor_id', $('#novo-setor').val());
+    formData.append('cliente_cpf', $('#novo-cpf').val());
+    formData.append('cliente_nome', $('#novo-cliente-nome').val());
+    formData.append('produto_id', $('#novo-produto').val());
+    formData.append('banco', $('#novo-banco').val());
+    formData.append('valor_af', $('#novo-valor-af').val());
+    formData.append('valor_repasse', $('#novo-valor-repasse').val());
+    formData.append('valor_tc', valorTc);
+    formData.append('flg_ponta', $('#novo-flg-ponta').is(':checked') ? 'true' : 'false');
+    formData.append('classificador_id', $('#novo-classificador').val());
+    formData.append('data_contrato', $('#novo-data-contrato').val());
+    formData.append('status', $('#novo-status').val());
+    formData.append('data_pagamento', $('#novo-data-pagamento').val() || '');
+    formData.append('csrfmiddlewaretoken', $('input[name="csrfmiddlewaretoken"]').val());
+
+    if (arquivoComp && arquivoComp.files && arquivoComp.files[0]) {
+        if (!valorComp || valorComp <= 0) {
+            alert('Informe o valor do comprovante');
+            return;
+        }
+        formData.append('arquivo_comprovante', arquivoComp.files[0]);
+        formData.append('valor_comprovante', valorComp);
+    }
+
+    if (!$('#novo-user').val() || !$('#novo-setor').val() || !$('#novo-cpf').val() || !$('#novo-cliente-nome').val() ||
+        !$('#novo-produto').val() || !$('#novo-banco').val() || !$('#novo-valor-af').val() || !$('#novo-valor-repasse').val() ||
+        !valorTc || !$('#novo-classificador').val() || !$('#novo-data-contrato').val() || !$('#novo-status').val()) {
         alert('Preencha todos os campos obrigatórios');
         return;
     }
@@ -409,6 +413,8 @@ function salvarNovoContrato() {
         url: '/vendas/financeiro/api/contratos/criar/',
         method: 'POST',
         data: formData,
+        processData: false,
+        contentType: false,
         success: function(response) {
             if (response.success) {
                 alert(response.message);
@@ -523,5 +529,169 @@ function escapeHtml(text) {
         "'": '&#039;'
     };
     return String(text).replace(/[&<>"']/g, m => map[m]);
+}
+
+let _compContratoExecucaoId = null;
+
+function abrirModalComprovantes(contratoId, contratoExecucaoId) {
+    _compContratoExecucaoId = contratoExecucaoId;
+    $('#comp-contrato-id').val(contratoId);
+    $('#comp-valor').val('');
+    $('#comp-arquivo').val('');
+
+    const modalElement = document.getElementById('modalComprovantesTc');
+    if (modalElement && typeof bootstrap !== 'undefined') {
+        bootstrap.Modal.getOrCreateInstance(modalElement).show();
+    } else if (modalElement) {
+        $(modalElement).modal('show');
+    }
+
+    const ehV2 = contratoExecucaoId && contratoExecucaoId !== 'null';
+    if (ehV2) {
+        $('#comp-alerta-v2').removeClass('d-none');
+        $('#comp-form-upload').addClass('d-none');
+    } else {
+        $('#comp-alerta-v2').addClass('d-none');
+        $('#comp-form-upload').removeClass('d-none');
+    }
+
+    carregarComprovantesTc(contratoId);
+}
+
+function carregarComprovantesTc(contratoId) {
+    $.ajax({
+        url: '/vendas/financeiro/api/comprovantes-tc/',
+        method: 'GET',
+        data: { contrato_pagamento_id: contratoId },
+        success: function(response) {
+            if (!response.success) {
+                alert('Erro: ' + (response.message || 'Erro desconhecido'));
+                return;
+            }
+            renderizarListaComprovantes(response.data);
+        },
+        error: function(xhr) {
+            const response = xhr.responseJSON || {};
+            alert('Erro ao carregar comprovantes: ' + (response.message || 'Erro desconhecido'));
+        }
+    });
+}
+
+function renderizarListaComprovantes(data) {
+    const tbody = $('#comp-tabela-lista');
+    tbody.empty();
+    $('#comp-resumo-tc').text(
+        formatarMoeda(data.valor_tc_acumulado) + ' / ' + formatarMoeda(data.valor_tc)
+    );
+
+    const lista = data.comprovantes || [];
+    if (!lista.length) {
+        tbody.append('<tr><td colspan="5" class="text-center text-muted">Nenhum comprovante registrado</td></tr>');
+        return;
+    }
+
+    lista.forEach(function(c) {
+        const dataFmt = c.criado_em ? formatarDataHoraIso(c.criado_em) : '-';
+        const link = c.arquivo_url
+            ? `<a href="${escapeHtml(c.arquivo_url)}" target="_blank" rel="noopener">Abrir</a>`
+            : '-';
+        const btnExcluir = _compContratoExecucaoId
+            ? ''
+            : `<button type="button" class="btn btn-sm btn-outline-danger" onclick="excluirComprovanteTc(${c.id})" title="Excluir"><i class='bx bx-trash'></i></button>`;
+        tbody.append(
+            '<tr>' +
+            `<td>${formatarMoeda(c.valor)}</td>` +
+            `<td>${link}</td>` +
+            `<td>${escapeHtml(c.criado_por)}</td>` +
+            `<td>${dataFmt}</td>` +
+            `<td>${btnExcluir}</td>` +
+            '</tr>'
+        );
+    });
+}
+
+function enviarComprovanteTc() {
+    const contratoId = $('#comp-contrato-id').val();
+    const valor = parseValorComprovanteCampo($('#comp-valor').val());
+    const arquivoInput = document.getElementById('comp-arquivo');
+
+    if (!contratoId) {
+        alert('Contrato não identificado');
+        return;
+    }
+    if (!valor || valor <= 0) {
+        alert('Informe o valor do comprovante');
+        return;
+    }
+    if (!arquivoInput || !arquivoInput.files || !arquivoInput.files[0]) {
+        alert('Anexe o arquivo do comprovante');
+        return;
+    }
+
+    const fd = new FormData();
+    fd.append('contrato_pagamento_id', contratoId);
+    fd.append('valor', valor);
+    fd.append('arquivo', arquivoInput.files[0]);
+    fd.append('csrfmiddlewaretoken', $('input[name="csrfmiddlewaretoken"]').val());
+
+    $.ajax({
+        url: '/vendas/financeiro/api/comprovante-tc/',
+        method: 'POST',
+        data: fd,
+        processData: false,
+        contentType: false,
+        success: function(response) {
+            if (response.success) {
+                alert(response.message);
+                $('#comp-valor').val('');
+                $('#comp-arquivo').val('');
+                carregarComprovantesTc(contratoId);
+                aplicarFiltros();
+            } else {
+                alert('Erro: ' + response.message);
+            }
+        },
+        error: function(xhr) {
+            const response = xhr.responseJSON || {};
+            alert('Erro ao enviar comprovante: ' + (response.message || 'Erro desconhecido'));
+        }
+    });
+}
+
+function excluirComprovanteTc(comprovanteId) {
+    const contratoId = $('#comp-contrato-id').val();
+    if (!confirm('Excluir este comprovante TC?')) return;
+
+    $.ajax({
+        url: '/vendas/financeiro/api/comprovante-tc/excluir/',
+        method: 'POST',
+        data: {
+            contrato_pagamento_id: contratoId,
+            comprovante_id: comprovanteId,
+            csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val()
+        },
+        success: function(response) {
+            if (response.success) {
+                carregarComprovantesTc(contratoId);
+                aplicarFiltros();
+            } else {
+                alert('Erro: ' + response.message);
+            }
+        },
+        error: function(xhr) {
+            const response = xhr.responseJSON || {};
+            alert('Erro ao excluir comprovante: ' + (response.message || 'Erro desconhecido'));
+        }
+    });
+}
+
+function formatarDataHoraIso(iso) {
+    if (!iso) return '-';
+    try {
+        const d = new Date(iso);
+        return d.toLocaleString('pt-BR');
+    } catch (e) {
+        return iso;
+    }
 }
 

@@ -19,15 +19,6 @@ def render_contratos_index(request):
 
 @login_required
 @controle_acess(COD_SS_ESTEIRA)
-def render_dashboard_operacional_v2(request):
-    """Dashboard operacional com KPIs, produção e pendências."""
-    return render(request, 'contratos/v2/dashboard_operacional.html', {
-        'is_superuser': request.user.is_superuser or request.user.is_staff,
-    })
-
-
-@login_required
-@controle_acess(COD_SS_ESTEIRA)
 def render_crm_operacional_v2(request):
     return render(request, 'contratos/v2/crm_operacional.html', {'is_superuser': request.user.is_superuser or request.user.is_staff})
 

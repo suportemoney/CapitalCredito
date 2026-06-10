@@ -9,7 +9,7 @@ from django.db import transaction
 from django.db.models import Sum, Count
 from datetime import datetime
 from apps.seguranca.permissoes.decorators import controle_acess
-from apps.vendas.financeiro_vendas.models import ContratoPagamento, Classificador
+from apps.vendas.financeiro_vendas.models import ComprovanteTC, ContratoPagamento, Classificador
 from apps.vendas.siape.models import Cliente, Produto
 from apps.rh.admin.models import Setor
 from apps.rh.funcionarios.models import Funcionario
@@ -43,52 +43,6 @@ def _filtrar_por_data_pagamento(queryset, data_inicio, data_fim):
         data_pagamento__gte=data_inicio,
         data_pagamento__lte=data_fim,
     )
-
-
-def _usuario_pode_gerenciar(user):
-    """Superusuário ou membro da equipe (staff) pode criar/editar/inativar contratos."""
-    return user.is_superuser or user.is_staff
-
-
-def _aplicar_filtros_gerenciador(queryset, request):
-    """Aplica filtros opcionais do gerenciador de contratos."""
-    user_id = request.GET.get('user_id', '').strip()
-    if user_id:
-        queryset = queryset.filter(user_id=user_id)
-
-    setor_id = request.GET.get('setor_id', '').strip()
-    if setor_id:
-        queryset = queryset.filter(setor_id=setor_id)
-
-    produto_id = request.GET.get('produto_id', '').strip()
-    if produto_id:
-        queryset = queryset.filter(produto_id=produto_id)
-
-    classificador_id = request.GET.get('classificador_id', '').strip()
-    if classificador_id:
-        queryset = queryset.filter(classificador_id=classificador_id)
-
-    cpf = request.GET.get('cpf', '').strip()
-    if cpf:
-        cpf_limpo = re.sub(r'\D', '', cpf)
-        if cpf_limpo:
-            queryset = queryset.filter(cliente_cpf__icontains=cpf_limpo)
-
-    cliente = request.GET.get('cliente', '').strip()
-    if cliente:
-        queryset = queryset.filter(cliente_nome__icontains=cliente.upper())
-
-    banco = request.GET.get('banco', '').strip()
-    if banco:
-        queryset = queryset.filter(banco__icontains=banco.upper())
-
-    ponta = request.GET.get('ponta', '').strip()
-    if ponta in ('1', 'true', 'sim'):
-        queryset = queryset.filter(flg_ponta=True)
-    elif ponta in ('0', 'false', 'nao'):
-        queryset = queryset.filter(flg_ponta=False)
-
-    return queryset
 
 
 @login_required
@@ -156,8 +110,7 @@ def api_listar_contratos(request):
             contratos = contratos.filter(status='PAGO')
         elif status == 'NAO_PAGO':
             contratos = contratos.filter(status='NAO_PAGO')
-
-        contratos = _aplicar_filtros_gerenciador(contratos, request)
+        
         contratos = contratos.order_by('-data_contrato', '-data_criacao')
         
         data = []
@@ -165,7 +118,8 @@ def api_listar_contratos(request):
             funcionario = None
             if hasattr(contrato.user, 'funcionario_profile') and contrato.user.funcionario_profile:
                 funcionario = contrato.user.funcionario_profile.nome_completo
-            
+
+            qtd_comprovantes = contrato.comprovantes_tc.filter(status=True).count()
             data.append({
                 'id': contrato.id,
                 'funcionario': funcionario or contrato.user.username,
@@ -176,12 +130,17 @@ def api_listar_contratos(request):
                 'banco': contrato.banco,
                 'valor_af': float(contrato.valor_af),
                 'valor_repasse': float(contrato.valor_repasse),
+                'valor_tc': float(contrato.valor_tc or 0),
+                'valor_tc_acumulado': float(contrato.valor_tc_acumulado or 0),
                 'flg_ponta': contrato.flg_ponta,
                 'classificador_id': contrato.classificador.id,
                 'classificador_nome': contrato.classificador.titulo,
                 'data_contrato': contrato.data_contrato.strftime('%Y-%m-%d'),
                 'status': contrato.status,
                 'data_pagamento': contrato.data_pagamento.strftime('%Y-%m-%d') if contrato.data_pagamento else '',
+                'contrato_execucao_id': contrato.contrato_execucao_id,
+                'qtd_comprovantes': qtd_comprovantes,
+                'tem_comprovante': qtd_comprovantes > 0,
             })
         
         return JsonResponse({'success': True, 'data': data})
@@ -251,9 +210,6 @@ def api_get_setor_funcionario(request, user_id):
 def api_criar_contrato(request):
     """API POST para criar novo contrato"""
     try:
-        if not _usuario_pode_gerenciar(request.user):
-            return JsonResponse({'success': False, 'message': 'Sem permissão para criar contratos'}, status=403)
-
         user_id = request.POST.get('user_id')
         setor_id = request.POST.get('setor_id')
         cliente_cpf = request.POST.get('cliente_cpf', '').strip()
@@ -262,7 +218,10 @@ def api_criar_contrato(request):
         banco = request.POST.get('banco', '').strip()
         valor_af = request.POST.get('valor_af', '').strip()
         valor_repasse = request.POST.get('valor_repasse', '').strip()
-        flg_ponta = request.POST.get('flg_ponta') == 'on'
+        valor_tc = request.POST.get('valor_tc', '').strip()
+        valor_comprovante = request.POST.get('valor_comprovante', '').strip()
+        arquivo_comprovante = request.FILES.get('arquivo_comprovante')
+        flg_ponta = request.POST.get('flg_ponta') == 'on' or request.POST.get('flg_ponta') == 'true'
         classificador_id = request.POST.get('classificador_id')
         data_contrato = request.POST.get('data_contrato', '').strip()
         status = request.POST.get('status', 'A_PAGAR')
@@ -315,6 +274,19 @@ def api_criar_contrato(request):
             if status == 'PAGO' and data_pagamento:
                 data_pagamento_obj = datetime.strptime(data_pagamento, '%Y-%m-%d').date()
             
+            from decimal import Decimal
+
+            valor_tc_dec = Decimal(valor_tc) if valor_tc else Decimal(valor_repasse)
+            valor_comp_dec = None
+            if valor_comprovante:
+                try:
+                    valor_comp_dec = Decimal(str(valor_comprovante).replace(',', '.'))
+                except Exception:
+                    return JsonResponse({'success': False, 'message': 'Valor do comprovante inválido'})
+
+            if arquivo_comprovante and (valor_comp_dec is None or valor_comp_dec <= 0):
+                return JsonResponse({'success': False, 'message': 'Informe o valor do comprovante'})
+
             with transaction.atomic():
                 contrato = ContratoPagamento.objects.create(
                     user=user,
@@ -325,13 +297,23 @@ def api_criar_contrato(request):
                     banco=banco.upper(),
                     valor_af=valor_af,
                     valor_repasse=valor_repasse,
+                    valor_tc=valor_tc_dec,
                     flg_ponta=flg_ponta,
                     classificador=classificador,
                     data_contrato=data_contrato_obj,
                     status=status,
                     data_pagamento=data_pagamento_obj,
-                    status_ativo=True
+                    status_ativo=True,
                 )
+
+                if arquivo_comprovante and valor_comp_dec and valor_comp_dec > 0:
+                    ComprovanteTC.objects.create(
+                        contrato_pagamento=contrato,
+                        valor=valor_comp_dec,
+                        arquivo=arquivo_comprovante,
+                        criado_por=request.user,
+                    )
+                    contrato.recalcular_tc_acumulado()
             
             return JsonResponse({
                 'success': True,
@@ -358,9 +340,6 @@ def api_criar_contrato(request):
 def api_editar_campo(request, contrato_id):
     """API POST para editar um campo específico do contrato"""
     try:
-        if not _usuario_pode_gerenciar(request.user):
-            return JsonResponse({'success': False, 'message': 'Sem permissão para editar contratos'}, status=403)
-
         campo = request.POST.get('campo')
         valor = request.POST.get('valor', '').strip()
         
@@ -389,6 +368,9 @@ def api_editar_campo(request, contrato_id):
             elif campo == 'classificador_id':
                 classificador = Classificador.objects.get(id=valor)
                 contrato.classificador = classificador
+            elif campo == 'valor_tc':
+                from decimal import Decimal
+                contrato.valor_tc = Decimal(valor)
             else:
                 return JsonResponse({'success': False, 'message': 'Campo inválido'})
             
@@ -410,9 +392,6 @@ def api_editar_campo(request, contrato_id):
 def api_inativar_contrato(request, contrato_id):
     """API POST para inativar contrato"""
     try:
-        if not _usuario_pode_gerenciar(request.user):
-            return JsonResponse({'success': False, 'message': 'Sem permissão para inativar contratos'}, status=403)
-
         contrato = ContratoPagamento.objects.get(id=contrato_id, status_ativo=True)
         contrato.status_ativo = False
         contrato.save()

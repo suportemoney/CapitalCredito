@@ -21,9 +21,6 @@ from apps.contratos_v2.models import (
     EnvioComprovantePagamentoVendedor,
     HistoricoEventoDigitacao,
     HistoricoEventoSimulacao,
-    HistoricoTransacaoContrato,
-    HistoricoTransacaoProposta,
-    HistoricoTransacaoSimulacao,
     HistoricoTransicaoContrato,
     LogCatalogoContratos,
     Pendencia,
@@ -539,57 +536,3 @@ class LogCatalogoContratosAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
-
-
-class _HistoricoTransacaoAdminBase(admin.ModelAdmin):
-    """Base somente leitura — visível apenas para superusuários."""
-
-    def has_module_permission(self, request):
-        return request.user.is_superuser
-
-    def has_view_permission(self, request, obj=None):
-        return request.user.is_superuser
-
-    def has_add_permission(self, request):
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        return False
-
-    def has_delete_permission(self, request, obj=None):
-        return False
-
-
-@admin.register(HistoricoTransacaoSimulacao)
-class HistoricoTransacaoSimulacaoAdmin(_HistoricoTransacaoAdminBase):
-    list_display = ('data_hora', 'acao', 'solicitacao', 'estado_novo', 'usuario', 'correlacao_id')
-    list_filter = ('acao', 'data_hora')
-    search_fields = ('solicitacao__id', 'correlacao_id', 'observacao')
-    readonly_fields = (
-        'correlacao_id', 'solicitacao', 'carteira_clientes', 'acao',
-        'estado_anterior', 'estado_novo', 'payload', 'proposta_vinculada',
-        'historico_evento', 'usuario', 'observacao', 'data_hora',
-    )
-
-
-@admin.register(HistoricoTransacaoProposta)
-class HistoricoTransacaoPropostaAdmin(_HistoricoTransacaoAdminBase):
-    list_display = ('data_hora', 'acao', 'proposta', 'contrato_vinculado', 'usuario', 'correlacao_id')
-    list_filter = ('acao', 'data_hora')
-    search_fields = ('proposta__codigo', 'correlacao_id', 'observacao')
-    readonly_fields = (
-        'correlacao_id', 'proposta', 'solicitacao_origem', 'carteira_clientes', 'acao',
-        'payload', 'contrato_vinculado', 'historico_digitacao', 'usuario', 'observacao', 'data_hora',
-    )
-
-
-@admin.register(HistoricoTransacaoContrato)
-class HistoricoTransacaoContratoAdmin(_HistoricoTransacaoAdminBase):
-    list_display = ('data_hora', 'acao', 'contrato', 'etapa_nova', 'pendencia', 'usuario', 'correlacao_id')
-    list_filter = ('acao', 'data_hora', 'etapa_nova')
-    search_fields = ('contrato__codigo', 'correlacao_id', 'observacao')
-    readonly_fields = (
-        'correlacao_id', 'contrato', 'proposta_origem', 'solicitacao_digitacao', 'carteira_clientes',
-        'acao', 'etapa_anterior', 'sub_anterior', 'etapa_nova', 'sub_nova', 'payload',
-        'pendencia', 'historico_transicao', 'usuario', 'observacao', 'data_hora',
-    )

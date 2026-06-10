@@ -1204,6 +1204,12 @@ def _registrar_comprovante_tc_sem_rm(
             if not ok:
                 raise RuntimeError(msg or 'Falha ao aplicar sub-status TC.')
 
+        from apps.vendas.financeiro_vendas.services.sincronizar_comprovante import (
+            sincronizar_comprovante_v2_para_ranking,
+        )
+
+        sincronizar_comprovante_v2_para_ranking(comp, ce, rm_payload=rm_payload)
+
     ce.refresh_from_db()
     return comp, soma, valor_tc, total_atingido
 
@@ -1775,6 +1781,12 @@ def api_post_excluir_comprovante_tc(request):
         with transaction.atomic():
             comp.status = False
             comp.save(update_fields=['status'])
+
+            from apps.vendas.financeiro_vendas.services.sincronizar_comprovante import (
+                excluir_comprovante_v2_do_ranking,
+            )
+
+            excluir_comprovante_v2_do_ranking(comp.id)
 
             if RegisterMoney_has_for_ce(ce):
                 _decrementar_acumulado_rm(ce, valor_excluido)

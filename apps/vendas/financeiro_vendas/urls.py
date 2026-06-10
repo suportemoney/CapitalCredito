@@ -2,6 +2,7 @@ from django.urls import path
 from . import views
 from .apis import gerenciar as apis_gerenciar
 from .apis import classificador as apis_classificador
+from .apis import comprovante as apis_comprovante
 
 app_name = 'financeiro_vendas'
 
@@ -17,6 +18,11 @@ urlpatterns = [
     path('api/contratos/inativar/<int:contrato_id>/', apis_gerenciar.api_inativar_contrato, name='api_inativar_contrato'),
     path('api/cliente/buscar-cpf/', apis_gerenciar.api_buscar_cliente_por_cpf, name='api_buscar_cliente_cpf'),
     path('api/funcionario/get-setor/<int:user_id>/', apis_gerenciar.api_get_setor_funcionario, name='api_get_setor_funcionario'),
+
+    # APIs Comprovante TC
+    path('api/comprovante-tc/', apis_comprovante.api_upload_comprovante_tc, name='api_upload_comprovante_tc'),
+    path('api/comprovantes-tc/', apis_comprovante.api_listar_comprovantes_tc, name='api_listar_comprovantes_tc'),
+    path('api/comprovante-tc/excluir/', apis_comprovante.api_excluir_comprovante_tc, name='api_excluir_comprovante_tc'),
     
     # APIs Classificador
     path('api/classificador/listar/', apis_classificador.api_listar_classificadores, name='api_listar_classificadores'),
