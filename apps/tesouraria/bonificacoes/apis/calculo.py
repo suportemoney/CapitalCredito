@@ -5,7 +5,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
-from django.db.models import Sum, Q, F, ExpressionWrapper, DecimalField
+from django.db.models import Q, Prefetch
 from apps.seguranca.permissoes.decorators import controle_acess, controle_acess_any
 from apps.tesouraria.bonificacoes.models import (
     BonificacaoRegra, BonificacaoGatilho, BonificacaoFuncionarioRegra,
@@ -13,32 +13,51 @@ from apps.tesouraria.bonificacoes.models import (
     TipoRegraChoices, CampoValorChoices
 )
 from apps.rh.funcionarios.models import Funcionario
-from apps.vendas.financeiro_vendas.models import ContratoPagamento
+from apps.vendas.financeiro_vendas.models import ContratoPagamento, ComprovanteTC
+
+def _obter_tc_acumulado_contrato(contrato):
+    """TC acumulado efetivo: soma dos comprovantes ativos ou valor legado do contrato."""
+    comps = getattr(contrato, '_comps_ativos_cache', None)
+    if comps:
+        return sum((c.valor for c in comps), Decimal('0'))
+    return contrato.valor_tc_acumulado or Decimal('0')
+
+def _calcular_repasse_contrato(contrato):
+    """Coluna repasse do financeiro: valor_tc_acumulado × percentual do classificador."""
+    tc_acumulado = _obter_tc_acumulado_contrato(contrato)
+    pct = Decimal('0')
+    if contrato.classificador_id and contrato.classificador:
+        pct = contrato.classificador.percentual or Decimal('0')
+    return tc_acumulado * pct / Decimal('100')
 
 def _obter_valor_base_funcionario(funcionario, periodo_inicio, periodo_fim, regra=None):
-    """Soma ContratoPagamento do user do funcionário no período (PAGO), conforme campo da regra."""
+    """
+    Valor base = soma do repasse de cada contrato PAGO no período.
+    Repasse = valor_tc_acumulado × classificador%; a bonificação usa esse total.
+    """
     user = getattr(funcionario, 'usuario', None)
     if not user:
         return Decimal('0.00')
     campo = regra.campo_valor if regra else CampoValorChoices.VALOR_REPASSE
-    qs = ContratoPagamento.objects.filter(
+    comps_prefetch = Prefetch(
+        'comprovantes_tc',
+        queryset=ComprovanteTC.objects.filter(status=True),
+        to_attr='_comps_ativos_cache',
+    )
+    contratos = ContratoPagamento.objects.filter(
         user=user,
         data_contrato__gte=periodo_inicio,
         data_contrato__lte=periodo_fim,
         status='PAGO',
         status_ativo=True,
-    )
-    if campo == CampoValorChoices.VALOR_AF:
-        agg = qs.aggregate(total=Sum('valor_af'))
-    else:
-        # Repasse = TC acumulado × percentual do classificador de cada contrato
-        agg = qs.annotate(
-            valor_calculado=ExpressionWrapper(
-                F('valor_tc_acumulado') * F('classificador__percentual') / Decimal('100'),
-                output_field=DecimalField(max_digits=15, decimal_places=2),
-            )
-        ).aggregate(total=Sum('valor_calculado'))
-    return agg['total'] or Decimal('0.00')
+    ).select_related('classificador').prefetch_related(comps_prefetch)
+    total = Decimal('0.00')
+    for contrato in contratos:
+        if campo == CampoValorChoices.VALOR_AF:
+            total += contrato.valor_af or Decimal('0')
+        else:
+            total += _calcular_repasse_contrato(contrato)
+    return total
 
 def _calcular_bonificacao_regra(regra, valor_base, gatilho_aplicado=None):
     """Calcula valor da bonificação conforme tipo da regra."""
