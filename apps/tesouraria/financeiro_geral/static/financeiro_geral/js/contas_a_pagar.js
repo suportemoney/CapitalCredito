@@ -14,12 +14,97 @@
     var contaIdPago = null;
     var tipoAtual = 'CONTA';
     var filtroIdFromUrl = null;
+
+    var EXTENSOES_PERMITIDAS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'pdf'];
+    var TAMANHO_MAX_MB = 10;
+
     function formatarMoeda(v) {
         return 'R$ ' + (typeof v === 'number' ? v.toFixed(2) : parseFloat(v || 0).toFixed(2)).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
     }
     function dataHoje() {
         var d = new Date();
         return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+    function badgeStatus(pago) {
+        if (pago) {
+            return '<span class="badge-status badge-status-pago"><i class="bx bx-check-circle"></i> Pago</span>';
+        }
+        return '<span class="badge-status badge-status-pendente"><i class="bx bx-error-circle"></i> Pendente</span>';
+    }
+    function celulaComprovante(item) {
+        if (item.has_comprovante && item.comprovante_url) {
+            var isPdf = (item.comprovante_url || '').toLowerCase().indexOf('.pdf') !== -1;
+            var icone = isPdf ? 'bxs-file-pdf' : 'bxs-file-image';
+            return '<a href="' + item.comprovante_url + '" target="_blank" rel="noopener" class="link-comprovante" title="Ver comprovante"><i class="bx ' + icone + '"></i></a>';
+        }
+        return '<span class="sem-comprovante">—</span>';
+    }
+    function validarArquivo(file) {
+        if (!file) return null;
+        var nome = (file.name || '').toLowerCase();
+        var ext = nome.split('.').pop();
+        if (EXTENSOES_PERMITIDAS.indexOf(ext) === -1) {
+            return 'Arquivo não permitido. Use imagem (JPG, PNG, GIF, WEBP) ou PDF.';
+        }
+        if (file.size > TAMANHO_MAX_MB * 1024 * 1024) {
+            return 'Arquivo não pode exceder ' + TAMANHO_MAX_MB + ' MB.';
+        }
+        return null;
+    }
+    function atualizarPreviewArquivo(inputId, previewId, nomeId) {
+        var input = document.getElementById(inputId);
+        var preview = document.getElementById(previewId);
+        var nomeEl = document.getElementById(nomeId);
+        if (!input || !preview) return;
+        if (input.files && input.files[0]) {
+            var erro = validarArquivo(input.files[0]);
+            if (erro) {
+                alert(erro);
+                input.value = '';
+                preview.classList.remove('visivel');
+                return;
+            }
+            var file = input.files[0];
+            var isPdf = (file.name || '').toLowerCase().endsWith('.pdf');
+            var icone = preview.querySelector('.preview-icon i');
+            if (icone) icone.className = 'bx ' + (isPdf ? 'bxs-file-pdf' : 'bxs-file-image');
+            if (nomeEl) nomeEl.textContent = file.name;
+            preview.classList.add('visivel');
+        } else {
+            preview.classList.remove('visivel');
+            if (nomeEl) nomeEl.textContent = '';
+        }
+    }
+    function limparPreviewArquivo(inputId, previewId, nomeId) {
+        var input = document.getElementById(inputId);
+        if (input) input.value = '';
+        var preview = document.getElementById(previewId);
+        if (preview) preview.classList.remove('visivel');
+        var nomeEl = document.getElementById(nomeId);
+        if (nomeEl) nomeEl.textContent = '';
+    }
+    function initUploadArea(areaId, inputId, previewId, nomeId) {
+        var area = document.getElementById(areaId);
+        var input = document.getElementById(inputId);
+        if (!area || !input) return;
+        input.addEventListener('change', function() {
+            atualizarPreviewArquivo(inputId, previewId, nomeId);
+        });
+        area.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            area.classList.add('dragover');
+        });
+        area.addEventListener('dragleave', function() {
+            area.classList.remove('dragover');
+        });
+        area.addEventListener('drop', function(e) {
+            e.preventDefault();
+            area.classList.remove('dragover');
+            if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                input.files = e.dataTransfer.files;
+                atualizarPreviewArquivo(inputId, previewId, nomeId);
+            }
+        });
     }
     function paramsFiltros(tipo) {
         var $filtros = $('.filtros-contas-pagar[data-tipo="' + tipo + '"]');
@@ -81,23 +166,30 @@
         if (st) p.status = st;
         return p;
     }
+    function linhaVazia(colspan) {
+        return '<tr class="tabela-vazia"><td colspan="' + colspan + '"><i class="bx bx-info-circle"></i> Nenhum registro encontrado.</td></tr>';
+    }
     function carregarTabelaBonificacoes() {
         $('#tabela-bonificacao').empty();
         var params = paramsFiltrosBonificacoes();
         $.get(urlBonifListar, params).done(function(r) {
             if (!r.success || !r.result) return;
+            if (!r.result.length) {
+                $('#tabela-bonificacao').append(linhaVazia(8));
+                return;
+            }
             r.result.forEach(function(b) {
-                var statusPag = b.status_pagamento ? '<span class="badge bg-success">Pago</span>' : '<span class="badge bg-warning">Pendente</span>';
+                var statusPag = b.status_pagamento ? badgeStatus(true) : badgeStatus(false);
                 var chavePixEsc = (b.chave_pix || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-                var btnPagar = b.status_pagamento ? '' : '<button type="button" class="btn btn-sm btn-primary me-1" onclick="window.financeiroGeralContasPagar.abrirModalBonifPagarAgora(' + b.id + ', \'' + (b.funcionario_nome || '').replace(/'/g, "\\'") + '\', ' + b.valor_bonificacao + ', \'' + (b.mes_referente || '').replace(/'/g, "\\'") + '\', \'' + chavePixEsc + '\')">Pagar Agora</button>';
-                var btnEditar = '<button type="button" class="btn btn-sm btn-outline-secondary me-1" onclick="window.financeiroGeralContasPagar.abrirModalEditarBonif(' + b.id + ')">Editar</button>';
-                var btnInativar = '<button type="button" class="btn btn-sm btn-outline-danger" onclick="window.financeiroGeralContasPagar.inativarBonif(' + b.id + ')">Inativar</button>';
-                var acoes = '<span class="d-flex flex-wrap gap-1">' + btnPagar + btnEditar + btnInativar + '</span>';
+                var btnPagar = b.status_pagamento ? '' : '<button type="button" class="btn btn-sm btn-primary btn-acao-pagar me-1" onclick="window.financeiroGeralContasPagar.abrirModalBonifPagarAgora(' + b.id + ', \'' + (b.funcionario_nome || '').replace(/'/g, "\\'") + '\', ' + b.valor_bonificacao + ', \'' + (b.mes_referente || '').replace(/'/g, "\\'") + '\', \'' + chavePixEsc + '\')"><i class="bx bx-money"></i> Pagar Agora</button>';
+                var btnEditar = '<button type="button" class="btn btn-sm btn-outline-secondary btn-acao-editar me-1" onclick="window.financeiroGeralContasPagar.abrirModalEditarBonif(' + b.id + ')"><i class="bx bx-edit"></i> Editar</button>';
+                var btnInativar = '<button type="button" class="btn btn-sm btn-outline-danger" onclick="window.financeiroGeralContasPagar.inativarBonif(' + b.id + ')"><i class="bx bx-trash"></i> Inativar</button>';
+                var acoes = '<span class="d-flex flex-wrap gap-1 td-acoes">' + btnPagar + btnEditar + btnInativar + '</span>';
                 var urlDownload = urlBonifComprovanteDownload + '?id=' + encodeURIComponent(b.id);
-                var comprovanteCell = b.has_comprovante ? '<a href="' + urlDownload + '" download title="Baixar comprovante"><i class="bx bx-download"></i></a>' : '-';
+                var comprovanteCell = b.has_comprovante ? '<a href="' + urlDownload + '" download class="link-comprovante" title="Baixar comprovante"><i class="bx bx-download"></i></a>' : '<span class="sem-comprovante">—</span>';
                 var chavePixCell = (b.chave_pix || '-');
                 var dataPag = b.data_pagamento || '-';
-                var linha = '<tr><td>' + (b.funcionario_nome || '-') + '</td><td>' + formatarMoeda(b.valor_bonificacao) + '</td><td>' + (b.mes_referente || '-') + '</td><td>' + dataPag + '</td><td>' + statusPag + '</td><td>' + chavePixCell + '</td><td>' + comprovanteCell + '</td><td>' + acoes + '</td></tr>';
+                var linha = '<tr><td>' + (b.funcionario_nome || '-') + '</td><td class="td-valor">' + formatarMoeda(b.valor_bonificacao) + '</td><td>' + (b.mes_referente || '-') + '</td><td>' + dataPag + '</td><td>' + statusPag + '</td><td>' + chavePixCell + '</td><td>' + comprovanteCell + '</td><td>' + acoes + '</td></tr>';
                 $('#tabela-bonificacao').append(linha);
             });
         });
@@ -105,24 +197,29 @@
     function carregarTabela(tipo) {
         tipoAtual = tipo;
         var $tbody = tipo === 'CONTA' ? $('#tabela-conta') : (tipo === 'SALARIO' ? $('#tabela-salario') : $('#tabela-beneficio'));
+        var colspan = tipo === 'CONTA' ? 8 : 7;
         $tbody.empty();
         var params = paramsFiltros(tipo);
         $.get(urlListar, params).done(function(r) {
             if (!r.success || !r.result) return;
+            if (!r.result.length) {
+                $tbody.append(linhaVazia(colspan));
+                return;
+            }
             r.result.forEach(function(c) {
-                var status = c.pago ? '<span class="badge bg-success">Pago</span>' : '<span class="badge bg-warning">Pendente</span>';
+                var status = badgeStatus(c.pago);
                 var podeEditar = !c.pago || (window.IS_SUPERUSER === true);
-                var btnEditar = podeEditar ? '<button type="button" class="btn btn-sm btn-outline-secondary me-1" onclick="window.financeiroGeralContasPagar.abrirModalEditar(' + c.id + ', \'' + tipo + '\')">Editar</button>' : '';
-                var btnPagar = c.pago ? '' : '<button type="button" class="btn btn-sm btn-primary" onclick="window.financeiroGeralContasPagar.abrirModalPago(' + c.id + ', \'' + (c.descricao || '').replace(/'/g, "\\'") + '\', ' + c.valor + ', \'' + c.data_vencimento + '\')">Pagar</button>';
-                var acoes = '<span class="d-flex flex-wrap gap-1">' + btnEditar + btnPagar + '</span>';
-                var comprovanteCell = (c.has_comprovante && c.comprovante_url) ? '<a href="' + c.comprovante_url + '" target="_blank" rel="noopener" title="Comprovante"><i class="bx bx-file"></i></a>' : '-';
+                var btnEditar = podeEditar ? '<button type="button" class="btn btn-sm btn-outline-secondary btn-acao-editar me-1" onclick="window.financeiroGeralContasPagar.abrirModalEditar(' + c.id + ', \'' + tipo + '\')"><i class="bx bx-edit"></i> Editar</button>' : '';
+                var btnPagar = c.pago ? '' : '<button type="button" class="btn btn-sm btn-primary btn-acao-pagar" onclick="window.financeiroGeralContasPagar.abrirModalPago(' + c.id + ', \'' + (c.descricao || '').replace(/'/g, "\\'") + '\', ' + c.valor + ', \'' + c.data_vencimento + '\')"><i class="bx bx-money"></i> Pagar</button>';
+                var acoes = '<span class="d-flex flex-wrap gap-1 td-acoes">' + btnEditar + btnPagar + '</span>';
+                var comprovanteCell = celulaComprovante(c);
                 var linha = '';
                 if (tipo === 'CONTA') {
-                    linha = '<tr><td>' + (c.descricao || '') + '</td><td>' + (c.categoria_nome || '-') + '</td><td>' + (c.subcategoria_nome || '-') + '</td><td>' + formatarMoeda(c.valor) + '</td><td>' + c.data_vencimento + '</td><td>' + status + '</td><td>' + comprovanteCell + '</td><td>' + acoes + '</td></tr>';
+                    linha = '<tr><td>' + (c.descricao || '') + '</td><td>' + (c.categoria_nome || '-') + '</td><td>' + (c.subcategoria_nome || '-') + '</td><td class="td-valor">' + formatarMoeda(c.valor) + '</td><td>' + c.data_vencimento + '</td><td>' + status + '</td><td>' + comprovanteCell + '</td><td>' + acoes + '</td></tr>';
                 } else if (tipo === 'SALARIO') {
-                    linha = '<tr><td>' + (c.descricao || '') + '</td><td>' + (c.funcionario_nome || '-') + '</td><td>' + formatarMoeda(c.valor) + '</td><td>' + c.data_vencimento + '</td><td>' + status + '</td><td>' + comprovanteCell + '</td><td>' + acoes + '</td></tr>';
+                    linha = '<tr><td>' + (c.descricao || '') + '</td><td>' + (c.funcionario_nome || '-') + '</td><td class="td-valor">' + formatarMoeda(c.valor) + '</td><td>' + c.data_vencimento + '</td><td>' + status + '</td><td>' + comprovanteCell + '</td><td>' + acoes + '</td></tr>';
                 } else {
-                    linha = '<tr><td>' + (c.descricao || '') + '</td><td>' + (c.funcionario_nome || '-') + '</td><td>' + (c.tipo_beneficio_nome || '-') + '</td><td>' + formatarMoeda(c.valor) + '</td><td>' + c.data_vencimento + '</td><td>' + status + '</td><td>' + comprovanteCell + '</td><td>' + acoes + '</td></tr>';
+                    linha = '<tr><td>' + (c.descricao || '') + '</td><td>' + (c.funcionario_nome || '-') + '</td><td>' + (c.tipo_beneficio_nome || '-') + '</td><td class="td-valor">' + formatarMoeda(c.valor) + '</td><td>' + c.data_vencimento + '</td><td>' + status + '</td><td>' + comprovanteCell + '</td><td>' + acoes + '</td></tr>';
                 }
                 $tbody.append(linha);
             });
@@ -132,7 +229,7 @@
         contaIdPago = id;
         $('#modalPagoDados').html('<p><strong>' + (descricao || '') + '</strong><br>Valor: ' + formatarMoeda(valor) + '<br>Vencimento: ' + (vencimento || '') + '</p>');
         $('#modalPagoData').val(dataHoje());
-        $('#modalPagoComprovante').val('');
+        limparPreviewArquivo('modalPagoComprovante', 'preview-pago', 'preview-pago-nome');
         new bootstrap.Modal(document.getElementById('modalConfirmarPago')).show();
     }
     function confirmarPago() {
@@ -143,7 +240,11 @@
         formData.append('conta_id', contaIdPago);
         formData.append('data_pagamento', dataPag);
         var fileInput = document.getElementById('modalPagoComprovante');
-        if (fileInput.files && fileInput.files[0]) formData.append('comprovante', fileInput.files[0]);
+        if (fileInput.files && fileInput.files[0]) {
+            var erro = validarArquivo(fileInput.files[0]);
+            if (erro) { alert(erro); return; }
+            formData.append('comprovante', fileInput.files[0]);
+        }
         $.ajax({ url: urlMarcarPago, type: 'POST', data: formData, processData: false, contentType: false }).done(function(r) {
             if (r.success) {
                 bootstrap.Modal.getInstance(document.getElementById('modalConfirmarPago')).hide();
@@ -158,11 +259,12 @@
         $('#nova-conta-tipo').val(tipo);
         $('#nova-conta-tipo-select').val(tipo);
         $('#nova-conta-row-tipo').hide();
-        $('#editar-comprovante').val('');
+        $('#nova-comprovante-row').hide();
+        limparPreviewArquivo('editar-comprovante', 'preview-editar', 'preview-editar-nome');
         if (window.IS_SUPERUSER === true) $('#editar-comprovante-row').show(); else $('#editar-comprovante-row').hide();
         toggleCamposNovaConta();
         var titulosEditar = { 'CONTA': 'Editar conta (empresa)', 'SALARIO': 'Editar salário', 'BENEFICIO': 'Editar benefício' };
-        $('#modalNovaContaTitulo').text(titulosEditar[tipo] || 'Editar');
+        $('#modalNovaContaTitulo').html('<i class="bx bx-edit"></i> ' + (titulosEditar[tipo] || 'Editar'));
         var params = paramsFiltros(tipo);
         params.id = contaId;
         $.get(urlListar, params).done(function(r) {
@@ -222,6 +324,8 @@
         var fileInput = document.getElementById('editar-comprovante');
         var enviaArquivo = window.IS_SUPERUSER === true && fileInput && fileInput.files && fileInput.files[0];
         if (enviaArquivo) {
+            var erro = validarArquivo(fileInput.files[0]);
+            if (erro) { alert(erro); return; }
             var formData = new FormData();
             for (var k in data) { if (data.hasOwnProperty(k)) formData.append(k, data[k]); }
             formData.append('comprovante', fileInput.files[0]);
@@ -250,9 +354,10 @@
     function abrirModalNovaConta() {
         $('#editar-conta-id').val('');
         $('#editar-comprovante-row').hide();
+        $('#nova-comprovante-row').show();
         $('#nova-conta-row-tipo').show();
         $('#nova-conta-tipo-select').val('CONTA');
-        $('#modalNovaContaTitulo').text('Adicionar conta a pagar');
+        $('#modalNovaContaTitulo').html('<i class="bx bx-plus-circle"></i> Adicionar conta a pagar');
         toggleCamposNovaConta();
         limparFormNovaConta();
         new bootstrap.Modal(document.getElementById('modalNovaConta')).show();
@@ -260,9 +365,10 @@
     function abrirModalNovaContaPorTab(tipo) {
         $('#editar-conta-id').val('');
         $('#editar-comprovante-row').hide();
+        $('#nova-comprovante-row').show();
         $('#nova-conta-row-tipo').hide();
         $('#nova-conta-tipo-select').val(tipo);
-        $('#modalNovaContaTitulo').text(titulosModal[tipo] || 'Adicionar conta a pagar');
+        $('#modalNovaContaTitulo').html('<i class="bx bx-plus-circle"></i> ' + (titulosModal[tipo] || 'Adicionar conta a pagar'));
         toggleCamposNovaConta();
         limparFormNovaConta();
         new bootstrap.Modal(document.getElementById('modalNovaConta')).show();
@@ -276,6 +382,8 @@
         $('#nova-subcategoria').html('<option value="">Selecione...</option>');
         $('#nova-funcionario').val('');
         $('#nova-tipo-beneficio').val('');
+        limparPreviewArquivo('nova-comprovante', 'preview-nova', 'preview-nova-nome');
+        limparPreviewArquivo('editar-comprovante', 'preview-editar', 'preview-editar-nome');
     }
     function toggleCamposNovaConta() {
         var t = $('#nova-conta-tipo-select').val();
@@ -330,15 +438,34 @@
                 data.tipo_beneficio_id = tipoBenId;
             }
         }
-        $.ajax({ url: urlCriar, type: 'POST', data: data }).done(function(r) {
-            if (r.success) {
-                bootstrap.Modal.getInstance(document.getElementById('modalNovaConta')).hide();
-                tipoAtual = tipo;
-                carregarTabela(tipo);
-            } else {
-                alert(r.message || 'Erro ao criar.');
-            }
-        }).fail(function() { alert('Erro ao criar conta.'); });
+        var fileInput = document.getElementById('nova-comprovante');
+        var temArquivo = fileInput && fileInput.files && fileInput.files[0];
+        if (temArquivo) {
+            var erro = validarArquivo(fileInput.files[0]);
+            if (erro) { alert(erro); return; }
+            var formData = new FormData();
+            for (var k in data) { if (data.hasOwnProperty(k)) formData.append(k, data[k]); }
+            formData.append('comprovante', fileInput.files[0]);
+            $.ajax({ url: urlCriar, type: 'POST', data: formData, processData: false, contentType: false }).done(function(r) {
+                if (r.success) {
+                    bootstrap.Modal.getInstance(document.getElementById('modalNovaConta')).hide();
+                    tipoAtual = tipo;
+                    carregarTabela(tipo);
+                } else {
+                    alert(r.message || 'Erro ao criar.');
+                }
+            }).fail(function() { alert('Erro ao criar conta.'); });
+        } else {
+            $.ajax({ url: urlCriar, type: 'POST', data: data }).done(function(r) {
+                if (r.success) {
+                    bootstrap.Modal.getInstance(document.getElementById('modalNovaConta')).hide();
+                    tipoAtual = tipo;
+                    carregarTabela(tipo);
+                } else {
+                    alert(r.message || 'Erro ao criar.');
+                }
+            }).fail(function() { alert('Erro ao criar conta.'); });
+        }
     }
     function salvarModalConta() {
         if ($('#editar-conta-id').val()) salvarEdicao();
@@ -346,7 +473,7 @@
     }
     function abrirModalBonificacaoForm() {
         $('#bonif-editar-id').val('');
-        $('#modalBonificacaoFormTitulo').text('Adicionar bonificação a pagar');
+        $('#modalBonificacaoFormTitulo').html('<i class="bx bx-gift"></i> Adicionar bonificação a pagar');
         $('#bonif-funcionario').val('');
         $('#bonif-chave-pix').val('');
         $('#bonif-valor').val('');
@@ -358,7 +485,7 @@
     }
     function abrirModalEditarBonif(id) {
         $('#bonif-editar-id').val(id);
-        $('#modalBonificacaoFormTitulo').text('Editar bonificação a pagar');
+        $('#modalBonificacaoFormTitulo').html('<i class="bx bx-edit"></i> Editar bonificação a pagar');
         $('#bonif-data-pagamento').val('');
         $('#bonif-comprovante').val('');
         $('#bonif-row-opcionais, #bonif-row-comprovante').hide();
@@ -404,7 +531,11 @@
                 formData.append('mes_referente', mesRef);
                 formData.append('chave_pix', chavePix);
                 if (dataPag) formData.append('data_pagamento', dataPag);
-                if (temArquivo) formData.append('comprovante', fileInput.files[0]);
+                if (temArquivo) {
+                    var erro = validarArquivo(fileInput.files[0]);
+                    if (erro) { alert(erro); return; }
+                    formData.append('comprovante', fileInput.files[0]);
+                }
                 $.ajax({ url: urlBonifCriar, type: 'POST', data: formData, processData: false, contentType: false }).done(function(r) {
                     if (r.success) {
                         bootstrap.Modal.getInstance(document.getElementById('modalBonificacaoForm')).hide();
@@ -447,6 +578,8 @@
         var fileInput = document.getElementById('bonif-pagar-comprovante');
         if (!dataPag) { alert('Data de pagamento é obrigatória.'); return; }
         if (!fileInput.files || !fileInput.files[0]) { alert('Comprovante é obrigatório.'); return; }
+        var erro = validarArquivo(fileInput.files[0]);
+        if (erro) { alert(erro); return; }
         var formData = new FormData();
         formData.append('id', id);
         formData.append('data_pagamento', dataPag);
@@ -466,6 +599,19 @@
         }).fail(function() { alert('Erro ao inativar.'); });
     }
     $(document).ready(function() {
+        initUploadArea('upload-area-nova', 'nova-comprovante', 'preview-nova', 'preview-nova-nome');
+        initUploadArea('upload-area-editar', 'editar-comprovante', 'preview-editar', 'preview-editar-nome');
+        initUploadArea('upload-area-pago', 'modalPagoComprovante', 'preview-pago', 'preview-pago-nome');
+        $(document).on('click', '.btn-remover-anexo', function() {
+            var target = $(this).data('target');
+            var previewMap = {
+                'nova-comprovante': ['preview-nova', 'preview-nova-nome'],
+                'editar-comprovante': ['preview-editar', 'preview-editar-nome'],
+                'modalPagoComprovante': ['preview-pago', 'preview-pago-nome']
+            };
+            var map = previewMap[target];
+            if (map) limparPreviewArquivo(target, map[0], map[1]);
+        });
         var params = new URLSearchParams(window.location.search);
         var tipoUrl = (params.get('tipo') || '').toUpperCase();
         var idUrl = params.get('id') || '';

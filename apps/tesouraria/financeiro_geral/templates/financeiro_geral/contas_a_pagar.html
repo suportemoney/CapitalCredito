@@ -5,182 +5,296 @@
 
 {% block header_title %}Contas a Pagar{% endblock %}
 
+{% block addcss_extra %}
+<link rel="stylesheet" href="{% static 'financeiro_geral/css/contas_a_pagar.css' %}">
+{% endblock %}
+
 {% block content %}
-<div class="container-fluid">
+<div class="container-fluid page-contas-pagar">
     <div class="section-header">
-        <h5>Listagem</h5>
+        <h5 class="mb-0"><i class='bx bx-list-ul'></i> Listagem</h5>
     </div>
     <div class="section-body">
         <ul class="nav nav-tabs" id="tabsContasPagar" role="tablist">
             <li class="nav-item" role="presentation">
-                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-conta" type="button" role="tab" data-tipo="CONTA">Contas (empresa)</button>
+                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-conta" type="button" role="tab" data-tipo="CONTA">
+                    <i class='bx bx-building'></i> Contas (empresa)
+                </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-salario" type="button" role="tab" data-tipo="SALARIO">Salários</button>
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-salario" type="button" role="tab" data-tipo="SALARIO">
+                    <i class='bx bx-user'></i> Salários
+                </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-beneficio" type="button" role="tab" data-tipo="BENEFICIO">Benefícios</button>
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-beneficio" type="button" role="tab" data-tipo="BENEFICIO">
+                    <i class='bx bx-heart'></i> Benefícios
+                </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-bonificacao" type="button" role="tab" data-tipo="BONIFICACAO">Bonificações a pagar</button>
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-bonificacao" type="button" role="tab" data-tipo="BONIFICACAO">
+                    <i class='bx bx-gift'></i> Bonificações a pagar
+                </button>
             </li>
         </ul>
+
         <div class="tab-content mt-3" id="tabsContasPagarContent">
+            <!-- Aba Contas (empresa) -->
             <div class="tab-pane fade show active" id="tab-conta" role="tabpanel">
-                <div class="filtros-contas-pagar mb-3" data-tipo="CONTA">
-                    <div class="section-header"><h6 class="mb-0">Filtros</h6></div>
-                    <div class="section-body py-2">
+                <div class="filtros-contas-pagar filtros-card" data-tipo="CONTA">
+                    <div class="filtros-header"><i class='bx bx-filter-alt'></i> Filtros</div>
+                    <div class="filtros-body">
                         <div class="row g-2 align-items-end flex-wrap">
-                            <div class="col-auto"><label class="form-label mb-0 small">Descrição</label><input type="text" class="form-control form-control-sm filtro-descricao" placeholder="Buscar..."></div>
-                            <div class="col-auto"><label class="form-label mb-0 small">Categoria</label><select class="form-select form-select-sm filtro-categoria"><option value="">Todas</option>{% for c in categorias %}<option value="{{ c.id }}">{{ c.nome }}</option>{% endfor %}</select></div>
-                            <div class="col-auto"><label class="form-label mb-0 small">Subcategoria</label><select class="form-select form-select-sm filtro-subcategoria"><option value="">Todas</option></select></div>
-                            <div class="col-auto"><label class="form-label mb-0 small">Valor mín</label><input type="text" class="form-control form-control-sm filtro-valor-min" placeholder="0,00"></div>
-                            <div class="col-auto"><label class="form-label mb-0 small">Valor máx</label><input type="text" class="form-control form-control-sm filtro-valor-max" placeholder="0,00"></div>
-                            <div class="col-auto"><label class="form-label mb-0 small">Venc. de</label><input type="date" class="form-control form-control-sm filtro-venc-de"></div>
-                            <div class="col-auto"><label class="form-label mb-0 small">Venc. até</label><input type="date" class="form-control form-control-sm filtro-venc-ate"></div>
-                            <div class="col-auto"><label class="form-label mb-0 small">Status</label><select class="form-select form-select-sm filtro-status"><option value="">Todos</option><option value="pendente">Pendente</option><option value="pago">Pago</option></select></div>
-                            <div class="col-auto"><button type="button" class="btn btn-sm btn-outline-primary btn-aplicar-filtros">Filtrar</button></div>
+                            <div class="col-auto filtro-item">
+                                <label class="form-label mb-0"><i class='bx bx-search'></i> Descrição</label>
+                                <input type="text" class="form-control form-control-sm filtro-descricao" placeholder="Buscar...">
+                            </div>
+                            <div class="col-auto filtro-item">
+                                <label class="form-label mb-0"><i class='bx bx-category'></i> Categoria</label>
+                                <select class="form-select form-select-sm filtro-categoria"><option value="">Todas</option>{% for c in categorias %}<option value="{{ c.id }}">{{ c.nome }}</option>{% endfor %}</select>
+                            </div>
+                            <div class="col-auto filtro-item">
+                                <label class="form-label mb-0"><i class='bx bx-list-ul'></i> Subcategoria</label>
+                                <select class="form-select form-select-sm filtro-subcategoria"><option value="">Todas</option></select>
+                            </div>
+                            <div class="col-auto filtro-item">
+                                <label class="form-label mb-0"><i class='bx bx-dollar'></i> Valor mín</label>
+                                <input type="text" class="form-control form-control-sm filtro-valor-min" placeholder="0,00">
+                            </div>
+                            <div class="col-auto filtro-item">
+                                <label class="form-label mb-0"><i class='bx bx-dollar'></i> Valor máx</label>
+                                <input type="text" class="form-control form-control-sm filtro-valor-max" placeholder="0,00">
+                            </div>
+                            <div class="col-auto filtro-item">
+                                <label class="form-label mb-0"><i class='bx bx-calendar'></i> Venc. de</label>
+                                <input type="date" class="form-control form-control-sm filtro-venc-de">
+                            </div>
+                            <div class="col-auto filtro-item">
+                                <label class="form-label mb-0"><i class='bx bx-calendar'></i> Venc. até</label>
+                                <input type="date" class="form-control form-control-sm filtro-venc-ate">
+                            </div>
+                            <div class="col-auto filtro-item">
+                                <label class="form-label mb-0"><i class='bx bx-check-circle'></i> Status</label>
+                                <select class="form-select form-select-sm filtro-status"><option value="">Todos</option><option value="pendente">Pendente</option><option value="pago">Pago</option></select>
+                            </div>
+                            <div class="col-auto">
+                                <button type="button" class="btn btn-sm btn-filtrar btn-aplicar-filtros"><i class='bx bx-filter'></i> Filtrar</button>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span></span>
-                    <button type="button" class="btn btn-primary btn-sm" onclick="abrirModalNovaContaPorTab('CONTA')">
+                <div class="tab-toolbar">
+                    <button type="button" class="btn btn-primary btn-sm btn-adicionar" onclick="abrirModalNovaContaPorTab('CONTA')">
                         <i class='bx bx-plus'></i> Adicionar conta
                     </button>
                 </div>
                 <div class="table-responsive">
-                    <table class="table table-hover">
+                    <table class="table table-hover table-contas-pagar">
                         <thead>
                             <tr>
-                                <th>Descrição</th>
-                                <th>Categoria</th>
-                                <th>Subcategoria</th>
-                                <th>Valor</th>
-                                <th>Vencimento</th>
-                                <th>Status</th>
-                                <th>Comprovante</th>
-                                <th>Ações</th>
+                                <th><i class='bx bx-text'></i> Descrição</th>
+                                <th><i class='bx bx-category'></i> Categoria</th>
+                                <th><i class='bx bx-list-ul'></i> Subcategoria</th>
+                                <th><i class='bx bx-dollar'></i> Valor</th>
+                                <th><i class='bx bx-calendar'></i> Vencimento</th>
+                                <th><i class='bx bx-check-circle'></i> Status</th>
+                                <th><i class='bx bx-paperclip'></i> Comprovante</th>
+                                <th><i class='bx bx-cog'></i> Ações</th>
                             </tr>
                         </thead>
                         <tbody id="tabela-conta"></tbody>
                     </table>
                 </div>
             </div>
+
+            <!-- Aba Salários -->
             <div class="tab-pane fade" id="tab-salario" role="tabpanel">
-                <div class="filtros-contas-pagar mb-3" data-tipo="SALARIO">
-                    <div class="section-header"><h6 class="mb-0">Filtros</h6></div>
-                    <div class="section-body py-2">
+                <div class="filtros-contas-pagar filtros-card" data-tipo="SALARIO">
+                    <div class="filtros-header"><i class='bx bx-filter-alt'></i> Filtros</div>
+                    <div class="filtros-body">
                         <div class="row g-2 align-items-end flex-wrap">
-                            <div class="col-auto"><label class="form-label mb-0 small">Descrição</label><input type="text" class="form-control form-control-sm filtro-descricao" placeholder="Buscar..."></div>
-                            <div class="col-auto"><label class="form-label mb-0 small">Funcionário</label><select class="form-select form-select-sm filtro-funcionario"><option value="">Todos</option>{% for f in funcionarios %}<option value="{{ f.id }}">{{ f.nome_completo }}</option>{% endfor %}</select></div>
-                            <div class="col-auto"><label class="form-label mb-0 small">Valor mín</label><input type="text" class="form-control form-control-sm filtro-valor-min" placeholder="0,00"></div>
-                            <div class="col-auto"><label class="form-label mb-0 small">Valor máx</label><input type="text" class="form-control form-control-sm filtro-valor-max" placeholder="0,00"></div>
-                            <div class="col-auto"><label class="form-label mb-0 small">Venc. de</label><input type="date" class="form-control form-control-sm filtro-venc-de"></div>
-                            <div class="col-auto"><label class="form-label mb-0 small">Venc. até</label><input type="date" class="form-control form-control-sm filtro-venc-ate"></div>
-                            <div class="col-auto"><label class="form-label mb-0 small">Status</label><select class="form-select form-select-sm filtro-status"><option value="">Todos</option><option value="pendente">Pendente</option><option value="pago">Pago</option></select></div>
-                            <div class="col-auto"><button type="button" class="btn btn-sm btn-outline-primary btn-aplicar-filtros">Filtrar</button></div>
+                            <div class="col-auto filtro-item">
+                                <label class="form-label mb-0"><i class='bx bx-search'></i> Descrição</label>
+                                <input type="text" class="form-control form-control-sm filtro-descricao" placeholder="Buscar...">
+                            </div>
+                            <div class="col-auto filtro-item">
+                                <label class="form-label mb-0"><i class='bx bx-user'></i> Funcionário</label>
+                                <select class="form-select form-select-sm filtro-funcionario"><option value="">Todos</option>{% for f in funcionarios %}<option value="{{ f.id }}">{{ f.nome_completo }}</option>{% endfor %}</select>
+                            </div>
+                            <div class="col-auto filtro-item">
+                                <label class="form-label mb-0"><i class='bx bx-dollar'></i> Valor mín</label>
+                                <input type="text" class="form-control form-control-sm filtro-valor-min" placeholder="0,00">
+                            </div>
+                            <div class="col-auto filtro-item">
+                                <label class="form-label mb-0"><i class='bx bx-dollar'></i> Valor máx</label>
+                                <input type="text" class="form-control form-control-sm filtro-valor-max" placeholder="0,00">
+                            </div>
+                            <div class="col-auto filtro-item">
+                                <label class="form-label mb-0"><i class='bx bx-calendar'></i> Venc. de</label>
+                                <input type="date" class="form-control form-control-sm filtro-venc-de">
+                            </div>
+                            <div class="col-auto filtro-item">
+                                <label class="form-label mb-0"><i class='bx bx-calendar'></i> Venc. até</label>
+                                <input type="date" class="form-control form-control-sm filtro-venc-ate">
+                            </div>
+                            <div class="col-auto filtro-item">
+                                <label class="form-label mb-0"><i class='bx bx-check-circle'></i> Status</label>
+                                <select class="form-select form-select-sm filtro-status"><option value="">Todos</option><option value="pendente">Pendente</option><option value="pago">Pago</option></select>
+                            </div>
+                            <div class="col-auto">
+                                <button type="button" class="btn btn-sm btn-filtrar btn-aplicar-filtros"><i class='bx bx-filter'></i> Filtrar</button>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span></span>
-                    <button type="button" class="btn btn-primary btn-sm" onclick="abrirModalNovaContaPorTab('SALARIO')">
+                <div class="tab-toolbar">
+                    <button type="button" class="btn btn-primary btn-sm btn-adicionar" onclick="abrirModalNovaContaPorTab('SALARIO')">
                         <i class='bx bx-plus'></i> Adicionar salário
                     </button>
                 </div>
                 <div class="table-responsive">
-                    <table class="table table-hover">
+                    <table class="table table-hover table-contas-pagar">
                         <thead>
                             <tr>
-                                <th>Descrição</th>
-                                <th>Funcionário</th>
-                                <th>Valor</th>
-                                <th>Vencimento</th>
-                                <th>Status</th>
-                                <th>Comprovante</th>
-                                <th>Ações</th>
+                                <th><i class='bx bx-text'></i> Descrição</th>
+                                <th><i class='bx bx-user'></i> Funcionário</th>
+                                <th><i class='bx bx-dollar'></i> Valor</th>
+                                <th><i class='bx bx-calendar'></i> Vencimento</th>
+                                <th><i class='bx bx-check-circle'></i> Status</th>
+                                <th><i class='bx bx-paperclip'></i> Comprovante</th>
+                                <th><i class='bx bx-cog'></i> Ações</th>
                             </tr>
                         </thead>
                         <tbody id="tabela-salario"></tbody>
                     </table>
                 </div>
             </div>
+
+            <!-- Aba Benefícios -->
             <div class="tab-pane fade" id="tab-beneficio" role="tabpanel">
-                <div class="filtros-contas-pagar mb-3" data-tipo="BENEFICIO">
-                    <div class="section-header"><h6 class="mb-0">Filtros</h6></div>
-                    <div class="section-body py-2">
+                <div class="filtros-contas-pagar filtros-card" data-tipo="BENEFICIO">
+                    <div class="filtros-header"><i class='bx bx-filter-alt'></i> Filtros</div>
+                    <div class="filtros-body">
                         <div class="row g-2 align-items-end flex-wrap">
-                            <div class="col-auto"><label class="form-label mb-0 small">Descrição</label><input type="text" class="form-control form-control-sm filtro-descricao" placeholder="Buscar..."></div>
-                            <div class="col-auto"><label class="form-label mb-0 small">Funcionário</label><select class="form-select form-select-sm filtro-funcionario"><option value="">Todos</option>{% for f in funcionarios %}<option value="{{ f.id }}">{{ f.nome_completo }}</option>{% endfor %}</select></div>
-                            <div class="col-auto"><label class="form-label mb-0 small">Tipo benefício</label><select class="form-select form-select-sm filtro-tipo-beneficio"><option value="">Todos</option>{% for t in tipos_beneficio %}<option value="{{ t.id }}">{{ t.nome }}</option>{% endfor %}</select></div>
-                            <div class="col-auto"><label class="form-label mb-0 small">Valor mín</label><input type="text" class="form-control form-control-sm filtro-valor-min" placeholder="0,00"></div>
-                            <div class="col-auto"><label class="form-label mb-0 small">Valor máx</label><input type="text" class="form-control form-control-sm filtro-valor-max" placeholder="0,00"></div>
-                            <div class="col-auto"><label class="form-label mb-0 small">Venc. de</label><input type="date" class="form-control form-control-sm filtro-venc-de"></div>
-                            <div class="col-auto"><label class="form-label mb-0 small">Venc. até</label><input type="date" class="form-control form-control-sm filtro-venc-ate"></div>
-                            <div class="col-auto"><label class="form-label mb-0 small">Status</label><select class="form-select form-select-sm filtro-status"><option value="">Todos</option><option value="pendente">Pendente</option><option value="pago">Pago</option></select></div>
-                            <div class="col-auto"><button type="button" class="btn btn-sm btn-outline-primary btn-aplicar-filtros">Filtrar</button></div>
+                            <div class="col-auto filtro-item">
+                                <label class="form-label mb-0"><i class='bx bx-search'></i> Descrição</label>
+                                <input type="text" class="form-control form-control-sm filtro-descricao" placeholder="Buscar...">
+                            </div>
+                            <div class="col-auto filtro-item">
+                                <label class="form-label mb-0"><i class='bx bx-user'></i> Funcionário</label>
+                                <select class="form-select form-select-sm filtro-funcionario"><option value="">Todos</option>{% for f in funcionarios %}<option value="{{ f.id }}">{{ f.nome_completo }}</option>{% endfor %}</select>
+                            </div>
+                            <div class="col-auto filtro-item">
+                                <label class="form-label mb-0"><i class='bx bx-heart'></i> Tipo benefício</label>
+                                <select class="form-select form-select-sm filtro-tipo-beneficio"><option value="">Todos</option>{% for t in tipos_beneficio %}<option value="{{ t.id }}">{{ t.nome }}</option>{% endfor %}</select>
+                            </div>
+                            <div class="col-auto filtro-item">
+                                <label class="form-label mb-0"><i class='bx bx-dollar'></i> Valor mín</label>
+                                <input type="text" class="form-control form-control-sm filtro-valor-min" placeholder="0,00">
+                            </div>
+                            <div class="col-auto filtro-item">
+                                <label class="form-label mb-0"><i class='bx bx-dollar'></i> Valor máx</label>
+                                <input type="text" class="form-control form-control-sm filtro-valor-max" placeholder="0,00">
+                            </div>
+                            <div class="col-auto filtro-item">
+                                <label class="form-label mb-0"><i class='bx bx-calendar'></i> Venc. de</label>
+                                <input type="date" class="form-control form-control-sm filtro-venc-de">
+                            </div>
+                            <div class="col-auto filtro-item">
+                                <label class="form-label mb-0"><i class='bx bx-calendar'></i> Venc. até</label>
+                                <input type="date" class="form-control form-control-sm filtro-venc-ate">
+                            </div>
+                            <div class="col-auto filtro-item">
+                                <label class="form-label mb-0"><i class='bx bx-check-circle'></i> Status</label>
+                                <select class="form-select form-select-sm filtro-status"><option value="">Todos</option><option value="pendente">Pendente</option><option value="pago">Pago</option></select>
+                            </div>
+                            <div class="col-auto">
+                                <button type="button" class="btn btn-sm btn-filtrar btn-aplicar-filtros"><i class='bx bx-filter'></i> Filtrar</button>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span></span>
-                    <button type="button" class="btn btn-primary btn-sm" onclick="abrirModalNovaContaPorTab('BENEFICIO')">
+                <div class="tab-toolbar">
+                    <button type="button" class="btn btn-primary btn-sm btn-adicionar" onclick="abrirModalNovaContaPorTab('BENEFICIO')">
                         <i class='bx bx-plus'></i> Adicionar benefício
                     </button>
                 </div>
                 <div class="table-responsive">
-                    <table class="table table-hover">
+                    <table class="table table-hover table-contas-pagar">
                         <thead>
                             <tr>
-                                <th>Descrição</th>
-                                <th>Funcionário</th>
-                                <th>Tipo</th>
-                                <th>Valor</th>
-                                <th>Vencimento</th>
-                                <th>Status</th>
-                                <th>Comprovante</th>
-                                <th>Ações</th>
+                                <th><i class='bx bx-text'></i> Descrição</th>
+                                <th><i class='bx bx-user'></i> Funcionário</th>
+                                <th><i class='bx bx-heart'></i> Tipo</th>
+                                <th><i class='bx bx-dollar'></i> Valor</th>
+                                <th><i class='bx bx-calendar'></i> Vencimento</th>
+                                <th><i class='bx bx-check-circle'></i> Status</th>
+                                <th><i class='bx bx-paperclip'></i> Comprovante</th>
+                                <th><i class='bx bx-cog'></i> Ações</th>
                             </tr>
                         </thead>
                         <tbody id="tabela-beneficio"></tbody>
                     </table>
                 </div>
             </div>
+
+            <!-- Aba Bonificações -->
             <div class="tab-pane fade" id="tab-bonificacao" role="tabpanel">
-                <div class="filtros-bonificacoes mb-3">
-                    <div class="section-header"><h6 class="mb-0">Filtros</h6></div>
-                    <div class="section-body py-2">
+                <div class="filtros-bonificacoes filtros-card">
+                    <div class="filtros-header"><i class='bx bx-filter-alt'></i> Filtros</div>
+                    <div class="filtros-body">
                         <div class="row g-2 align-items-end flex-wrap">
-                            <div class="col-auto"><label class="form-label mb-0 small">Funcionário</label><select class="form-select form-select-sm filtro-bonif-funcionario"><option value="">Todos</option>{% for f in funcionarios %}<option value="{{ f.id }}">{{ f.nome_completo }}</option>{% endfor %}</select></div>
-                            <div class="col-auto"><label class="form-label mb-0 small">Mês referente</label><input type="text" class="form-control form-control-sm filtro-bonif-mes" placeholder="Ex: 03/2025"></div>
-                            <div class="col-auto"><label class="form-label mb-0 small">Data pag. de</label><input type="date" class="form-control form-control-sm filtro-bonif-data-de"></div>
-                            <div class="col-auto"><label class="form-label mb-0 small">Data pag. até</label><input type="date" class="form-control form-control-sm filtro-bonif-data-ate"></div>
-                            <div class="col-auto"><label class="form-label mb-0 small">Valor mín</label><input type="text" class="form-control form-control-sm filtro-bonif-valor-min" placeholder="0,00"></div>
-                            <div class="col-auto"><label class="form-label mb-0 small">Valor máx</label><input type="text" class="form-control form-control-sm filtro-bonif-valor-max" placeholder="0,00"></div>
-                            <div class="col-auto"><label class="form-label mb-0 small">Status</label><select class="form-select form-select-sm filtro-bonif-status"><option value="true">Ativo</option><option value="false">Inativo</option><option value="todos">Todos</option></select></div>
-                            <div class="col-auto"><button type="button" class="btn btn-sm btn-outline-primary btn-aplicar-filtros-bonif">Filtrar</button></div>
+                            <div class="col-auto filtro-item">
+                                <label class="form-label mb-0"><i class='bx bx-user'></i> Funcionário</label>
+                                <select class="form-select form-select-sm filtro-bonif-funcionario"><option value="">Todos</option>{% for f in funcionarios %}<option value="{{ f.id }}">{{ f.nome_completo }}</option>{% endfor %}</select>
+                            </div>
+                            <div class="col-auto filtro-item">
+                                <label class="form-label mb-0"><i class='bx bx-calendar'></i> Mês referente</label>
+                                <input type="text" class="form-control form-control-sm filtro-bonif-mes" placeholder="Ex: 03/2025">
+                            </div>
+                            <div class="col-auto filtro-item">
+                                <label class="form-label mb-0"><i class='bx bx-calendar'></i> Data pag. de</label>
+                                <input type="date" class="form-control form-control-sm filtro-bonif-data-de">
+                            </div>
+                            <div class="col-auto filtro-item">
+                                <label class="form-label mb-0"><i class='bx bx-calendar'></i> Data pag. até</label>
+                                <input type="date" class="form-control form-control-sm filtro-bonif-data-ate">
+                            </div>
+                            <div class="col-auto filtro-item">
+                                <label class="form-label mb-0"><i class='bx bx-dollar'></i> Valor mín</label>
+                                <input type="text" class="form-control form-control-sm filtro-bonif-valor-min" placeholder="0,00">
+                            </div>
+                            <div class="col-auto filtro-item">
+                                <label class="form-label mb-0"><i class='bx bx-dollar'></i> Valor máx</label>
+                                <input type="text" class="form-control form-control-sm filtro-bonif-valor-max" placeholder="0,00">
+                            </div>
+                            <div class="col-auto filtro-item">
+                                <label class="form-label mb-0"><i class='bx bx-check-circle'></i> Status</label>
+                                <select class="form-select form-select-sm filtro-bonif-status"><option value="true">Ativo</option><option value="false">Inativo</option><option value="todos">Todos</option></select>
+                            </div>
+                            <div class="col-auto">
+                                <button type="button" class="btn btn-sm btn-filtrar btn-aplicar-filtros-bonif"><i class='bx bx-filter'></i> Filtrar</button>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span></span>
-                    <button type="button" class="btn btn-primary btn-sm" id="btnAdicionarBonificacao">
+                <div class="tab-toolbar">
+                    <button type="button" class="btn btn-primary btn-sm btn-adicionar" id="btnAdicionarBonificacao">
                         <i class='bx bx-plus'></i> Adicionar bonificação
                     </button>
                 </div>
                 <div class="table-responsive">
-                    <table class="table table-hover">
+                    <table class="table table-hover table-contas-pagar">
                         <thead>
                             <tr>
-                                <th>Funcionário</th>
-                                <th>Valor bonificação</th>
-                                <th>Mês referente</th>
-                                <th>Data pagamento</th>
-                                <th>Status pagamento</th>
-                                <th>Chave PIX</th>
-                                <th>Recibo/Comprovante</th>
-                                <th>Ações</th>
+                                <th><i class='bx bx-user'></i> Funcionário</th>
+                                <th><i class='bx bx-dollar'></i> Valor bonificação</th>
+                                <th><i class='bx bx-calendar'></i> Mês referente</th>
+                                <th><i class='bx bx-calendar'></i> Data pagamento</th>
+                                <th><i class='bx bx-check-circle'></i> Status pagamento</th>
+                                <th><i class='bx bx-key'></i> Chave PIX</th>
+                                <th><i class='bx bx-paperclip'></i> Recibo/Comprovante</th>
+                                <th><i class='bx bx-cog'></i> Ações</th>
                             </tr>
                         </thead>
                         <tbody id="tabela-bonificacao"></tbody>
@@ -191,46 +305,56 @@
     </div>
 </div>
 
-<!-- Modal confirmar pagamento (z-index flutuante) -->
-<div class="modal fade" id="modalConfirmarPago" tabindex="-1" aria-hidden="true" style="z-index: 100001;">
+<!-- Modal confirmar pagamento -->
+<div class="modal fade page-contas-pagar" id="modalConfirmarPago" tabindex="-1" aria-hidden="true" style="z-index: 100001;">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Confirmar pagamento</h5>
+                <h5 class="modal-title"><i class='bx bx-check-circle'></i> Confirmar pagamento</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <div id="modalPagoDados"></div>
                 <div class="mb-3">
-                    <label class="form-label">Data do pagamento</label>
+                    <label class="form-label"><i class='bx bx-calendar'></i> Data do pagamento</label>
                     <input type="date" class="form-control" id="modalPagoData">
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Comprovante de pagamento</label>
-                    <input type="file" class="form-control" id="modalPagoComprovante" accept="image/*,.pdf">
+                    <label class="form-label"><i class='bx bx-paperclip'></i> Comprovante de pagamento</label>
+                    <div class="upload-anexo-area" id="upload-area-pago">
+                        <input type="file" id="modalPagoComprovante" accept="image/*,.pdf">
+                        <div class="upload-icon"><i class='bx bx-cloud-upload'></i></div>
+                        <div class="upload-texto">Clique ou arraste o arquivo aqui</div>
+                        <div class="upload-hint">Imagens (JPG, PNG, GIF, WEBP) ou PDF — máx. 10 MB</div>
+                    </div>
+                    <div class="upload-anexo-preview" id="preview-pago">
+                        <span class="preview-icon"><i class='bx bx-file'></i></span>
+                        <span class="preview-nome" id="preview-pago-nome"></span>
+                        <button type="button" class="btn-remover-anexo" data-target="modalPagoComprovante" title="Remover"><i class='bx bx-x'></i></button>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary" id="btnConfirmarPago">Confirmar</button>
+                <button type="button" class="btn btn-primary" id="btnConfirmarPago"><i class='bx bx-check'></i> Confirmar</button>
             </div>
         </div>
     </div>
 </div>
 
 <!-- Modal nova conta a pagar / editar -->
-<div class="modal fade" id="modalNovaConta" tabindex="-1" aria-hidden="true" style="z-index: 100001;">
+<div class="modal fade page-contas-pagar" id="modalNovaConta" tabindex="-1" aria-hidden="true" style="z-index: 100001;">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="modalNovaContaTitulo">Adicionar conta a pagar</h5>
+                <h5 class="modal-title" id="modalNovaContaTitulo"><i class='bx bx-plus-circle'></i> Adicionar conta a pagar</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="nova-conta-tipo" value="CONTA">
                 <input type="hidden" id="editar-conta-id" value="">
                 <div class="mb-3" id="nova-conta-row-tipo">
-                    <label class="form-label">Tipo</label>
+                    <label class="form-label"><i class='bx bx-category'></i> Tipo</label>
                     <select class="form-select" id="nova-conta-tipo-select">
                         <option value="CONTA">Conta (empresa)</option>
                         <option value="SALARIO">Salário</option>
@@ -238,83 +362,114 @@
                     </select>
                 </div>
                 <div id="nova-conta-campos-conta">
-                    <div class="mb-3">
-                        <label class="form-label">Categoria</label>
-                        <select class="form-select" id="nova-categoria">
-                            <option value="">Selecione...</option>
-                            {% for c in categorias %}
-                            <option value="{{ c.id }}">{{ c.nome }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Subcategoria</label>
-                        <select class="form-select" id="nova-subcategoria">
-                            <option value="">Selecione...</option>
-                        </select>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class='bx bx-category'></i> Categoria</label>
+                            <select class="form-select" id="nova-categoria">
+                                <option value="">Selecione...</option>
+                                {% for c in categorias %}
+                                <option value="{{ c.id }}">{{ c.nome }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class='bx bx-list-ul'></i> Subcategoria</label>
+                            <select class="form-select" id="nova-subcategoria">
+                                <option value="">Selecione...</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
                 <div id="nova-conta-campos-funcionario" style="display:none;">
-                    <div class="mb-3">
-                        <label class="form-label">Funcionário</label>
-                        <select class="form-select" id="nova-funcionario">
-                            <option value="">Selecione...</option>
-                            {% for f in funcionarios %}
-                            <option value="{{ f.id }}">{{ f.nome_completo }}</option>
-                            {% endfor %}
-                        </select>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class='bx bx-user'></i> Funcionário</label>
+                            <select class="form-select" id="nova-funcionario">
+                                <option value="">Selecione...</option>
+                                {% for f in funcionarios %}
+                                <option value="{{ f.id }}">{{ f.nome_completo }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3" id="nova-conta-campos-tipo-beneficio" style="display:none;">
+                            <label class="form-label"><i class='bx bx-heart'></i> Tipo de benefício</label>
+                            <select class="form-select" id="nova-tipo-beneficio">
+                                <option value="">Selecione...</option>
+                                {% for t in tipos_beneficio %}
+                                <option value="{{ t.id }}">{{ t.nome }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
                     </div>
-                    <div class="mb-3" id="nova-conta-campos-tipo-beneficio" style="display:none;">
-                        <label class="form-label">Tipo de benefício</label>
-                        <select class="form-select" id="nova-tipo-beneficio">
-                            <option value="">Selecione...</option>
-                            {% for t in tipos_beneficio %}
-                            <option value="{{ t.id }}">{{ t.nome }}</option>
-                            {% endfor %}
-                        </select>
+                </div>
+                <div class="row">
+                    <div class="col-md-8 mb-3">
+                        <label class="form-label"><i class='bx bx-text'></i> Descrição</label>
+                        <input type="text" class="form-control" id="nova-descricao" required>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label"><i class='bx bx-dollar'></i> Valor (R$)</label>
+                        <input type="text" class="form-control" id="nova-valor" placeholder="0,00" required>
                     </div>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Descrição</label>
-                    <input type="text" class="form-control" id="nova-descricao" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Valor (R$)</label>
-                    <input type="text" class="form-control" id="nova-valor" placeholder="0,00" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Data de vencimento</label>
+                    <label class="form-label"><i class='bx bx-calendar'></i> Data de vencimento</label>
                     <input type="date" class="form-control" id="nova-data-vencimento" required>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Observação</label>
+                    <label class="form-label"><i class='bx bx-note'></i> Observação</label>
                     <textarea class="form-control" id="nova-observacao" rows="2"></textarea>
                 </div>
+                <!-- Anexo opcional ao criar conta -->
+                <div class="mb-3" id="nova-comprovante-row">
+                    <label class="form-label"><i class='bx bx-paperclip'></i> Anexo / Comprovante <span class="text-muted fw-normal">(opcional)</span></label>
+                    <div class="upload-anexo-area" id="upload-area-nova">
+                        <input type="file" id="nova-comprovante" accept="image/*,.pdf">
+                        <div class="upload-icon"><i class='bx bx-cloud-upload'></i></div>
+                        <div class="upload-texto">Clique ou arraste imagem ou PDF</div>
+                        <div class="upload-hint">JPG, PNG, GIF, WEBP ou PDF — máx. 10 MB</div>
+                    </div>
+                    <div class="upload-anexo-preview" id="preview-nova">
+                        <span class="preview-icon"><i class='bx bx-file'></i></span>
+                        <span class="preview-nome" id="preview-nova-nome"></span>
+                        <button type="button" class="btn-remover-anexo" data-target="nova-comprovante" title="Remover"><i class='bx bx-x'></i></button>
+                    </div>
+                </div>
                 <div class="mb-3" id="editar-comprovante-row" style="display:none;">
-                    <label class="form-label">Comprovante de pagamento (superuser)</label>
-                    <input type="file" class="form-control" id="editar-comprovante" accept="image/*,.pdf">
+                    <label class="form-label"><i class='bx bx-paperclip'></i> Comprovante de pagamento (superuser)</label>
+                    <div class="upload-anexo-area" id="upload-area-editar">
+                        <input type="file" id="editar-comprovante" accept="image/*,.pdf">
+                        <div class="upload-icon"><i class='bx bx-cloud-upload'></i></div>
+                        <div class="upload-texto">Substituir comprovante existente</div>
+                        <div class="upload-hint">Imagens ou PDF — máx. 10 MB</div>
+                    </div>
+                    <div class="upload-anexo-preview" id="preview-editar">
+                        <span class="preview-icon"><i class='bx bx-file'></i></span>
+                        <span class="preview-nome" id="preview-editar-nome"></span>
+                        <button type="button" class="btn-remover-anexo" data-target="editar-comprovante" title="Remover"><i class='bx bx-x'></i></button>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary" id="btnSalvarNovaConta">Salvar</button>
+                <button type="button" class="btn btn-primary" id="btnSalvarNovaConta"><i class='bx bx-save'></i> Salvar</button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal criar/editar bonificação a pagar (z-index flutuante) -->
-<div class="modal fade" id="modalBonificacaoForm" tabindex="-1" aria-hidden="true" style="z-index: 100001;">
+<!-- Modal criar/editar bonificação -->
+<div class="modal fade page-contas-pagar" id="modalBonificacaoForm" tabindex="-1" aria-hidden="true" style="z-index: 100001;">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="modalBonificacaoFormTitulo">Adicionar bonificação a pagar</h5>
+                <h5 class="modal-title" id="modalBonificacaoFormTitulo"><i class='bx bx-gift'></i> Adicionar bonificação a pagar</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="bonif-editar-id" value="">
                 <div class="mb-3">
-                    <label class="form-label">Funcionário <span class="text-danger">*</span></label>
+                    <label class="form-label"><i class='bx bx-user'></i> Funcionário <span class="text-danger">*</span></label>
                     <select class="form-select" id="bonif-funcionario">
                         <option value="">Selecione...</option>
                         {% for f in funcionarios %}
@@ -323,57 +478,57 @@
                     </select>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Chave PIX <span class="text-danger">*</span></label>
+                    <label class="form-label"><i class='bx bx-key'></i> Chave PIX <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" id="bonif-chave-pix" placeholder="CPF, E-mail, Telefone ou Chave Aleatória">
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Valor bonificação (R$) <span class="text-danger">*</span></label>
+                    <label class="form-label"><i class='bx bx-dollar'></i> Valor bonificação (R$) <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" id="bonif-valor" placeholder="0,00">
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Mês referente <span class="text-danger">*</span></label>
+                    <label class="form-label"><i class='bx bx-calendar'></i> Mês referente <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" id="bonif-mes-referente" placeholder="Ex: 03/2025 ou Março/2025">
                 </div>
                 <div class="mb-3" id="bonif-row-opcionais">
-                    <label class="form-label">Data do pagamento</label>
+                    <label class="form-label"><i class='bx bx-calendar'></i> Data do pagamento</label>
                     <input type="date" class="form-control" id="bonif-data-pagamento">
                 </div>
                 <div class="mb-3" id="bonif-row-comprovante">
-                    <label class="form-label">Recibo/Comprovante de pagamento</label>
+                    <label class="form-label"><i class='bx bx-paperclip'></i> Recibo/Comprovante de pagamento</label>
                     <input type="file" class="form-control" id="bonif-comprovante" accept="image/*,.pdf">
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary" id="btnSalvarBonificacao">Salvar</button>
+                <button type="button" class="btn btn-primary" id="btnSalvarBonificacao"><i class='bx bx-save'></i> Salvar</button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal pagar agora bonificação (z-index flutuante) -->
-<div class="modal fade" id="modalBonificacaoPagarAgora" tabindex="-1" aria-hidden="true" style="z-index: 100001;">
+<!-- Modal pagar agora bonificação -->
+<div class="modal fade page-contas-pagar" id="modalBonificacaoPagarAgora" tabindex="-1" aria-hidden="true" style="z-index: 100001;">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Pagar agora - Bonificação</h5>
+                <h5 class="modal-title"><i class='bx bx-money'></i> Pagar agora - Bonificação</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="bonif-pagar-id" value="">
                 <div id="bonifPagarDados" class="mb-3"></div>
                 <div class="mb-3">
-                    <label class="form-label">Data do pagamento <span class="text-danger">*</span></label>
+                    <label class="form-label"><i class='bx bx-calendar'></i> Data do pagamento <span class="text-danger">*</span></label>
                     <input type="date" class="form-control" id="bonif-pagar-data">
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Recibo/Comprovante <span class="text-danger">*</span></label>
+                    <label class="form-label"><i class='bx bx-paperclip'></i> Recibo/Comprovante <span class="text-danger">*</span></label>
                     <input type="file" class="form-control" id="bonif-pagar-comprovante" accept="image/*,.pdf">
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary" id="btnConfirmarBonifPagar">Confirmar</button>
+                <button type="button" class="btn btn-primary" id="btnConfirmarBonifPagar"><i class='bx bx-check'></i> Confirmar</button>
             </div>
         </div>
     </div>

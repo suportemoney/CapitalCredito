@@ -9,6 +9,26 @@ from apps.seguranca.permissoes.decorators import controle_acess
 from apps.tesouraria.financeiro_geral.models import Conta, Salario, Beneficio, CategoriaConta, SubcategoriaConta, TipoBeneficio
 from apps.rh.funcionarios.models import Funcionario
 
+_EXTENSOES_COMPROVANTE = {'.jpg', '.jpeg', '.png', '.gif', '.webp', '.pdf'}
+_MIMES_COMPROVANTE = {
+    'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf',
+}
+
+def _validar_comprovante(arquivo):
+    """Valida arquivo de comprovante (imagem ou PDF)."""
+    if not arquivo:
+        return None
+    nome = (arquivo.name or '').lower()
+    ext = '.' + nome.rsplit('.', 1)[-1] if '.' in nome else ''
+    if ext not in _EXTENSOES_COMPROVANTE:
+        return 'Comprovante deve ser imagem (JPG, PNG, GIF, WEBP) ou PDF.'
+    content_type = (getattr(arquivo, 'content_type', '') or '').lower()
+    if content_type and content_type not in _MIMES_COMPROVANTE:
+        return 'Tipo de arquivo não permitido. Use imagem ou PDF.'
+    if arquivo.size > 10 * 1024 * 1024:
+        return 'Comprovante não pode exceder 10 MB.'
+    return None
+
 def _serializar_conta(c):
     return {
         'id': c.id,
@@ -269,6 +289,11 @@ def api_post_contas_pagar_criar(request):
             data_venc = datetime.strptime(data_vencimento, '%Y-%m-%d').date()
         except (ValueError, TypeError):
             return JsonResponse({'success': False, 'message': 'Valor ou data inválidos'})
+        comprovante = request.FILES.get('comprovante')
+        if comprovante:
+            erro_comprovante = _validar_comprovante(comprovante)
+            if erro_comprovante:
+                return JsonResponse({'success': False, 'message': erro_comprovante})
         if tipo == 'CONTA':
             categoria_id = request.POST.get('categoria_id')
             if not categoria_id:
@@ -285,6 +310,7 @@ def api_post_contas_pagar_criar(request):
                     categoria=categoria,
                     subcategoria=subcategoria,
                     observacao=observacao,
+                    comprovante=comprovante,
                     status_ativo=True,
                 )
         elif tipo == 'SALARIO':
@@ -300,6 +326,7 @@ def api_post_contas_pagar_criar(request):
                     pago=False,
                     funcionario=funcionario,
                     observacao=observacao,
+                    comprovante=comprovante,
                     status_ativo=True,
                 )
         else:
@@ -318,6 +345,7 @@ def api_post_contas_pagar_criar(request):
                     funcionario=funcionario,
                     tipo_beneficio=tipo_beneficio,
                     observacao=observacao,
+                    comprovante=comprovante,
                     status_ativo=True,
                 )
         return JsonResponse({'success': True, 'message': 'Conta a pagar criada com sucesso.', 'result': None})

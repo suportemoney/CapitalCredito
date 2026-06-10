@@ -1,2 +1,380 @@
-/* Contas a Pagar - abas Contas, Salários, Benefícios, Bonificações a pagar */
-/* Filtros e tabela da aba Bonificações usam .filtros-bonificacoes e #tabela-bonificacao */
+/* Contas a Pagar - layout alinhado ao template CapitalCredito */
+
+.page-contas-pagar .section-header {
+    background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%);
+    color: #D4AF37;
+    padding: 12px 20px;
+    margin: 0 0 0 0;
+    border-radius: 8px 8px 0 0;
+    font-weight: 600;
+    font-size: 1.05rem;
+    border-left: 4px solid #D4AF37;
+}
+
+.page-contas-pagar .section-body {
+    background: #fff;
+    border: 1px solid #e8e8e8;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    padding: 16px 20px 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.page-contas-pagar .nav-tabs {
+    border-bottom: 2px solid #e8e8e8;
+    gap: 4px;
+}
+
+.page-contas-pagar .nav-tabs .nav-link {
+    color: #555;
+    font-weight: 500;
+    border: none;
+    border-bottom: 3px solid transparent;
+    padding: 10px 18px;
+    border-radius: 6px 6px 0 0;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.page-contas-pagar .nav-tabs .nav-link i {
+    font-size: 1.1rem;
+    color: #0d6efd;
+}
+
+.page-contas-pagar .nav-tabs .nav-link:hover {
+    color: #D4AF37;
+    background: rgba(212, 175, 55, 0.08);
+}
+
+.page-contas-pagar .nav-tabs .nav-link.active {
+    color: #D4AF37;
+    background: rgba(212, 175, 55, 0.1);
+    border-bottom-color: #D4AF37;
+    font-weight: 600;
+}
+
+.page-contas-pagar .nav-tabs .nav-link.active i {
+    color: #D4AF37;
+}
+
+/* Filtros */
+.page-contas-pagar .filtros-card {
+    background: #f8f9fa;
+    border: 1px solid #e8e8e8;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 16px;
+}
+
+.page-contas-pagar .filtros-card .filtros-header {
+    background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%);
+    color: #D4AF37;
+    padding: 8px 16px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.page-contas-pagar .filtros-card .filtros-body {
+    padding: 14px 16px;
+}
+
+.page-contas-pagar .filtro-item label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.page-contas-pagar .filtro-item label i {
+    color: #0d6efd;
+    font-size: 0.95rem;
+}
+
+.page-contas-pagar .filtro-item .form-control,
+.page-contas-pagar .filtro-item .form-select {
+    min-width: 130px;
+    border-radius: 6px;
+    border-color: #dee2e6;
+    font-size: 0.85rem;
+}
+
+.page-contas-pagar .btn-filtrar {
+    background: #0d6efd;
+    border: none;
+    color: #fff;
+    font-weight: 500;
+    padding: 6px 20px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.2s;
+}
+
+.page-contas-pagar .btn-filtrar:hover {
+    background: #0b5ed7;
+    color: #fff;
+}
+
+/* Toolbar e tabela */
+.page-contas-pagar .tab-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 12px;
+}
+
+.page-contas-pagar .btn-adicionar {
+    background: #0d6efd;
+    border: none;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 6px;
+    padding: 7px 16px;
+}
+
+.page-contas-pagar .btn-adicionar:hover {
+    background: #0b5ed7;
+}
+
+.page-contas-pagar .table-contas-pagar {
+    margin-bottom: 0;
+    font-size: 0.88rem;
+}
+
+.page-contas-pagar .table-contas-pagar thead {
+    background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%);
+    color: #D4AF37;
+}
+
+.page-contas-pagar .table-contas-pagar thead th {
+    font-weight: 600;
+    padding: 11px 12px;
+    border: none;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.page-contas-pagar .table-contas-pagar thead th i {
+    margin-right: 4px;
+    font-size: 1rem;
+}
+
+.page-contas-pagar .table-contas-pagar tbody td {
+    padding: 10px 12px;
+    vertical-align: middle;
+    border-color: #eee;
+}
+
+.page-contas-pagar .table-contas-pagar tbody tr {
+    transition: background 0.15s ease;
+}
+
+.page-contas-pagar .table-contas-pagar tbody tr:hover {
+    background: #f8f9fa;
+}
+
+.page-contas-pagar .table-contas-pagar .td-valor {
+    font-weight: 600;
+    color: #2c2c2c;
+    white-space: nowrap;
+}
+
+.page-contas-pagar .table-contas-pagar .td-acoes {
+    white-space: nowrap;
+}
+
+/* Status badges */
+.page-contas-pagar .badge-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.page-contas-pagar .badge-status-pago {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.page-contas-pagar .badge-status-pendente {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+}
+
+/* Comprovante na tabela */
+.page-contas-pagar .link-comprovante {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    background: #e7f1ff;
+    color: #0d6efd;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.page-contas-pagar .link-comprovante:hover {
+    background: #0d6efd;
+    color: #fff;
+}
+
+.page-contas-pagar .sem-comprovante {
+    color: #adb5bd;
+}
+
+/* Botões de ação na tabela */
+.page-contas-pagar .btn-acao-editar {
+    border-color: #dee2e6;
+    color: #555;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.page-contas-pagar .btn-acao-pagar {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Upload de arquivo no modal */
+.upload-anexo-area {
+    border: 2px dashed #ced4da;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    background: #f8f9fa;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.upload-anexo-area:hover,
+.upload-anexo-area.dragover {
+    border-color: #0d6efd;
+    background: #e7f1ff;
+}
+
+.upload-anexo-area input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+}
+
+.upload-anexo-area .upload-icon {
+    font-size: 2rem;
+    color: #0d6efd;
+    margin-bottom: 8px;
+}
+
+.upload-anexo-area .upload-texto {
+    font-size: 0.88rem;
+    color: #555;
+    margin-bottom: 4px;
+}
+
+.upload-anexo-area .upload-hint {
+    font-size: 0.75rem;
+    color: #888;
+}
+
+.upload-anexo-preview {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+    padding: 10px 12px;
+    background: #e7f1ff;
+    border-radius: 6px;
+    border: 1px solid #b6d4fe;
+}
+
+.upload-anexo-preview.visivel {
+    display: flex;
+}
+
+.upload-anexo-preview .preview-icon {
+    font-size: 1.5rem;
+    color: #0d6efd;
+}
+
+.upload-anexo-preview .preview-nome {
+    flex: 1;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #333;
+    word-break: break-all;
+}
+
+.upload-anexo-preview .btn-remover-anexo {
+    background: none;
+    border: none;
+    color: #dc3545;
+    font-size: 1.2rem;
+    padding: 0 4px;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.upload-anexo-preview .btn-remover-anexo:hover {
+    color: #a71d2a;
+}
+
+/* Modais */
+.page-contas-pagar .modal-header {
+    background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%);
+    color: #D4AF37;
+    border-bottom: 2px solid #D4AF37;
+}
+
+.page-contas-pagar .modal-header .btn-close {
+    filter: invert(1) brightness(2);
+}
+
+.page-contas-pagar .modal-title {
+    font-weight: 600;
+}
+
+.page-contas-pagar .modal-footer {
+    border-top: 1px solid #e8e8e8;
+}
+
+/* Estado vazio da tabela */
+.page-contas-pagar .tabela-vazia td {
+    text-align: center;
+    color: #888;
+    padding: 32px 12px !important;
+    font-style: italic;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+    .page-contas-pagar .filtro-item .form-control,
+    .page-contas-pagar .filtro-item .form-select {
+        min-width: 100%;
+    }
+
+    .page-contas-pagar .section-body {
+        padding: 12px;
+    }
+}
