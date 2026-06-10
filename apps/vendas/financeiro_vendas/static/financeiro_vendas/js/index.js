@@ -45,34 +45,7 @@ function aplicarFiltros() {
     if (filtroDatasDisponivel() && !filtros) {
         return;
     }
-    if (filtros) {
-        carregarResumo();
-    }
     carregarTabela(statusAtual);
-}
-
-function carregarResumo() {
-    const filtros = getFiltroDatas();
-    if (!filtros) {
-        return;
-    }
-
-    $.ajax({
-        url: '/vendas/financeiro/api/contratos/resumo/',
-        method: 'GET',
-        data: filtros,
-        success: function(response) {
-            if (response.success) {
-                $('#resumo-total-af').text(formatarMoeda(response.data.total_af));
-            } else {
-                alert('Erro: ' + (response.message || 'Erro desconhecido'));
-            }
-        },
-        error: function(xhr) {
-            const response = xhr.responseJSON || {};
-            alert('Erro ao carregar resumo: ' + (response.message || 'Erro desconhecido'));
-        }
-    });
 }
 
 $(document).ready(function() {
@@ -176,12 +149,18 @@ function filtrarContratosTabela(contratos) {
 }
 
 function atualizarKpisTabela(contratosFiltrados) {
+    let totalAf = 0;
+    let totalTcPago = 0;
     let totalRepasse = 0;
     (contratosFiltrados || []).forEach(function(c) {
+        totalAf += parseFloat(c.valor_af || 0);
+        totalTcPago += parseFloat(c.valor_tc_acumulado || 0);
         totalRepasse += calcularRepasseExibicao(c);
     });
-    $('#resumo-total-repasse-calc').text(formatarMoeda(totalRepasse));
-    $('#resumo-total-contratos-tabela').text((contratosFiltrados || []).length);
+    $('#resumo-total-af').text(formatarMoeda(totalAf));
+    $('#resumo-total-tc-pago').text(formatarMoeda(totalTcPago));
+    $('#resumo-total-repasse').text(formatarMoeda(totalRepasse));
+    $('#resumo-qtd-contratos').text((contratosFiltrados || []).length);
 }
 
 function aplicarFiltrosTabelaLocal() {
