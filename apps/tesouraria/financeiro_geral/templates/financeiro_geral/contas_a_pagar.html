@@ -98,7 +98,8 @@
                                 <th><i class='bx bx-dollar'></i> Valor</th>
                                 <th><i class='bx bx-calendar'></i> Vencimento</th>
                                 <th><i class='bx bx-check-circle'></i> Status</th>
-                                <th><i class='bx bx-paperclip'></i> Comprovante</th>
+                                <th><i class='bx bx-paperclip'></i> Anexo</th>
+                                <th><i class='bx bx-receipt'></i> Comprovante</th>
                                 <th><i class='bx bx-cog'></i> Ações</th>
                             </tr>
                         </thead>
@@ -161,7 +162,8 @@
                                 <th><i class='bx bx-dollar'></i> Valor</th>
                                 <th><i class='bx bx-calendar'></i> Vencimento</th>
                                 <th><i class='bx bx-check-circle'></i> Status</th>
-                                <th><i class='bx bx-paperclip'></i> Comprovante</th>
+                                <th><i class='bx bx-paperclip'></i> Anexo</th>
+                                <th><i class='bx bx-receipt'></i> Comprovante</th>
                                 <th><i class='bx bx-cog'></i> Ações</th>
                             </tr>
                         </thead>
@@ -229,7 +231,8 @@
                                 <th><i class='bx bx-dollar'></i> Valor</th>
                                 <th><i class='bx bx-calendar'></i> Vencimento</th>
                                 <th><i class='bx bx-check-circle'></i> Status</th>
-                                <th><i class='bx bx-paperclip'></i> Comprovante</th>
+                                <th><i class='bx bx-paperclip'></i> Anexo</th>
+                                <th><i class='bx bx-receipt'></i> Comprovante</th>
                                 <th><i class='bx bx-cog'></i> Ações</th>
                             </tr>
                         </thead>
@@ -320,7 +323,8 @@
                     <input type="date" class="form-control" id="modalPagoData">
                 </div>
                 <div class="mb-3">
-                    <label class="form-label"><i class='bx bx-paperclip'></i> Comprovante de pagamento</label>
+                    <label class="form-label"><i class='bx bx-receipt'></i> Comprovante de pagamento</label>
+                    <small class="d-block text-muted mb-2">Recibo do pagamento efetuado (diferente do anexo geral da conta).</small>
                     <div class="upload-anexo-area" id="upload-area-pago">
                         <input type="file" id="modalPagoComprovante" accept="image/*,.pdf">
                         <div class="upload-icon"><i class='bx bx-cloud-upload'></i></div>
@@ -420,11 +424,12 @@
                     <label class="form-label"><i class='bx bx-note'></i> Observação</label>
                     <textarea class="form-control" id="nova-observacao" rows="2"></textarea>
                 </div>
-                <!-- Anexo opcional ao criar conta -->
-                <div class="mb-3" id="nova-comprovante-row">
-                    <label class="form-label"><i class='bx bx-paperclip'></i> Anexo / Comprovante <span class="text-muted fw-normal">(opcional)</span></label>
+                <!-- Anexo geral (documento da conta — não é comprovante de pagamento) -->
+                <div class="mb-3" id="nova-anexo-row">
+                    <label class="form-label"><i class='bx bx-paperclip'></i> Anexo geral <span class="text-muted fw-normal">(opcional)</span></label>
+                    <small class="d-block text-muted mb-2">Nota fiscal, boleto, contrato ou outro documento da conta.</small>
                     <div class="upload-anexo-area" id="upload-area-nova">
-                        <input type="file" id="nova-comprovante" accept="image/*,.pdf">
+                        <input type="file" id="nova-anexo" accept="image/*,.pdf">
                         <div class="upload-icon"><i class='bx bx-cloud-upload'></i></div>
                         <div class="upload-texto">Clique ou arraste imagem ou PDF</div>
                         <div class="upload-hint">JPG, PNG, GIF, WEBP ou PDF — máx. 10 MB</div>
@@ -432,20 +437,36 @@
                     <div class="upload-anexo-preview" id="preview-nova">
                         <span class="preview-icon"><i class='bx bx-file'></i></span>
                         <span class="preview-nome" id="preview-nova-nome"></span>
-                        <button type="button" class="btn-remover-anexo" data-target="nova-comprovante" title="Remover"><i class='bx bx-x'></i></button>
+                        <button type="button" class="btn-remover-anexo" data-target="nova-anexo" title="Remover"><i class='bx bx-x'></i></button>
+                    </div>
+                </div>
+                <div class="mb-3" id="editar-anexo-row" style="display:none;">
+                    <label class="form-label"><i class='bx bx-paperclip'></i> Anexo geral</label>
+                    <small class="d-block text-muted mb-2">Substituir documento anexado à conta.</small>
+                    <div class="upload-anexo-area" id="upload-area-editar-anexo">
+                        <input type="file" id="editar-anexo" accept="image/*,.pdf">
+                        <div class="upload-icon"><i class='bx bx-cloud-upload'></i></div>
+                        <div class="upload-texto">Clique ou arraste para substituir o anexo</div>
+                        <div class="upload-hint">JPG, PNG, GIF, WEBP ou PDF — máx. 10 MB</div>
+                    </div>
+                    <div class="upload-anexo-preview" id="preview-editar-anexo">
+                        <span class="preview-icon"><i class='bx bx-file'></i></span>
+                        <span class="preview-nome" id="preview-editar-anexo-nome"></span>
+                        <button type="button" class="btn-remover-anexo" data-target="editar-anexo" title="Remover"><i class='bx bx-x'></i></button>
                     </div>
                 </div>
                 <div class="mb-3" id="editar-comprovante-row" style="display:none;">
-                    <label class="form-label"><i class='bx bx-paperclip'></i> Comprovante de pagamento (superuser)</label>
-                    <div class="upload-anexo-area" id="upload-area-editar">
+                    <label class="form-label"><i class='bx bx-receipt'></i> Comprovante de pagamento <span class="text-muted fw-normal">(superuser)</span></label>
+                    <small class="d-block text-muted mb-2">Recibo ou comprovante do pagamento efetuado — enviado ao marcar como pago.</small>
+                    <div class="upload-anexo-area" id="upload-area-editar-comprovante">
                         <input type="file" id="editar-comprovante" accept="image/*,.pdf">
                         <div class="upload-icon"><i class='bx bx-cloud-upload'></i></div>
-                        <div class="upload-texto">Substituir comprovante existente</div>
+                        <div class="upload-texto">Substituir comprovante de pagamento</div>
                         <div class="upload-hint">Imagens ou PDF — máx. 10 MB</div>
                     </div>
-                    <div class="upload-anexo-preview" id="preview-editar">
+                    <div class="upload-anexo-preview" id="preview-editar-comprovante">
                         <span class="preview-icon"><i class='bx bx-file'></i></span>
-                        <span class="preview-nome" id="preview-editar-nome"></span>
+                        <span class="preview-nome" id="preview-editar-comprovante-nome"></span>
                         <button type="button" class="btn-remover-anexo" data-target="editar-comprovante" title="Remover"><i class='bx bx-x'></i></button>
                     </div>
                 </div>

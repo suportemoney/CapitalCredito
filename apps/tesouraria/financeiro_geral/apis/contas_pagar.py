@@ -14,19 +14,19 @@ _MIMES_COMPROVANTE = {
     'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf',
 }
 
-def _validar_comprovante(arquivo):
-    """Valida arquivo de comprovante (imagem ou PDF)."""
+def _validar_arquivo(arquivo, rotulo='Arquivo'):
+    """Valida arquivo de anexo ou comprovante (imagem ou PDF)."""
     if not arquivo:
         return None
     nome = (arquivo.name or '').lower()
     ext = '.' + nome.rsplit('.', 1)[-1] if '.' in nome else ''
     if ext not in _EXTENSOES_COMPROVANTE:
-        return 'Comprovante deve ser imagem (JPG, PNG, GIF, WEBP) ou PDF.'
+        return f'{rotulo} deve ser imagem (JPG, PNG, GIF, WEBP) ou PDF.'
     content_type = (getattr(arquivo, 'content_type', '') or '').lower()
     if content_type and content_type not in _MIMES_COMPROVANTE:
-        return 'Tipo de arquivo não permitido. Use imagem ou PDF.'
+        return f'Tipo de arquivo não permitido em {rotulo.lower()}. Use imagem ou PDF.'
     if arquivo.size > 10 * 1024 * 1024:
-        return 'Comprovante não pode exceder 10 MB.'
+        return f'{rotulo} não pode exceder 10 MB.'
     return None
 
 def _serializar_conta(c):
@@ -48,6 +48,8 @@ def _serializar_conta(c):
         'funcionario_id': None,
         'funcionario_nome': None,
         'observacao': c.observacao or '',
+        'has_anexo': bool(c.anexo),
+        'anexo_url': c.anexo.url if c.anexo else None,
         'has_comprovante': bool(c.comprovante),
         'comprovante_url': c.comprovante.url if c.comprovante else None,
     }
@@ -71,6 +73,8 @@ def _serializar_salario(c):
         'funcionario_id': c.funcionario_id,
         'funcionario_nome': c.funcionario.nome_completo if c.funcionario else None,
         'observacao': c.observacao or '',
+        'has_anexo': bool(c.anexo),
+        'anexo_url': c.anexo.url if c.anexo else None,
         'has_comprovante': bool(c.comprovante),
         'comprovante_url': c.comprovante.url if c.comprovante else None,
     }
@@ -94,6 +98,8 @@ def _serializar_beneficio(c):
         'funcionario_id': c.funcionario_id,
         'funcionario_nome': c.funcionario.nome_completo if c.funcionario else None,
         'observacao': c.observacao or '',
+        'has_anexo': bool(c.anexo),
+        'anexo_url': c.anexo.url if c.anexo else None,
         'has_comprovante': bool(c.comprovante),
         'comprovante_url': c.comprovante.url if c.comprovante else None,
     }
@@ -289,11 +295,11 @@ def api_post_contas_pagar_criar(request):
             data_venc = datetime.strptime(data_vencimento, '%Y-%m-%d').date()
         except (ValueError, TypeError):
             return JsonResponse({'success': False, 'message': 'Valor ou data inválidos'})
-        comprovante = request.FILES.get('comprovante')
-        if comprovante:
-            erro_comprovante = _validar_comprovante(comprovante)
-            if erro_comprovante:
-                return JsonResponse({'success': False, 'message': erro_comprovante})
+        anexo = request.FILES.get('anexo')
+        if anexo:
+            erro_anexo = _validar_arquivo(anexo, 'Anexo')
+            if erro_anexo:
+                return JsonResponse({'success': False, 'message': erro_anexo})
         if tipo == 'CONTA':
             categoria_id = request.POST.get('categoria_id')
             if not categoria_id:
@@ -310,7 +316,7 @@ def api_post_contas_pagar_criar(request):
                     categoria=categoria,
                     subcategoria=subcategoria,
                     observacao=observacao,
-                    comprovante=comprovante,
+                    anexo=anexo,
                     status_ativo=True,
                 )
         elif tipo == 'SALARIO':
@@ -326,7 +332,7 @@ def api_post_contas_pagar_criar(request):
                     pago=False,
                     funcionario=funcionario,
                     observacao=observacao,
-                    comprovante=comprovante,
+                    anexo=anexo,
                     status_ativo=True,
                 )
         else:
@@ -345,7 +351,7 @@ def api_post_contas_pagar_criar(request):
                     funcionario=funcionario,
                     tipo_beneficio=tipo_beneficio,
                     observacao=observacao,
-                    comprovante=comprovante,
+                    anexo=anexo,
                     status_ativo=True,
                 )
         return JsonResponse({'success': True, 'message': 'Conta a pagar criada com sucesso.', 'result': None})
@@ -390,6 +396,9 @@ def api_post_contas_pagar_marcar_pago(request):
         obj.data_pagamento = data_pag
         comprovante = request.FILES.get('comprovante')
         if comprovante:
+            erro_comprovante = _validar_arquivo(comprovante, 'Comprovante de pagamento')
+            if erro_comprovante:
+                return JsonResponse({'success': False, 'message': erro_comprovante})
             obj.comprovante = comprovante
         obj.save()
         return JsonResponse({'success': True, 'message': 'Conta marcada como paga.', 'result': None})
@@ -441,7 +450,15 @@ def api_post_contas_pagar_editar(request):
             obj.observacao = observacao
             obj.categoria = categoria
             obj.subcategoria = subcategoria
+            if request.FILES.get('anexo'):
+                erro_anexo = _validar_arquivo(request.FILES.get('anexo'), 'Anexo')
+                if erro_anexo:
+                    return JsonResponse({'success': False, 'message': erro_anexo})
+                obj.anexo = request.FILES.get('anexo')
             if request.user.is_superuser and request.FILES.get('comprovante'):
+                erro_comprovante = _validar_arquivo(request.FILES.get('comprovante'), 'Comprovante de pagamento')
+                if erro_comprovante:
+                    return JsonResponse({'success': False, 'message': erro_comprovante})
                 obj.comprovante = request.FILES.get('comprovante')
             obj.save()
         elif tipo == 'SALARIO':
@@ -457,7 +474,15 @@ def api_post_contas_pagar_editar(request):
             obj.data_vencimento = data_venc
             obj.observacao = observacao
             obj.funcionario = funcionario
+            if request.FILES.get('anexo'):
+                erro_anexo = _validar_arquivo(request.FILES.get('anexo'), 'Anexo')
+                if erro_anexo:
+                    return JsonResponse({'success': False, 'message': erro_anexo})
+                obj.anexo = request.FILES.get('anexo')
             if request.user.is_superuser and request.FILES.get('comprovante'):
+                erro_comprovante = _validar_arquivo(request.FILES.get('comprovante'), 'Comprovante de pagamento')
+                if erro_comprovante:
+                    return JsonResponse({'success': False, 'message': erro_comprovante})
                 obj.comprovante = request.FILES.get('comprovante')
             obj.save()
         else:
@@ -476,7 +501,15 @@ def api_post_contas_pagar_editar(request):
             obj.observacao = observacao
             obj.funcionario = funcionario
             obj.tipo_beneficio = tipo_beneficio
+            if request.FILES.get('anexo'):
+                erro_anexo = _validar_arquivo(request.FILES.get('anexo'), 'Anexo')
+                if erro_anexo:
+                    return JsonResponse({'success': False, 'message': erro_anexo})
+                obj.anexo = request.FILES.get('anexo')
             if request.user.is_superuser and request.FILES.get('comprovante'):
+                erro_comprovante = _validar_arquivo(request.FILES.get('comprovante'), 'Comprovante de pagamento')
+                if erro_comprovante:
+                    return JsonResponse({'success': False, 'message': erro_comprovante})
                 obj.comprovante = request.FILES.get('comprovante')
             obj.save()
         return JsonResponse({'success': True, 'message': 'Conta atualizada.', 'result': None})
