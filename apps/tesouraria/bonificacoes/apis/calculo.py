@@ -5,28 +5,39 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
-from django.db.models import Sum, Q
+from django.db.models import Sum, Q, F, ExpressionWrapper, DecimalField
 from apps.seguranca.permissoes.decorators import controle_acess, controle_acess_any
 from apps.tesouraria.bonificacoes.models import (
     BonificacaoRegra, BonificacaoGatilho, BonificacaoFuncionarioRegra,
     BonificacaoCalculada, ReducaoBonificacaoFuncionario, ReducaoBonificacaoRegra,
-    TipoRegraChoices
+    TipoRegraChoices, CampoValorChoices
 )
 from apps.rh.funcionarios.models import Funcionario
 from apps.vendas.financeiro_vendas.models import ContratoPagamento
 
-def _obter_valor_base_funcionario(funcionario, periodo_inicio, periodo_fim):
-    """Soma ContratoPagamento (valor_repasse) do user do funcionário no período (PAGO)."""
+def _obter_valor_base_funcionario(funcionario, periodo_inicio, periodo_fim, regra=None):
+    """Soma ContratoPagamento do user do funcionário no período (PAGO), conforme campo da regra."""
     user = getattr(funcionario, 'usuario', None)
     if not user:
         return Decimal('0.00')
-    agg = ContratoPagamento.objects.filter(
+    campo = regra.campo_valor if regra else CampoValorChoices.VALOR_REPASSE
+    qs = ContratoPagamento.objects.filter(
         user=user,
         data_contrato__gte=periodo_inicio,
         data_contrato__lte=periodo_fim,
         status='PAGO',
-        status_ativo=True
-    ).aggregate(total=Sum('valor_repasse'))
+        status_ativo=True,
+    )
+    if campo == CampoValorChoices.VALOR_AF:
+        agg = qs.aggregate(total=Sum('valor_af'))
+    else:
+        # Repasse = TC acumulado × percentual do classificador de cada contrato
+        agg = qs.annotate(
+            valor_calculado=ExpressionWrapper(
+                F('valor_tc_acumulado') * F('classificador__percentual') / Decimal('100'),
+                output_field=DecimalField(max_digits=15, decimal_places=2),
+            )
+        ).aggregate(total=Sum('valor_calculado'))
     return agg['total'] or Decimal('0.00')
 
 def _calcular_bonificacao_regra(regra, valor_base, gatilho_aplicado=None):
@@ -93,7 +104,7 @@ def api_get_preview_calculo(request):
                 Q(data_fim__isnull=True) | Q(data_fim__gte=dt_inicio)
             ).select_related('regra').order_by('-prioridade')
             for v in vinculos:
-                valor_base = _obter_valor_base_funcionario(func, dt_inicio, dt_fim)
+                valor_base = _obter_valor_base_funcionario(func, dt_inicio, dt_fim, v.regra)
                 gatilho = _obter_gatilho_aplicado(v.regra, valor_base)
                 valor_bonif, _ = _calcular_bonificacao_regra(v.regra, valor_base, gatilho)
                 soma_red, reducoes_det = _obter_soma_reducoes(func, dt_inicio, dt_fim)
@@ -144,7 +155,7 @@ def api_get_calculo_mes(request):
         lista = []
         for v in vinculos:
             func = v.funcionario
-            valor_base = _obter_valor_base_funcionario(func, dt_inicio, dt_fim)
+            valor_base = _obter_valor_base_funcionario(func, dt_inicio, dt_fim, v.regra)
             gatilho = _obter_gatilho_aplicado(v.regra, valor_base)
             valor_bonif, _ = _calcular_bonificacao_regra(v.regra, valor_base, gatilho)
             soma_red, _ = _obter_soma_reducoes(func, dt_inicio, dt_fim)
@@ -238,7 +249,7 @@ def api_post_calcular_bonificacao(request):
         ).first()
         if not vinculo:
             return JsonResponse({'success': False, 'message': 'Não há vínculo ativo para este funcionário e regra no período'})
-        valor_base = _obter_valor_base_funcionario(funcionario, dt_inicio, dt_fim)
+        valor_base = _obter_valor_base_funcionario(funcionario, dt_inicio, dt_fim, regra)
         gatilho = _obter_gatilho_aplicado(regra, valor_base)
         valor_bonif, gatilho_obj = _calcular_bonificacao_regra(regra, valor_base, gatilho)
         soma_red, reducoes_det = _obter_soma_reducoes(funcionario, dt_inicio, dt_fim)
@@ -286,7 +297,7 @@ def api_post_calcular_lote(request):
                     Q(data_fim__isnull=True) | Q(data_fim__gte=dt_inicio)
                 ).select_related('regra').order_by('-prioridade')
                 for v in vinculos:
-                    valor_base = _obter_valor_base_funcionario(func, dt_inicio, dt_fim)
+                    valor_base = _obter_valor_base_funcionario(func, dt_inicio, dt_fim, v.regra)
                     gatilho = _obter_gatilho_aplicado(v.regra, valor_base)
                     valor_bonif, gatilho_obj = _calcular_bonificacao_regra(v.regra, valor_base, gatilho)
                     soma_red, reducoes_det = _obter_soma_reducoes(func, dt_inicio, dt_fim)
