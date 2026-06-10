@@ -9,6 +9,8 @@ from django.db import transaction
 from django.db.models import Sum, Count
 from datetime import datetime
 from apps.seguranca.permissoes.decorators import controle_acess
+from django.db.models import Prefetch
+
 from apps.vendas.financeiro_vendas.models import ComprovanteTC, ContratoPagamento, Classificador
 from apps.vendas.siape.models import Cliente, Produto
 from apps.rh.admin.models import Setor
@@ -101,7 +103,12 @@ def api_listar_contratos(request):
             'user',
             'setor',
             'produto',
-            'classificador'
+            'classificador',
+        ).prefetch_related(
+            Prefetch(
+                'comprovantes_tc',
+                queryset=ComprovanteTC.objects.filter(status=True).order_by('criado_em'),
+            ),
         )
         
         if status == 'A_PAGAR':
@@ -119,11 +126,20 @@ def api_listar_contratos(request):
             if hasattr(contrato.user, 'funcionario_profile') and contrato.user.funcionario_profile:
                 funcionario = contrato.user.funcionario_profile.nome_completo
 
-            comps_ativos = contrato.comprovantes_tc.filter(status=True)
-            qtd_comprovantes = comps_ativos.count()
+            comps_ativos = list(contrato.comprovantes_tc.all())
+            qtd_comprovantes = len(comps_ativos)
             soma_comprovantes = sum((c.valor for c in comps_ativos), 0)
             # Com comprovantes: acumulado = soma; sem comprovantes: mantém legado (migration)
             valor_tc_acumulado = float(soma_comprovantes) if qtd_comprovantes else float(contrato.valor_tc_acumulado or 0)
+            percentual = float(contrato.classificador.percentual or 0)
+            valor_repasse_calc = valor_tc_acumulado * (percentual / 100)
+
+            data_pago = ''
+            if comps_ativos and comps_ativos[0].criado_em:
+                data_pago = comps_ativos[0].criado_em.strftime('%Y-%m-%d')
+            elif valor_tc_acumulado > 0 and contrato.data_criacao:
+                data_pago = contrato.data_criacao.strftime('%Y-%m-%d')
+
             data.append({
                 'id': contrato.id,
                 'funcionario': funcionario or contrato.user.username,
@@ -134,14 +150,17 @@ def api_listar_contratos(request):
                 'banco': contrato.banco,
                 'valor_af': float(contrato.valor_af),
                 'valor_repasse': float(contrato.valor_repasse),
+                'valor_repasse_calc': valor_repasse_calc,
                 'valor_tc': float(contrato.valor_tc or 0),
                 'valor_tc_acumulado': valor_tc_acumulado,
                 'flg_ponta': contrato.flg_ponta,
                 'classificador_id': contrato.classificador.id,
                 'classificador_nome': contrato.classificador.titulo,
+                'classificador_percentual': percentual,
                 'data_contrato': contrato.data_contrato.strftime('%Y-%m-%d'),
+                'data_criacao': contrato.data_criacao.strftime('%Y-%m-%d') if contrato.data_criacao else '',
                 'status': contrato.status,
-                'data_pagamento': contrato.data_pagamento.strftime('%Y-%m-%d') if contrato.data_pagamento else '',
+                'data_pagamento': data_pago,
                 'contrato_execucao_id': contrato.contrato_execucao_id,
                 'qtd_comprovantes': qtd_comprovantes,
                 'tem_comprovante': qtd_comprovantes > 0,

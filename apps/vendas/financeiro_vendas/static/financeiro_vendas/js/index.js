@@ -136,55 +136,69 @@ function carregarTabela(status) {
     });
 }
 
+const COLUNAS_TABELA = 13;
+
 function exibirTabela(status, contratos) {
     let tbodyId = '';
-    let colunas = [];
     
     if (status === 'A_PAGAR') {
         tbodyId = 'tabela-a-pagar';
-        colunas = ['funcionario', 'cliente', 'cpf', 'produto', 'banco', 'af', 'repasse', 'tc', 'tc_pago', 'ponta', 'classificador', 'comprovante', 'acoes'];
     } else if (status === 'PAGO') {
         tbodyId = 'tabela-pago';
-        colunas = ['funcionario', 'cliente', 'cpf', 'produto', 'banco', 'af', 'repasse', 'tc', 'tc_pago', 'ponta', 'classificador', 'data_pagamento', 'comprovante', 'acoes'];
     } else if (status === 'NAO_PAGO') {
         tbodyId = 'tabela-nao-pago';
-        colunas = ['funcionario', 'cliente', 'cpf', 'produto', 'banco', 'af', 'repasse', 'tc', 'tc_pago', 'ponta', 'classificador', 'comprovante', 'acoes'];
     }
     
     const tbody = $(`#${tbodyId}`);
     tbody.empty();
     
     if (contratos.length === 0) {
-        const colspan = colunas.length;
-        tbody.append(`<tr><td colspan="${colspan}" class="text-center">Nenhum contrato encontrado</td></tr>`);
+        tbody.append(`<tr><td colspan="${COLUNAS_TABELA}" class="text-center">Nenhum contrato encontrado</td></tr>`);
         return;
     }
     
     contratos.forEach(function(contrato) {
-        const row = gerarLinhaTabela(contrato, status);
+        const row = gerarLinhaTabela(contrato);
         tbody.append(row);
     });
 }
 
-function gerarLinhaTabela(contrato, status) {
+function calcularRepasseExibicao(contrato) {
+    if (contrato.valor_repasse_calc !== undefined && contrato.valor_repasse_calc !== null) {
+        return parseFloat(contrato.valor_repasse_calc) || 0;
+    }
+    const tcPago = parseFloat(contrato.valor_tc_acumulado || 0);
+    const pct = parseFloat(contrato.classificador_percentual || 0);
+    return tcPago * (pct / 100);
+}
+
+function gerarLinhaTabela(contrato) {
     const cpfFormatado = formatarCPF(contrato.cliente_cpf);
     const afFormatado = formatarMoeda(contrato.valor_af);
-    const repasseFormatado = formatarMoeda(contrato.valor_repasse);
+    const repasseCalc = calcularRepasseExibicao(contrato);
+    const repasseFormatado = formatarMoeda(repasseCalc);
     const pontaChecked = contrato.flg_ponta ? 'checked' : '';
+    const pctLabel = contrato.classificador_percentual !== undefined
+        ? ` <small class="text-muted">(${parseFloat(contrato.classificador_percentual).toFixed(0)}%)</small>`
+        : '';
     
     let html = '<tr>';
     html += `<td>${escapeHtml(contrato.funcionario)}</td>`;
-    html += `<td>${escapeHtml(contrato.cliente_nome)}</td>`;
-    html += `<td>${cpfFormatado}</td>`;
     html += `<td>
-        <select class="form-select form-select-sm campo-editavel" data-contrato-id="${contrato.id}" data-campo="produto_id" onchange="editarCampo(${contrato.id}, 'produto_id', this.value)">
-            ${gerarOpcoesProdutos(contrato.produto_id)}
-        </select>
+        <div class="celula-cliente-cpf">
+            <strong class="d-block">${escapeHtml(contrato.cliente_nome)}</strong>
+            <small class="text-muted">${cpfFormatado}</small>
+        </div>
     </td>`;
     html += `<td>
         <input type="text" class="form-control form-control-sm campo-editavel" value="${escapeHtml(contrato.banco)}" 
                data-contrato-id="${contrato.id}" data-campo="banco" 
                onblur="editarCampo(${contrato.id}, 'banco', this.value)">
+    </td>`;
+    html += `<td>
+        <select class="form-select form-select-sm campo-editavel" data-contrato-id="${contrato.id}" data-campo="produto_id" onchange="editarCampo(${contrato.id}, 'produto_id', this.value)">
+            ${gerarOpcoesProdutos(contrato.produto_id)}
+        </select>
     </td>`;
     html += `<td>
         <input type="number" class="form-control form-control-sm campo-editavel" value="${contrato.valor_af}" step="0.01" 
@@ -193,18 +207,12 @@ function gerarLinhaTabela(contrato, status) {
         <small class="text-muted">${afFormatado}</small>
     </td>`;
     html += `<td>
-        <input type="number" class="form-control form-control-sm campo-editavel" value="${contrato.valor_repasse}" step="0.01" 
-               data-contrato-id="${contrato.id}" data-campo="valor_repasse" 
-               onblur="editarCampo(${contrato.id}, 'valor_repasse', this.value)">
-        <small class="text-muted">${repasseFormatado}</small>
-    </td>`;
-    html += `<td>
-        <input type="number" class="form-control form-control-sm campo-editavel" value="${contrato.valor_tc || 0}" step="0.01" min="0"
-               data-contrato-id="${contrato.id}" data-campo="valor_tc"
-               onblur="editarCampo(${contrato.id}, 'valor_tc', this.value)">
-    </td>`;
-    html += `<td>
-        <span class="badge ${badgeTcClasse(contrato)}">${formatarMoeda(contrato.valor_tc_acumulado || 0)} / ${formatarMoeda(contrato.valor_tc || 0)}</span>
+        <div class="celula-tc">
+            <input type="number" class="form-control form-control-sm campo-editavel mb-1" value="${contrato.valor_tc || 0}" step="0.01" min="0"
+                   data-contrato-id="${contrato.id}" data-campo="valor_tc"
+                   onblur="editarCampo(${contrato.id}, 'valor_tc', this.value)" title="Meta TC">
+            <span class="badge ${badgeTcClasse(contrato)}">${formatarMoeda(contrato.valor_tc_acumulado || 0)} / ${formatarMoeda(contrato.valor_tc || 0)}</span>
+        </div>
     </td>`;
     html += `<td>
         <input type="checkbox" class="form-check-input campo-editavel" ${pontaChecked} 
@@ -217,10 +225,12 @@ function gerarLinhaTabela(contrato, status) {
             ${gerarOpcoesClassificadores(contrato.classificador_id)}
         </select>
     </td>`;
-    
-    if (status === 'PAGO') {
-        html += `<td>${contrato.data_pagamento ? formatarData(contrato.data_pagamento) : '-'}</td>`;
-    }
+    html += `<td>
+        <span class="fw-semibold">${repasseFormatado}</span>${pctLabel}
+        <small class="text-muted d-block">TC pago × %</small>
+    </td>`;
+    html += `<td>${contrato.data_criacao ? formatarData(contrato.data_criacao) : '-'}</td>`;
+    html += `<td>${contrato.data_pagamento ? formatarData(contrato.data_pagamento) : '-'}</td>`;
 
     const qtdComp = contrato.qtd_comprovantes || 0;
     html += `<td>

@@ -18,6 +18,16 @@
     vertical-align: middle;
 }
 
+.celula-cliente-cpf strong {
+    font-size: 0.875rem;
+    line-height: 1.2;
+}
+
+.celula-tc .badge {
+    font-size: 0.75rem;
+    white-space: nowrap;
+}
+
 .form-select-sm,
 .form-control-sm {
     font-size: 0.875rem;
