@@ -79,12 +79,7 @@
                 <div class="card-body">
                     <ul class="nav nav-tabs" id="tabsContratos" role="tablist">
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="a-pagar-tab" data-bs-toggle="tab" data-bs-target="#a-pagar" type="button" role="tab" onclick="carregarTabela('A_PAGAR')">
-                                A Pagar
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="pago-tab" data-bs-toggle="tab" data-bs-target="#pago" type="button" role="tab" onclick="carregarTabela('PAGO')">
+                            <button class="nav-link active" id="pago-tab" data-bs-toggle="tab" data-bs-target="#pago" type="button" role="tab" onclick="carregarTabela('PAGO')">
                                 Pagos
                             </button>
                         </li>
@@ -93,36 +88,15 @@
                                 Não Pagos
                             </button>
                         </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="a-pagar-tab" data-bs-toggle="tab" data-bs-target="#a-pagar" type="button" role="tab" onclick="carregarTabela('A_PAGAR')">
+                                A Pagar
+                            </button>
+                        </li>
                     </ul>
                     <div class="tab-content mt-3" id="tabsContratosContent">
-                        <!-- Tab A Pagar -->
-                        <div class="tab-pane fade show active" id="a-pagar" role="tabpanel">
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Funcionário</th>
-                                            <th>Cliente</th>
-                                            <th>CPF</th>
-                                            <th>Produto</th>
-                                            <th>Banco</th>
-                                            <th>AF (R$)</th>
-                                            <th>Repasse (R$)</th>
-                                            <th>TC</th>
-                                            <th>TC Pago</th>
-                                            <th>Ponta</th>
-                                            <th>Classificador</th>
-                                            <th>Comprovante</th>
-                                            <th>Ações</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="tabela-a-pagar">
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
                         <!-- Tab Pagos -->
-                        <div class="tab-pane fade" id="pago" role="tabpanel">
+                        <div class="tab-pane fade show active" id="pago" role="tabpanel">
                             <div class="table-responsive">
                                 <table class="table table-hover">
                                     <thead>
@@ -170,6 +144,32 @@
                                         </tr>
                                     </thead>
                                     <tbody id="tabela-nao-pago">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <!-- Tab A Pagar -->
+                        <div class="tab-pane fade" id="a-pagar" role="tabpanel">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Funcionário</th>
+                                            <th>Cliente</th>
+                                            <th>CPF</th>
+                                            <th>Produto</th>
+                                            <th>Banco</th>
+                                            <th>AF (R$)</th>
+                                            <th>Repasse (R$)</th>
+                                            <th>TC</th>
+                                            <th>TC Pago</th>
+                                            <th>Ponta</th>
+                                            <th>Classificador</th>
+                                            <th>Comprovante</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tabela-a-pagar">
                                     </tbody>
                                 </table>
                             </div>

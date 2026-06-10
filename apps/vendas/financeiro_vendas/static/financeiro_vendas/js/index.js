@@ -1,4 +1,4 @@
-let statusAtual = 'A_PAGAR';
+let statusAtual = 'PAGO';
 
 function filtroDatasDisponivel() {
     return $('#filtroDataInicio').length > 0 && $('#filtroDataFim').length > 0;
