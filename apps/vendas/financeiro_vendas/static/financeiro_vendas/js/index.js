@@ -1,4 +1,5 @@
 let statusAtual = 'PAGO';
+let contratosDadosAtual = [];
 
 function filtroDatasDisponivel() {
     return $('#filtroDataInicio').length > 0 && $('#filtroDataFim').length > 0;
@@ -63,8 +64,6 @@ function carregarResumo() {
         success: function(response) {
             if (response.success) {
                 $('#resumo-total-af').text(formatarMoeda(response.data.total_af));
-                $('#resumo-total-repasse').text(formatarMoeda(response.data.total_repasse));
-                $('#resumo-total-contratos').text(response.data.total_contratos);
             } else {
                 alert('Erro: ' + (response.message || 'Erro desconhecido'));
             }
@@ -102,6 +101,10 @@ $(document).ready(function() {
             $(this).val(fmt);
         }
     });
+
+    $('#filtroTabelaFuncionario, #filtroTabelaCliente').on('input', function() {
+        aplicarFiltrosTabelaLocal();
+    });
 });
 
 function carregarTabela(status) {
@@ -124,7 +127,8 @@ function carregarTabela(status) {
         data: params,
         success: function(response) {
             if (response.success) {
-                exibirTabela(status, response.data);
+                contratosDadosAtual = response.data || [];
+                aplicarFiltrosTabelaLocal();
             } else {
                 alert('Erro: ' + (response.message || 'Erro desconhecido'));
             }
@@ -137,6 +141,60 @@ function carregarTabela(status) {
 }
 
 const COLUNAS_TABELA = 13;
+
+function normalizarTextoFiltro(valor) {
+    return String(valor || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .trim();
+}
+
+function normalizarCpfFiltro(valor) {
+    return String(valor || '').replace(/\D/g, '');
+}
+
+function filtrarContratosTabela(contratos) {
+    const termoFunc = normalizarTextoFiltro($('#filtroTabelaFuncionario').val());
+    const termoCliente = normalizarTextoFiltro($('#filtroTabelaCliente').val());
+    const termoCpf = normalizarCpfFiltro($('#filtroTabelaCliente').val());
+
+    return (contratos || []).filter(function(c) {
+        if (termoFunc) {
+            const func = normalizarTextoFiltro(c.funcionario);
+            if (!func.includes(termoFunc)) return false;
+        }
+        if (termoCliente || termoCpf) {
+            const nome = normalizarTextoFiltro(c.cliente_nome);
+            const cpf = normalizarCpfFiltro(c.cliente_cpf);
+            const matchNome = termoCliente && nome.includes(termoCliente);
+            const matchCpf = termoCpf && cpf.includes(termoCpf);
+            if (!matchNome && !matchCpf) return false;
+        }
+        return true;
+    });
+}
+
+function atualizarKpisTabela(contratosFiltrados) {
+    let totalRepasse = 0;
+    (contratosFiltrados || []).forEach(function(c) {
+        totalRepasse += calcularRepasseExibicao(c);
+    });
+    $('#resumo-total-repasse-calc').text(formatarMoeda(totalRepasse));
+    $('#resumo-total-contratos-tabela').text((contratosFiltrados || []).length);
+}
+
+function aplicarFiltrosTabelaLocal() {
+    const filtrados = filtrarContratosTabela(contratosDadosAtual);
+    exibirTabela(statusAtual, filtrados);
+    atualizarKpisTabela(filtrados);
+}
+
+function limparFiltrosTabela() {
+    $('#filtroTabelaFuncionario').val('');
+    $('#filtroTabelaCliente').val('');
+    aplicarFiltrosTabelaLocal();
+}
 
 function exibirTabela(status, contratos) {
     let tbodyId = '';

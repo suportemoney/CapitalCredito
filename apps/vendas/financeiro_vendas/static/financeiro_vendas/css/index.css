@@ -28,6 +28,10 @@
     white-space: nowrap;
 }
 
+.filtros-tabela {
+    border-radius: 0.375rem;
+}
+
 .form-select-sm,
 .form-control-sm {
     font-size: 0.875rem;
