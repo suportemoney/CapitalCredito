@@ -42,7 +42,7 @@ def api_ranking(request):
             valor_tc_acumulado__gt=0,
             data_pagamento__gte=meta.data_inicio,
             data_pagamento__lte=meta.data_final,
-        ).select_related('user', 'classificador')
+        ).select_related('user')
         
         # Agrupar por vendedor e calcular total
         ranking_data = {}
@@ -64,11 +64,9 @@ def api_ranking(request):
                     'valor_total': 0,
                 }
             
-            # Ranking = TC pago acumulado × percentual do classificador
-            percentual_classificador = float(contrato.classificador.percentual) / 100
+            # Ranking = soma do TC pago acumulado (sem aplicar percentual do classificador)
             base_tc = float(contrato.valor_tc_acumulado or 0)
-            valor_ranking = base_tc * percentual_classificador
-            ranking_data[user_id]['valor_total'] += valor_ranking
+            ranking_data[user_id]['valor_total'] += base_tc
         
         # Converter para lista e ordenar por valor_total (decrescente)
         ranking_list = list(ranking_data.values())

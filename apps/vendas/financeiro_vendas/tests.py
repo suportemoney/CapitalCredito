@@ -105,10 +105,8 @@ class ResolverClassificadorFinanceiroTest(SimpleTestCase):
 
 
 class RankingFormulaTest(SimpleTestCase):
-    """Garante fórmula do ranking com valor_tc_acumulado."""
+    """Garante fórmula do ranking: TC acumulado bruto, sem classificador."""
 
-    def test_formula_valor_tc_acumulado_vezes_percentual(self):
+    def test_formula_valor_tc_acumulado_sem_classificador(self):
         acumulado = Decimal('200')
-        percentual = Decimal('50')
-        esperado = float(acumulado) * (float(percentual) / 100)
-        self.assertEqual(esperado, 100.0)
+        self.assertEqual(float(acumulado), 200.0)
