@@ -46,7 +46,7 @@ def _sse_preview_csv_campanha(request):
 
 
 @login_required(login_url='/')
-@controle_acess('SS49')
+@controle_acess('SS51')
 @require_POST
 def api_sse_gerenciador_siape_preview(request):
     return _sse_preview_csv_campanha(request)

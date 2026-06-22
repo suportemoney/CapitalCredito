@@ -8,7 +8,7 @@ from apps.vendas.plus.services.v2.csv_import import confirmar_importacao_csv, pa
 
 
 @login_required(login_url='/')
-@controle_acess('SS49')
+@controle_acess('SS51')
 @require_POST
 def api_post_importacao_csv_preview(request):
     arquivo = request.FILES.get('arquivo')
@@ -24,7 +24,7 @@ def api_post_importacao_csv_preview(request):
 
 
 @login_required(login_url='/')
-@controle_acess('SS49')
+@controle_acess('SS51')
 @require_POST
 def api_post_importacao_csv_confirmar(request):
     arquivo = request.FILES.get('arquivo')

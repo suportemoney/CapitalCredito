@@ -11,7 +11,7 @@ from apps.vendas.plus.services.v2.utils import normalizar_cpf
 
 
 @login_required(login_url='/')
-@controle_acess('SS48')
+@controle_acess('SS50')
 @require_GET
 def api_get_cliente_ficha(request):
     """Retorna ficha resolvida por CPF e tipo."""

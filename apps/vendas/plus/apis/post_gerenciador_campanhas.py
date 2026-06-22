@@ -52,14 +52,14 @@ def _criar_campanha_csv(request):
 
 
 @login_required(login_url='/')
-@controle_acess('SS49')
+@controle_acess('SS51')
 @require_POST
 def api_post_gerenciador_siape_preview(request):
     return _preview_csv_campanha(request)
 
 
 @login_required(login_url='/')
-@controle_acess('SS49')
+@controle_acess('SS51')
 @require_POST
 def api_post_gerenciador_siape_criar(request):
     return _criar_campanha_csv(request)

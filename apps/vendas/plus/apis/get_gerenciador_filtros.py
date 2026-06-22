@@ -8,7 +8,7 @@ from apps.vendas.plus.services.v2.gerador_siape import listar_status_comercial_s
 
 
 @login_required(login_url='/')
-@controle_acess('SS49')
+@controle_acess('SS51')
 @require_GET
 def api_get_gerenciador_siape_filtros(request):
     from apps.contratos_v2.fluxo_constants import FaseContratoExecucao

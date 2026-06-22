@@ -37,7 +37,7 @@ def _sse_criar_campanha(request, tipo: str):
 
 
 @login_required(login_url='/')
-@controle_acess('SS49')
+@controle_acess('SS51')
 @require_POST
 def api_sse_gerenciador_siape_criar(request):
     return _sse_criar_campanha(request, 'SIAPE')

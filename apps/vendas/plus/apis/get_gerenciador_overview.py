@@ -15,7 +15,7 @@ from apps.vendas.plus.services.v2.gerenciador_overview import (
 
 
 @login_required(login_url='/')
-@controle_acess('SS49')
+@controle_acess('SS51')
 @require_GET
 def api_get_gerenciador_kpis(request):
     tipo = request.GET.get('tipo')
@@ -23,7 +23,7 @@ def api_get_gerenciador_kpis(request):
 
 
 @login_required(login_url='/')
-@controle_acess('SS49')
+@controle_acess('SS51')
 @require_GET
 def api_get_gerenciador_campanha_detalhe(request):
     campanha_id = request.GET.get('campanha_id')
@@ -36,7 +36,7 @@ def api_get_gerenciador_campanha_detalhe(request):
 
 
 @login_required(login_url='/')
-@controle_acess('SS49')
+@controle_acess('SS51')
 @require_GET
 def api_get_gerenciador_ultima_importacao(request):
     campanha_id = request.GET.get('campanha_id')
@@ -47,7 +47,7 @@ def api_get_gerenciador_ultima_importacao(request):
 
 
 @login_required(login_url='/')
-@controle_acess('SS49')
+@controle_acess('SS51')
 @require_GET
 def api_get_gerenciador_agendamentos_campanha(request):
     campanha_id = request.GET.get('campanha_id')
@@ -60,7 +60,7 @@ def api_get_gerenciador_agendamentos_campanha(request):
 
 
 @login_required(login_url='/')
-@controle_acess('SS49')
+@controle_acess('SS51')
 @require_GET
 def api_get_gerenciador_campanhas_enriquecidas(request):
     tipo = request.GET.get('tipo')
@@ -68,7 +68,7 @@ def api_get_gerenciador_campanhas_enriquecidas(request):
 
 
 @login_required(login_url='/')
-@controle_acess('SS49')
+@controle_acess('SS51')
 @require_GET
 def api_get_gerenciador_clientes_detalhe(request):
     campanha_id = request.GET.get('campanha_id')

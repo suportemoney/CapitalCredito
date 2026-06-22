@@ -8,7 +8,7 @@ from apps.vendas.plus.services.v2.equipe_filtros import listar_filtros_equipe_pa
 
 
 @login_required(login_url='/')
-@controle_acess('SS49')
+@controle_acess('SS51')
 @require_GET
 def api_get_gerenciador_equipe_filtros(request):
     dados = listar_filtros_equipe_participantes()

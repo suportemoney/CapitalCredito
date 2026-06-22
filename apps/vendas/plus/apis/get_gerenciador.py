@@ -14,14 +14,14 @@ from apps.vendas.plus.services.v2.gerenciador import (
 
 
 @login_required(login_url='/')
-@controle_acess('SS49')
+@controle_acess('SS51')
 @require_GET
 def api_get_gerenciador_equipes(request):
     return JsonResponse({'ok': True, 'equipes': listar_equipes()})
 
 
 @login_required(login_url='/')
-@controle_acess('SS49')
+@controle_acess('SS51')
 @require_GET
 def api_get_gerenciador_campanhas(request):
     tipo = request.GET.get('tipo')
@@ -29,14 +29,14 @@ def api_get_gerenciador_campanhas(request):
 
 
 @login_required(login_url='/')
-@controle_acess('SS49')
+@controle_acess('SS51')
 @require_GET
 def api_get_gerenciador_status(request):
     return JsonResponse({'ok': True, 'status_choices': listar_status_choices()})
 
 
 @login_required(login_url='/')
-@controle_acess('SS49')
+@controle_acess('SS51')
 @require_GET
 def api_get_gerenciador_clientes(request):
     campanha_id = request.GET.get('campanha_id')
@@ -49,7 +49,7 @@ def api_get_gerenciador_clientes(request):
 
 
 @login_required(login_url='/')
-@controle_acess('SS49')
+@controle_acess('SS51')
 @require_GET
 def api_get_gerenciador_usuarios(request):
     users = list(

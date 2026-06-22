@@ -12,7 +12,7 @@ from apps.vendas.plus.models_v2 import AgendamentoV2, ControleClienteV2
 
 
 @login_required(login_url='/')
-@controle_acess('SS48')
+@controle_acess('SS50')
 @require_POST
 def api_post_esteira_tabulacao(request):
     try:
@@ -44,7 +44,7 @@ def api_post_esteira_tabulacao(request):
 
 
 @login_required(login_url='/')
-@controle_acess('SS48')
+@controle_acess('SS50')
 @require_POST
 def api_post_esteira_agendamento(request):
     try:

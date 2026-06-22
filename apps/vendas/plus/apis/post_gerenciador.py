@@ -17,7 +17,7 @@ from apps.vendas.plus.services.v2.gerenciador import (
 
 
 @login_required(login_url='/')
-@controle_acess('SS49')
+@controle_acess('SS51')
 @require_POST
 def api_post_gerenciador_campanha(request):
     try:
@@ -34,7 +34,7 @@ def api_post_gerenciador_campanha(request):
 
 
 @login_required(login_url='/')
-@controle_acess('SS49')
+@controle_acess('SS51')
 @require_POST
 def api_post_gerenciador_equipe(request):
     try:
@@ -51,7 +51,7 @@ def api_post_gerenciador_equipe(request):
 
 
 @login_required(login_url='/')
-@controle_acess('SS49')
+@controle_acess('SS51')
 @require_POST
 def api_post_gerenciador_equipe_atualizar(request):
     try:
@@ -79,7 +79,7 @@ def api_post_gerenciador_equipe_atualizar(request):
 
 
 @login_required(login_url='/')
-@controle_acess('SS49')
+@controle_acess('SS51')
 @require_POST
 def api_post_gerenciador_campanha_status(request):
     try:
@@ -97,7 +97,7 @@ def api_post_gerenciador_campanha_status(request):
 
 
 @login_required(login_url='/')
-@controle_acess('SS49')
+@controle_acess('SS51')
 @require_POST
 def api_post_gerenciador_campanha_atualizar(request):
     try:
@@ -127,7 +127,7 @@ def api_post_gerenciador_campanha_atualizar(request):
 
 
 @login_required(login_url='/')
-@controle_acess('SS49')
+@controle_acess('SS51')
 @require_POST
 def api_post_gerenciador_clientes(request):
     try:

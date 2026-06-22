@@ -17,7 +17,7 @@ from apps.vendas.plus.services.v2.esteira_kpis import build_esteira_kpis
 
 
 @login_required(login_url='/')
-@controle_acess('SS48')
+@controle_acess('SS50')
 @require_GET
 def api_get_esteira_campanhas(request):
     campanhas = campanhas_do_usuario(request.user)
@@ -31,7 +31,7 @@ def api_get_esteira_campanhas(request):
 
 
 @login_required(login_url='/')
-@controle_acess('SS48')
+@controle_acess('SS50')
 @require_GET
 def api_get_esteira_proximo_cliente(request):
     campanha_id = request.GET.get('campanha_id')
@@ -56,7 +56,7 @@ def api_get_esteira_proximo_cliente(request):
 
 
 @login_required(login_url='/')
-@controle_acess('SS48')
+@controle_acess('SS50')
 @require_GET
 def api_get_esteira_pendente(request):
     campanha_id = request.GET.get('campanha_id')
@@ -68,7 +68,7 @@ def api_get_esteira_pendente(request):
 
 
 @login_required(login_url='/')
-@controle_acess('SS48')
+@controle_acess('SS50')
 @require_GET
 def api_get_esteira_historico(request):
     campanha_id = request.GET.get('campanha_id')
@@ -80,7 +80,7 @@ def api_get_esteira_historico(request):
 
 
 @login_required(login_url='/')
-@controle_acess('SS48')
+@controle_acess('SS50')
 @require_GET
 def api_get_esteira_controle(request):
     controle_id = request.GET.get('controle_id')
@@ -95,7 +95,7 @@ def api_get_esteira_controle(request):
 
 
 @login_required(login_url='/')
-@controle_acess('SS48')
+@controle_acess('SS50')
 @require_GET
 def api_get_esteira_kpis(request):
     campanha_id = request.GET.get('campanha_id')
@@ -104,7 +104,7 @@ def api_get_esteira_kpis(request):
 
 
 @login_required(login_url='/')
-@controle_acess('SS48')
+@controle_acess('SS50')
 @require_GET
 def api_get_esteira_agendamentos(request):
     campanha_id = request.GET.get('campanha_id')
@@ -116,7 +116,7 @@ def api_get_esteira_agendamentos(request):
 
 
 @login_required(login_url='/')
-@controle_acess('SS48')
+@controle_acess('SS50')
 @require_GET
 def api_get_esteira_status_choices(request):
     status = list(
