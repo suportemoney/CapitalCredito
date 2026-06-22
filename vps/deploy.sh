@@ -11,7 +11,9 @@ cd "$APP_DIR"
 echo "==> [1/7] Atualizando código ($BRANCH)"
 git fetch origin "$BRANCH"
 git checkout "$BRANCH"
-git pull origin "$BRANCH"
+# Descarta alterações locais no VPS — o repositório remoto é a fonte de verdade
+git reset --hard "origin/$BRANCH"
+chmod +x vps/deploy.sh vps/install.sh
 
 echo "==> [2/7] Migrate (sem makemigrations)"
 "$VENV/python" manage.py migrate --noinput
