@@ -6,9 +6,12 @@ APP_DIR="/home/capitalcredito/sistema-capitalcredito"
 
 cd "$APP_DIR"
 
+echo "==> Permissões do repositório (usuário capitalcredito)"
+sudo chown -R capitalcredito:capitalcredito "$APP_DIR"
+sudo -u capitalcredito git config --global --add safe.directory "$APP_DIR"
+
 echo "==> Configurando permissões dos scripts de deploy"
-chmod +x vps/deploy.sh
-chmod +x vps/install.sh
+chmod +x vps/deploy.sh vps/install.sh vps/django.sh vps/sync.sh
 
 echo "==> Instalando unit systemd capitalcredito"
 sudo cp vps/capitalcredito.service /etc/systemd/system/capitalcredito.service
