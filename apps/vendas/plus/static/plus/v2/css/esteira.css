@@ -5,10 +5,10 @@
   --esteira-bar: #ffffff;
   --esteira-bar-text: #1a1a1a;
   --esteira-insights-bg: #ffffff;
-  --esteira-surface: #fff;
+  --esteira-surface: #ffffff;
   --esteira-bg: #f5f5f5;
-  --esteira-border: #d4d4d4;
-  --esteira-muted: #4a4a4a;
+  --esteira-border: #e0e0e0;
+  --esteira-muted: #6b7280;
   --esteira-text: #1a1a1a;
   padding: 20px 24px 32px;
   background: var(--esteira-bg);
@@ -62,6 +62,7 @@
   border-radius: 10px;
   padding: 10px 14px;
   min-width: 120px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
 .esteira-kpi__label {
@@ -86,20 +87,21 @@
   gap: 16px;
   background: var(--esteira-bar);
   color: var(--esteira-bar-text);
+  border: 1px solid var(--esteira-border);
   border-radius: 12px;
   padding: 14px 20px;
   margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
 .esteira-controles label {
   display: block;
   font-size: 10px;
   text-transform: uppercase;
-  color: var(--esteira-bar-text);
-  opacity: 0.85;
+  color: var(--esteira-muted);
   margin-bottom: 6px;
   letter-spacing: 0.04em;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .esteira-controles__campanha {
@@ -111,7 +113,7 @@
 .esteira-controles__divider {
   width: 1px;
   height: 44px;
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--esteira-border);
   align-self: center;
 }
 
@@ -124,8 +126,8 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: var(--esteira-accent);
-  color: #1a1a1a;
+  background: #dcfce7;
+  color: #16a34a;
   font-size: 11px;
   font-weight: 800;
   text-transform: uppercase;
@@ -138,7 +140,7 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #fff;
+  background: #16a34a;
   animation: esteira-pulse 2s infinite;
 }
 
@@ -160,8 +162,8 @@
   padding: 10px 12px;
   border-radius: 8px;
   border: 1px solid var(--esteira-border);
-  background: var(--plus-surface-alt, #f8f8f8);
-  color: var(--esteira-bar-text);
+  background: var(--esteira-surface);
+  color: var(--esteira-text);
   font-weight: 600;
   font-size: 13px;
 }
@@ -201,13 +203,13 @@
 }
 
 .esteira-btn--ghost {
-  background: transparent;
+  background: var(--esteira-surface);
   border-color: var(--esteira-border);
-  color: var(--esteira-bar-text);
+  color: var(--esteira-text);
 }
 
 .esteira-btn--ghost:hover:not(:disabled) {
-  background: var(--plus-surface-alt, #f0f0f0);
+  background: #fafafa;
 }
 
 .esteira-btn--primary {
@@ -250,6 +252,7 @@
   border-radius: 12px;
   padding: 16px 20px;
   min-height: 420px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
 .esteira-ficha-head {
@@ -275,7 +278,7 @@
 }
 
 .ficha-vazia {
-  color: #5a5a5a;
+  color: #757575;
   font-style: italic;
   margin: 0;
   font-size: 0.95rem;
@@ -293,6 +296,7 @@
   border: 1px solid var(--esteira-border);
   border-radius: 12px;
   padding: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
 .esteira-card__title {

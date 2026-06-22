@@ -5,18 +5,22 @@ html[data-plus-theme="light"] {
   --plus-gold: #D4AF37;
   --plus-gold-dark: #b8941f;
   --plus-text: #1a1a1a;
-  --plus-text-muted: #4a4a4a;
-  --plus-text-soft: #5a5a5a;
+  --plus-text-muted: #6b7280;
+  --plus-text-soft: #757575;
   --plus-surface: #ffffff;
-  --plus-surface-alt: #f8f8f8;
+  --plus-surface-alt: #fafafa;
   --plus-page-bg: #f5f5f5;
-  --plus-border: #d4d4d4;
+  --plus-border: #e0e0e0;
   --plus-bar-bg: #ffffff;
   --plus-bar-text: #1a1a1a;
   --plus-insights-bg: #ffffff;
   --plus-insights-text: #1a1a1a;
   --plus-accent: #D4AF37;
   --plus-accent-dark: #b8941f;
+  --plus-success: #16a34a;
+  --plus-success-bg: #dcfce7;
+  --plus-shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --plus-radius: 12px;
 }
 
 html[data-plus-theme="dark"] {
@@ -167,7 +171,7 @@ html[data-plus-theme="dark"] .plus-theme-toggle:hover {
   gap: 12px;
 }
 
-/* ===== Tema claro — página toda clara ===== */
+/* ===== Tema claro — template modelo (cards brancos, bordas #e0e0e0, dourado #D4AF37) ===== */
 .esteira-page[data-plus-theme="light"],
 .ger-page[data-plus-theme="light"] {
   background: var(--plus-page-bg) !important;
@@ -197,31 +201,49 @@ html[data-plus-theme="dark"] .plus-theme-toggle:hover {
   --esteira-insights-bg: var(--plus-insights-bg);
 }
 
-.esteira-page[data-plus-theme="light"] .esteira-hero__title,
-.esteira-page[data-plus-theme="light"] .esteira-ficha-head h2,
-.esteira-page[data-plus-theme="light"] .esteira-card__title,
-.esteira-page[data-plus-theme="light"] .esteira-kpi strong {
-  color: var(--plus-text) !important;
+.esteira-page[data-plus-theme="light"] .esteira-hero__title {
+  color: #1a1a1a !important;
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
 .esteira-page[data-plus-theme="light"] .esteira-hero__subtitle {
   color: var(--plus-text-muted) !important;
 }
 
+.esteira-page[data-plus-theme="light"] .esteira-ficha-head h2,
+.esteira-page[data-plus-theme="light"] .esteira-card__title {
+  color: #1a1a1a !important;
+  font-weight: 700;
+}
+
 .esteira-page[data-plus-theme="light"] .esteira-kpi {
   background: var(--plus-surface);
-  border-color: var(--plus-border);
+  border: 1px solid var(--plus-border);
+  border-radius: var(--plus-radius);
+  box-shadow: var(--plus-shadow-card);
 }
 
 .esteira-page[data-plus-theme="light"] .esteira-kpi__label {
   color: var(--plus-text-muted);
   font-weight: 600;
+  font-size: 10px;
+}
+
+.esteira-page[data-plus-theme="light"] .esteira-kpi strong {
+  color: #1a1a1a !important;
+  border-bottom: 2px solid var(--plus-gold);
+  display: inline-block;
+  padding-bottom: 2px;
+  min-width: 1.5rem;
 }
 
 .esteira-page[data-plus-theme="light"] .esteira-ficha-area,
 .esteira-page[data-plus-theme="light"] .esteira-card {
   background: var(--plus-surface);
-  border-color: var(--plus-border);
+  border: 1px solid var(--plus-border);
+  border-radius: var(--plus-radius);
+  box-shadow: var(--plus-shadow-card);
   color: var(--plus-text);
 }
 
@@ -229,37 +251,47 @@ html[data-plus-theme="dark"] .plus-theme-toggle:hover {
 .esteira-page[data-plus-theme="light"] .esteira-placeholder,
 .esteira-page[data-plus-theme="light"] .esteira-muted-text {
   color: var(--plus-text-soft) !important;
+  font-style: italic;
 }
 
 .esteira-page[data-plus-theme="light"] .esteira-textarea,
 .esteira-page[data-plus-theme="light"] .esteira-form-agendamento input {
   background: var(--plus-surface);
-  border-color: var(--plus-border);
+  border: 1px solid var(--plus-border);
+  border-radius: 8px;
   color: var(--plus-text);
 }
 
 .esteira-page[data-plus-theme="light"] .esteira-textarea::placeholder,
 .esteira-page[data-plus-theme="light"] .esteira-form-agendamento input::placeholder {
-  color: #6b6b6b;
+  color: #9ca3af;
   opacity: 1;
+}
+
+.esteira-page[data-plus-theme="light"] .esteira-char-count {
+  color: var(--plus-text-muted);
 }
 
 .esteira-page[data-plus-theme="light"] .esteira-ficha-id {
   color: var(--plus-text-muted);
   background: var(--plus-surface-alt);
+  border: 1px solid var(--plus-border);
 }
 
-/* Barra de controles clara no modo claro */
+/* Barra de controles — card branco (modelo) */
 .esteira-page[data-plus-theme="light"] .esteira-controles {
   background: var(--plus-bar-bg);
   color: var(--plus-bar-text);
   border: 1px solid var(--plus-border);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  border-radius: var(--plus-radius);
+  box-shadow: var(--plus-shadow-card);
 }
 
 .esteira-page[data-plus-theme="light"] .esteira-controles label {
   color: var(--plus-text-muted) !important;
   opacity: 1;
+  font-size: 10px;
+  font-weight: 700;
 }
 
 .esteira-page[data-plus-theme="light"] .esteira-controles__divider {
@@ -267,37 +299,56 @@ html[data-plus-theme="dark"] .plus-theme-toggle:hover {
 }
 
 .esteira-page[data-plus-theme="light"] .esteira-select {
-  background: var(--plus-surface-alt);
-  border-color: var(--plus-border);
+  background: var(--plus-surface);
+  border: 1px solid var(--plus-border);
   color: var(--plus-text);
 }
 
+.esteira-page[data-plus-theme="light"] .esteira-status-badge {
+  background: var(--plus-success-bg);
+  color: var(--plus-success);
+}
+
+.esteira-page[data-plus-theme="light"] .esteira-status-dot {
+  background: var(--plus-success);
+}
+
+.esteira-page[data-plus-theme="light"] .esteira-btn--primary {
+  background: var(--plus-gold);
+  border-color: var(--plus-gold-dark);
+  color: #1a1a1a !important;
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
 .esteira-page[data-plus-theme="light"] .esteira-btn--ghost {
-  background: transparent;
-  border-color: var(--plus-border);
+  background: var(--plus-surface);
+  border: 1px solid var(--plus-border);
   color: var(--plus-text);
+  border-radius: 8px;
 }
 
 .esteira-page[data-plus-theme="light"] .esteira-btn--ghost:hover:not(:disabled) {
   background: var(--plus-surface-alt);
+  border-color: #c9c9c9;
   color: var(--plus-text) !important;
 }
 
 .esteira-page[data-plus-theme="light"] .esteira-btn:not(.esteira-btn--primary):not(.esteira-btn--ghost) {
   background: var(--plus-surface);
-  border-color: var(--plus-border);
+  border: 1px solid var(--plus-border);
   color: var(--plus-text);
 }
 
-/* Insights claro no modo claro */
 .esteira-page[data-plus-theme="light"] .esteira-card--insights {
   background: var(--plus-insights-bg);
   color: var(--plus-insights-text);
   border: 1px solid var(--plus-border);
+  box-shadow: var(--plus-shadow-card);
 }
 
 .esteira-page[data-plus-theme="light"] .esteira-card--insights .esteira-card__title {
-  color: var(--plus-text) !important;
+  color: #1a1a1a !important;
 }
 
 .esteira-page[data-plus-theme="light"] .insights-lista li {
@@ -307,8 +358,21 @@ html[data-plus-theme="dark"] .plus-theme-toggle:hover {
 
 .esteira-page[data-plus-theme="light"] .ag-card {
   background: var(--plus-surface-alt);
-  border-color: var(--plus-border);
+  border: 1px solid var(--plus-border);
   color: var(--plus-text);
+}
+
+.esteira-page[data-plus-theme="light"] .plus-theme-toggle {
+  background: var(--plus-surface);
+  border: 1px solid var(--plus-border);
+  color: var(--plus-text);
+  box-shadow: var(--plus-shadow-card);
+}
+
+.esteira-page[data-plus-theme="light"] .plus-theme-toggle:hover {
+  background: #faf6e8;
+  border-color: var(--plus-gold);
+  color: var(--plus-text) !important;
 }
 
 /* Ficha dinâmica — modo claro */
@@ -328,15 +392,55 @@ html[data-plus-theme="dark"] .plus-theme-toggle:hover {
   --ger-muted: var(--plus-text-muted);
   --ger-primary: var(--plus-accent);
   --ger-primary-soft: #faf6e8;
+  --ger-shadow: var(--plus-shadow-card);
 }
 
 .ger-page[data-plus-theme="light"] .ger-header__title {
-  color: var(--plus-text);
+  color: #1a1a1a;
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
 .ger-page[data-plus-theme="light"] .ger-header__subtitle,
 .ger-page[data-plus-theme="light"] .ger-kpi-card__label {
   color: var(--plus-text-muted);
+}
+
+.ger-page[data-plus-theme="light"] .ger-kpi-card,
+.ger-page[data-plus-theme="light"] .ger-panel,
+.ger-page[data-plus-theme="light"] .ger-table-wrap {
+  background: var(--plus-surface);
+  border: 1px solid var(--plus-border);
+  box-shadow: var(--plus-shadow-card);
+}
+
+.ger-page[data-plus-theme="light"] .ger-tabs {
+  border-bottom-color: var(--plus-border);
+}
+
+.ger-page[data-plus-theme="light"] .ger-tabs__btn.active {
+  color: var(--plus-text);
+  border-bottom-color: var(--plus-gold);
+}
+
+.ger-page[data-plus-theme="light"] .ger-btn--primary {
+  background: var(--plus-gold);
+  border-color: var(--plus-gold-dark);
+  color: #1a1a1a !important;
+}
+
+.ger-page[data-plus-theme="light"] input,
+.ger-page[data-plus-theme="light"] select,
+.ger-page[data-plus-theme="light"] textarea {
+  background: var(--plus-surface);
+  border: 1px solid var(--plus-border);
+  color: var(--plus-text);
+}
+
+.ger-page[data-plus-theme="light"] .plus-theme-toggle {
+  background: var(--plus-surface);
+  border: 1px solid var(--plus-border);
+  box-shadow: var(--plus-shadow-card);
 }
 
 /* ===== Tema escuro — página toda escura ===== */
