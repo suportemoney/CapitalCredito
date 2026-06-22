@@ -304,13 +304,22 @@ html[data-plus-theme="dark"] .plus-theme-toggle:hover {
   color: var(--plus-text);
 }
 
-.esteira-page[data-plus-theme="light"] .esteira-status-badge {
+.esteira-page[data-plus-theme="light"] .esteira-status-badge--conectado {
   background: var(--plus-success-bg);
   color: var(--plus-success);
 }
 
-.esteira-page[data-plus-theme="light"] .esteira-status-dot {
+.esteira-page[data-plus-theme="light"] .esteira-status-badge--conectado .esteira-status-dot {
   background: var(--plus-success);
+}
+
+.esteira-page[data-plus-theme="light"] .esteira-status-badge--desconectado {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.esteira-page[data-plus-theme="light"] .esteira-status-badge--desconectado .esteira-status-dot {
+  background: #dc2626;
 }
 
 .esteira-page[data-plus-theme="light"] .esteira-btn--primary {
@@ -504,6 +513,24 @@ html[data-plus-theme="dark"] .plus-theme-toggle:hover {
 
 .esteira-page[data-plus-theme="dark"] .esteira-controles__divider {
   background: rgba(255, 255, 255, 0.15);
+}
+
+.esteira-page[data-plus-theme="dark"] .esteira-status-badge--conectado {
+  background: #14532d;
+  color: #86efac;
+}
+
+.esteira-page[data-plus-theme="dark"] .esteira-status-badge--conectado .esteira-status-dot {
+  background: #4ade80;
+}
+
+.esteira-page[data-plus-theme="dark"] .esteira-status-badge--desconectado {
+  background: #450a0a;
+  color: #fca5a5;
+}
+
+.esteira-page[data-plus-theme="dark"] .esteira-status-badge--desconectado .esteira-status-dot {
+  background: #f87171;
 }
 
 .esteira-page[data-plus-theme="dark"] .esteira-select {

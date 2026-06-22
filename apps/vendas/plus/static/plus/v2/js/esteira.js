@@ -42,12 +42,22 @@
     document.getElementById('esteira-subtitulo').textContent = cfg.subtitulo;
   }
 
+  function atualizarStatusDiscador(conectado) {
+    const badge = document.getElementById('esteira-status-badge');
+    const texto = document.getElementById('esteira-status-texto');
+    if (!badge || !texto) return;
+    badge.classList.toggle('esteira-status-badge--conectado', conectado);
+    badge.classList.toggle('esteira-status-badge--desconectado', !conectado);
+    texto.textContent = conectado ? 'Conectado' : 'Desconectado';
+    atualizarBotoesControle();
+  }
+
   function atualizarBotoesControle() {
+    const temCampanha = !!getCampanhaId();
     const temCliente = !!clienteAtual;
     const tabulado = temCliente && clienteAtual.tabulado;
     btnRecarregar.disabled = !temCliente;
-    // Próximo: habilitado se não há cliente OU cliente já tabulado
-    btnProximo.disabled = temCliente && !tabulado;
+    btnProximo.disabled = !temCampanha || (temCliente && !tabulado);
   }
 
   function aplicarCliente(cliente) {
@@ -87,11 +97,22 @@
           sel.appendChild(o);
         });
         if (sel.options.length) {
+          atualizarStatusDiscador(true);
           onCampanhaChange();
         } else {
           aplicarTema('OUTROS');
-          atualizarBotoesControle();
+          atualizarStatusDiscador(false);
+          aplicarCliente(null);
+          document.getElementById('agendamentos-lista').innerHTML =
+            '<p class="ficha-vazia">Nenhum agendamento pendente.</p>';
+          ['kpi-tabulados', 'kpi-agendamentos', 'kpi-conversao', 'kpi-clientes', 'kpi-campanhas'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = '—';
+          });
         }
+      })
+      .catch(function () {
+        atualizarStatusDiscador(false);
       });
   }
 
@@ -111,9 +132,12 @@
 
   function onCampanhaChange() {
     const sel = document.getElementById('esteira-campanha');
+    const temCampanha = sel.options.length > 0 && !!sel.value;
+    atualizarStatusDiscador(temCampanha);
     const opt = sel.options[sel.selectedIndex];
     const tipo = opt ? (opt.dataset.tipo || campanhasMap[sel.value]?.tipo_campanha) : 'OUTROS';
     aplicarTema(tipo);
+    if (!temCampanha) return;
     carregarKpis();
     carregarAgendamentos();
     carregarPendenteCampanha();
@@ -385,5 +409,5 @@
 
   carregarCampanhas();
   carregarStatus();
-  atualizarBotoesControle();
+  atualizarStatusDiscador(false);
 })();

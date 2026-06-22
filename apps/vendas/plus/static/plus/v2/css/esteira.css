@@ -126,8 +126,6 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: #dcfce7;
-  color: #16a34a;
   font-size: 11px;
   font-weight: 800;
   text-transform: uppercase;
@@ -136,11 +134,28 @@
   letter-spacing: 0.04em;
 }
 
+.esteira-status-badge--conectado {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.esteira-status-badge--conectado .esteira-status-dot {
+  background: #16a34a;
+}
+
+.esteira-status-badge--desconectado {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.esteira-status-badge--desconectado .esteira-status-dot {
+  background: #dc2626;
+}
+
 .esteira-status-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #16a34a;
   animation: esteira-pulse 2s infinite;
 }
 
