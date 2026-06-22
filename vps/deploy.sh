@@ -13,7 +13,7 @@ git fetch origin "$BRANCH"
 git checkout "$BRANCH"
 # Descarta alterações locais no VPS — o repositório remoto é a fonte de verdade
 git reset --hard "origin/$BRANCH"
-chmod +x vps/deploy.sh vps/install.sh vps/django.sh vps/sync.sh
+chmod +x vps/deploy.sh vps/install.sh vps/django.sh vps/sync.sh vps/setup-git-deploy-key.sh
 
 echo "==> [2/7] Migrate (sem makemigrations)"
 "$VENV/python" manage.py migrate --noinput
