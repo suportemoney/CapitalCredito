@@ -1,0 +1,25 @@
+<section class="esteira-rodape">
+  <div class="esteira-card esteira-card--agendamentos">
+    <h3 class="esteira-card__title">Agendamentos Pendentes</h3>
+    <div id="agendamentos-lista" class="agendamentos-scroll"></div>
+  </div>
+  <div class="esteira-card">
+    <h3 class="esteira-card__title">Novo Agendamento</h3>
+    <form id="form-agendamento" class="esteira-form-agendamento" hidden>
+      <div class="esteira-form-row">
+        <label>Data <input type="date" id="ag-dia" required></label>
+        <label>Hora <input type="time" id="ag-hora" required></label>
+      </div>
+      <label>Responsável <input type="text" id="ag-responsavel" placeholder="Responsável"></label>
+      <label>Observação <input type="text" id="ag-obs" placeholder="Observação"></label>
+      <button type="submit" class="esteira-btn esteira-btn--primary">Agendar</button>
+    </form>
+    <p class="ficha-vazia" id="agendamento-hint">Carregue um cliente para agendar.</p>
+  </div>
+  <div class="esteira-card esteira-card--insights" id="esteira-insights">
+    <h3 class="esteira-card__title">Insights Rápidos</h3>
+    <ul id="insights-lista" class="insights-lista">
+      <li>Selecione um cliente para ver insights.</li>
+    </ul>
+  </div>
+</section>

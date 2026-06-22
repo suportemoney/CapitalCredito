@@ -1,0 +1,191 @@
+<div class="ger-dashboard" id="panel-produto">
+
+  <section class="ger-kpi-row" id="ger-kpis">
+    <article class="ger-kpi-card">
+      <div class="ger-kpi-card__icon ger-kpi-card__icon--blue"><i class="ph ph-megaphone"></i></div>
+      <div>
+        <span class="ger-kpi-card__label">Campanhas ativas</span>
+        <strong class="ger-kpi-card__value" id="kpi-campanhas-ativas">—</strong>
+        <span class="ger-kpi-card__hint" id="kpi-campanhas-total">—</span>
+      </div>
+    </article>
+    <article class="ger-kpi-card">
+      <div class="ger-kpi-card__icon ger-kpi-card__icon--green"><i class="ph ph-users"></i></div>
+      <div>
+        <span class="ger-kpi-card__label">Clientes vinculados</span>
+        <strong class="ger-kpi-card__value" id="kpi-clientes">—</strong>
+      </div>
+    </article>
+    <article class="ger-kpi-card">
+      <div class="ger-kpi-card__icon ger-kpi-card__icon--purple"><i class="ph ph-users-three"></i></div>
+      <div>
+        <span class="ger-kpi-card__label">Equipes vinculadas</span>
+        <strong class="ger-kpi-card__value" id="kpi-equipes">—</strong>
+      </div>
+    </article>
+    <article class="ger-kpi-card">
+      <div class="ger-kpi-card__icon ger-kpi-card__icon--amber"><i class="ph ph-calendar-check"></i></div>
+      <div>
+        <span class="ger-kpi-card__label">Agend. pendentes</span>
+        <strong class="ger-kpi-card__value" id="kpi-agendamentos">—</strong>
+      </div>
+    </article>
+    <article class="ger-kpi-card">
+      <div class="ger-kpi-card__icon ger-kpi-card__icon--cyan"><i class="ph ph-upload-simple"></i></div>
+      <div>
+        <span class="ger-kpi-card__label">Importações recentes</span>
+        <strong class="ger-kpi-card__value" id="kpi-importacoes">—</strong>
+        <span class="ger-kpi-card__hint">últimos 7 dias</span>
+      </div>
+    </article>
+  </section>
+
+  <section class="ger-mid-row">
+    <article class="ger-card ger-card--campanhas">
+      <div class="ger-card__head">
+        <h2>Campanhas</h2>
+        <div class="ger-filters">
+          <input type="search" id="filtro-busca-campanha" class="ger-input" placeholder="Buscar campanha…">
+          <select id="filtro-status-campanha" class="ger-select ger-select--sm">
+            <option value="">Status</option>
+            <option value="1">Ativa</option>
+            <option value="0">Inativa</option>
+          </select>
+          <button type="button" class="ger-btn ger-btn--ghost ger-btn--sm" id="btn-limpar-filtros">Limpar</button>
+          <button type="button" class="ger-btn ger-btn--ghost ger-btn--sm" id="btn-atualizar-campanhas"><i class="ph ph-arrows-clockwise"></i> Atualizar</button>
+        </div>
+      </div>
+      <div class="ger-table-wrap">
+        <table class="ger-table" id="tabela-campanhas">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Tipo</th>
+              <th>Status</th>
+              <th>Equipes</th>
+              <th>Criação</th>
+              <th>Clientes</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </article>
+
+    <article class="ger-card ger-card--detalhes" id="ger-detalhes-campanha">
+      <div class="ger-card__head">
+        <h2>Detalhes da campanha</h2>
+        <span class="ger-badge ger-badge--success" id="det-status-badge" hidden>Ativa</span>
+      </div>
+      <div class="ger-detalhes-empty" id="detalhes-vazio">
+        <i class="ph ph-cursor-click"></i>
+        <p>Selecione uma campanha na tabela ao lado.</p>
+      </div>
+      <div class="ger-detalhes-body" id="detalhes-conteudo" hidden>
+        <h3 class="ger-detalhes-nome" id="det-nome">—</h3>
+        <dl class="ger-dl">
+          <div><dt>Descrição</dt><dd id="det-descricao">—</dd></div>
+          <div><dt>Tipo</dt><dd id="det-tipo">—</dd></div>
+          <div><dt>Data criação</dt><dd id="det-criacao">—</dd></div>
+          <div><dt>Equipes</dt><dd id="det-equipes">—</dd></div>
+          <div><dt>Total clientes</dt><dd id="det-clientes-total">—</dd></div>
+        </dl>
+        <div class="ger-chart-block">
+          <h4>Distribuição por tipo</h4>
+          <div class="ger-donut-wrap">
+            <div class="ger-donut" id="det-donut"></div>
+            <ul class="ger-donut-legend" id="det-donut-legend"></ul>
+          </div>
+        </div>
+        <div class="ger-chart-block">
+          <h4>Status dos controles</h4>
+          <div class="ger-progress-list" id="det-progress-controles"></div>
+        </div>
+      </div>
+    </article>
+
+    <aside class="ger-card ger-card--acoes">
+      <h2>Ações rápidas</h2>
+      <div class="ger-acoes-stack">
+        <button type="button" class="ger-acao-btn ger-acao-btn--primary" id="btn-acao-nova-campanha">
+          <i class="ph ph-plus"></i> Nova campanha
+        </button>
+        <button type="button" class="ger-acao-btn" id="btn-acao-importar">
+          <i class="ph ph-upload-simple"></i> Importar CSV
+        </button>
+        <button type="button" class="ger-acao-btn" id="btn-acao-equipe">
+          <i class="ph ph-users-three"></i> Vincular equipe
+        </button>
+        <button type="button" class="ger-acao-btn" id="btn-acao-toggle-status" disabled>
+          <i class="ph ph-power"></i> Ativar / Inativar
+        </button>
+        <button type="button" class="ger-acao-btn" id="btn-acao-atualizar-detalhe" disabled>
+          <i class="ph ph-arrows-clockwise"></i> Atualizar detalhes
+        </button>
+      </div>
+    </aside>
+  </section>
+
+  <section class="ger-bottom-row">
+    <article class="ger-card ger-card--clientes">
+      <div class="ger-card__head">
+        <div>
+          <h2>Clientes da campanha</h2>
+          <p class="ger-card__hint" id="clientes-campanha-nome">Selecione uma campanha</p>
+        </div>
+        <div class="ger-filters">
+          <input type="search" id="filtro-busca-cliente" class="ger-input" placeholder="Filtrar CPF ou nome…">
+        </div>
+      </div>
+      <div class="ger-table-wrap ger-table-wrap--tall">
+        <table class="ger-table" id="tabela-clientes-campanha">
+          <thead>
+            <tr>
+              <th>CPF</th>
+              <th>Nome</th>
+              <th>Tipo</th>
+              <th>Usuário</th>
+              <th>Tabulação</th>
+              <th>Status</th>
+              <th>Atualização</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </article>
+
+    <div class="ger-bottom-side">
+      <article class="ger-card" id="ger-ultima-importacao">
+        <h2>Última importação CSV</h2>
+        <div class="ger-import-empty" id="import-vazio">
+          <i class="ph ph-file-csv"></i>
+          <p>Nenhuma importação registrada.</p>
+        </div>
+        <div class="ger-import-body" id="import-conteudo" hidden>
+          <div class="ger-import-file">
+            <i class="ph ph-file-csv"></i>
+            <div>
+              <strong id="imp-arquivo">—</strong>
+              <span id="imp-linhas">—</span>
+            </div>
+            <span class="ger-badge ger-badge--success" id="imp-status">Concluída</span>
+          </div>
+          <dl class="ger-dl ger-dl--compact">
+            <div><dt>Colunas</dt><dd id="imp-colunas">—</dd></div>
+            <div><dt>Criado por</dt><dd id="imp-criador">—</dd></div>
+            <div><dt>Data</dt><dd id="imp-data">—</dd></div>
+          </dl>
+        </div>
+      </article>
+
+      <article class="ger-card" id="ger-proximos-agendamentos">
+        <h2>Próximos agendamentos</h2>
+        <ul class="ger-agenda-list" id="lista-agendamentos">
+          <li class="ger-agenda-empty">Selecione uma campanha.</li>
+        </ul>
+      </article>
+    </div>
+  </section>
+</div>

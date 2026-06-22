@@ -1,0 +1,75 @@
+/* Tema CapitalCredito para o módulo Plus */
+:root {
+  --plus-gold: #D4AF37;
+  --plus-gold-dark: #b8941f;
+  --plus-dark: #2d2d2d;
+  --plus-dark-soft: #4d4d4d;
+  --plus-bg: #f5f5f5;
+}
+
+.ger-page {
+  --ger-primary: var(--plus-gold);
+  --ger-primary-soft: #faf6e8;
+}
+
+.ger-tabs__btn.active {
+  color: var(--plus-gold);
+  border-bottom-color: var(--plus-gold);
+}
+
+.ger-btn--primary {
+  background: var(--plus-gold);
+  border-color: var(--plus-gold-dark);
+}
+
+.ger-btn--primary:hover:not(:disabled) {
+  background: var(--plus-gold-dark);
+}
+
+.ger-kpi-card__icon {
+  color: var(--plus-gold);
+}
+
+.esteira-page {
+  --esteira-accent: var(--plus-gold);
+  --esteira-accent-dark: var(--plus-gold-dark);
+  --esteira-bar: var(--plus-dark);
+  --esteira-insights-bg: var(--plus-dark);
+}
+
+.esteira-page--outros {
+  --esteira-accent: var(--plus-dark-soft);
+  --esteira-accent-dark: var(--plus-dark);
+  --esteira-bar: var(--plus-dark);
+  --esteira-insights-bg: var(--plus-dark);
+}
+
+.esteira-btn-primary,
+.esteira-sidebar__btn-tabulacao,
+.esteira-controles__btn--primary {
+  background: var(--plus-gold);
+  border-color: var(--plus-gold-dark);
+}
+
+.esteira-btn-primary:hover,
+.esteira-sidebar__btn-tabulacao:hover,
+.esteira-controles__btn--primary:hover {
+  background: var(--plus-gold-dark);
+}
+
+.esteira-kpi strong {
+  color: var(--plus-dark);
+}
+
+.esteira-bar {
+  background: var(--plus-dark);
+}
+
+.esteira-insights {
+  background: var(--plus-dark);
+}
+
+.esteira-status-chip.is-selected {
+  border-color: var(--plus-gold);
+  background: #faf6e8;
+}

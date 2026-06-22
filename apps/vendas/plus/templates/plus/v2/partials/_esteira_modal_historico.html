@@ -1,0 +1,30 @@
+<div class="esteira-modal" id="modal-historico" hidden>
+  <div class="esteira-modal__dialog esteira-modal__dialog--wide">
+    <div class="esteira-modal__header">
+      <h3>Histórico — tabulações e agendamentos</h3>
+      <button type="button" class="esteira-modal__close" data-fechar-modal="modal-historico" aria-label="Fechar">&times;</button>
+    </div>
+    <div class="esteira-modal__body">
+      <p class="esteira-modal-hint">Clientes que você tabulou ou possui agendamento na campanha selecionada.</p>
+      <div class="esteira-historico-wrap">
+        <table class="esteira-historico-table">
+          <thead>
+            <tr>
+              <th>CPF</th>
+              <th>Nome</th>
+              <th>Agendamento</th>
+              <th>Tabulação</th>
+              <th>Ação</th>
+            </tr>
+          </thead>
+          <tbody id="historico-tbody">
+            <tr><td colspan="5" class="ficha-vazia">Carregando…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="esteira-modal__footer">
+      <button type="button" class="esteira-btn esteira-btn--ghost" data-fechar-modal="modal-historico">Fechar</button>
+    </div>
+  </div>
+</div>

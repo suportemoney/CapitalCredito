@@ -48,8 +48,7 @@ INSTALLED_APPS = [
     # Apps Vendas
     'apps.vendas.siape',
     'apps.vendas.financeiro_vendas',
-    
-    # Apps Tesouraria
+    'apps.vendas.plus',
     'apps.tesouraria.financeiro_geral',
     'apps.tesouraria.bonificacoes',
     
@@ -59,7 +58,7 @@ INSTALLED_APPS = [
     # Apps Segurança
     'apps.seguranca.permissoes',
     
-    # Apps Contratos (esteira operacional v2)
+    # Apps Tesouraria
     'apps.contratos_v2.apps.ContratosConfig',  # label contratos_v2 (tabelas separadas do legado)
 ]
 

@@ -402,6 +402,35 @@
               </ul>
             </li>
             {% endif %}
+
+            {# Plus - SubCategoria #}
+            {% if user|has_access:'SCT47' %}
+            <li class="subcategory-item" data-subcategory="plus">
+              <a href="javascript:void(0)" class="subcategory-toggle">
+                <i class="bx bx-phone-call"></i>
+                <span class="menu-label">Plus</span>
+                <i class="bx bx-chevron-down subcategory-arrow"></i>
+              </a>
+              <ul class="options-menu">
+                {% if user|has_access:'SS48' %}
+                <li>
+                  <a href="{% url 'plus:render_esteira' %}">
+                    <i class="bx bx-list-check"></i>
+                    <span class="menu-label">Esteira</span>
+                  </a>
+                </li>
+                {% endif %}
+                {% if user|has_access:'SS49' %}
+                <li>
+                  <a href="{% url 'plus:render_gerenciador' %}">
+                    <i class="bx bx-cog"></i>
+                    <span class="menu-label">Gerenciador</span>
+                  </a>
+                </li>
+                {% endif %}
+              </ul>
+            </li>
+            {% endif %}
           </ul>
         </li>
         {% endif %}

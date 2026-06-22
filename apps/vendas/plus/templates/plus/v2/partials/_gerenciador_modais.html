@@ -1,0 +1,102 @@
+{# Modais flutuantes — formulários nunca expostos na página #}
+
+<div class="ger-modal" id="modal-equipe" hidden>
+  <div class="ger-modal__dialog ger-modal__dialog--wide">
+    <div class="ger-modal__header">
+      <h3 id="modal-equipe-titulo">Nova equipe</h3>
+      <button type="button" class="ger-modal__close" data-fechar-modal="modal-equipe" aria-label="Fechar">&times;</button>
+    </div>
+    <div class="ger-modal__body">
+      <input type="hidden" id="equipe-edit-id" value="">
+      <label>Nome da equipe</label>
+      <input type="text" id="ger-nome-equipe" placeholder="Nome da equipe">
+      <label class="ger-check" id="equipe-status-wrap" hidden>
+        <input type="checkbox" id="equipe-status" checked> Equipe ativa
+      </label>
+      <label>Participantes</label>
+      <div class="ger-filtro-cascade">
+        <select id="filtro-empresa"><option value="">Empresa</option></select>
+        <select id="filtro-departamento" disabled><option value="">Departamento</option></select>
+        <select id="filtro-setor" disabled><option value="">Setor</option></select>
+      </div>
+      <div class="ger-filtro-acoes">
+        <label class="ger-check"><input type="checkbox" id="filtro-selecionar-todos"> Selecionar todos do setor</label>
+        <span id="equipe-total-selecionados" class="ger-badge-count">0 selecionados</span>
+      </div>
+      <div id="equipe-participantes-list" class="ger-check-grid ger-check-grid--scroll"></div>
+    </div>
+    <div class="ger-modal__footer">
+      <button type="button" class="ger-btn" data-fechar-modal="modal-equipe">Cancelar</button>
+      <button type="button" class="ger-btn ger-btn--primary" id="btn-salvar-equipe">Salvar equipe</button>
+    </div>
+  </div>
+</div>
+
+<div class="ger-modal" id="modal-siape" hidden>
+  <div class="ger-modal__dialog ger-modal__dialog--wide">
+    <div class="ger-modal__header">
+      <h3>Nova campanha SIAPE</h3>
+      <button type="button" class="ger-modal__close" data-fechar-modal="modal-siape" aria-label="Fechar">&times;</button>
+    </div>
+    <div class="ger-modal__body">
+      <p class="ger-modal-hint">CSV com coluna A cabeçalho <strong>CPF</strong>. Consulta carteira, RegisterMoney e contratos.</p>
+      <label>Nome da campanha</label>
+      <input type="text" id="siape-nome" placeholder="Nome da campanha">
+      <label>Equipe</label>
+      <select id="siape-equipes" multiple class="ger-multiselect"></select>
+      <label>Arquivo CSV</label>
+      <input type="file" id="siape-arquivo" accept=".csv">
+      <div id="siape-preview" class="ger-preview"></div>
+    </div>
+    <div class="ger-modal__footer">
+      <button type="button" class="ger-btn" data-fechar-modal="modal-siape">Cancelar</button>
+      <button type="button" class="ger-btn" id="btn-siape-preview">Preview</button>
+      <button type="button" class="ger-btn ger-btn--primary" id="btn-siape-criar" disabled>Confirmar campanha</button>
+    </div>
+  </div>
+</div>
+
+<div class="ger-modal" id="modal-editar-campanha" hidden>
+  <div class="ger-modal__dialog">
+    <div class="ger-modal__header">
+      <h3>Editar campanha</h3>
+      <button type="button" class="ger-modal__close" data-fechar-modal="modal-editar-campanha" aria-label="Fechar">&times;</button>
+    </div>
+    <div class="ger-modal__body">
+      <input type="hidden" id="editar-campanha-id" value="">
+      <label>Nome da campanha</label>
+      <input type="text" id="editar-campanha-nome" placeholder="Nome da campanha">
+      <label>Descrição</label>
+      <textarea id="editar-campanha-descricao" rows="3" placeholder="Descrição opcional"></textarea>
+      <label>Equipes vinculadas</label>
+      <select id="editar-campanha-equipes" multiple class="ger-multiselect"></select>
+      <p class="ger-modal-hint">Tipo e status são alterados na tabela de campanhas.</p>
+    </div>
+    <div class="ger-modal__footer">
+      <button type="button" class="ger-btn" data-fechar-modal="modal-editar-campanha">Cancelar</button>
+      <button type="button" class="ger-btn ger-btn--primary" id="btn-salvar-editar-campanha">Salvar alterações</button>
+    </div>
+  </div>
+</div>
+
+<div class="ger-modal" id="modal-outros" hidden>
+  <div class="ger-modal__dialog ger-modal__dialog--wide">
+    <div class="ger-modal__header">
+      <h3>Importar CSV → JSON</h3>
+      <button type="button" class="ger-modal__close" data-fechar-modal="modal-outros" aria-label="Fechar">&times;</button>
+    </div>
+    <div class="ger-modal__body">
+      <input type="text" id="outros-nome-campanha" placeholder="Nome da nova campanha (se não selecionar existente)">
+      <label>Campanha existente (opcional)</label>
+      <select id="outros-select-campanha"><option value="">Criar nova campanha OUTROS</option></select>
+      <label>Arquivo CSV</label>
+      <input type="file" id="outros-arquivo" accept=".csv">
+      <div id="outros-preview" class="ger-preview"></div>
+    </div>
+    <div class="ger-modal__footer">
+      <button type="button" class="ger-btn" data-fechar-modal="modal-outros">Cancelar</button>
+      <button type="button" class="ger-btn" id="btn-outros-preview">Preview</button>
+      <button type="button" class="ger-btn ger-btn--primary" id="btn-outros-confirm" disabled>Confirmar importação</button>
+    </div>
+  </div>
+</div>

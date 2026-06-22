@@ -31,6 +31,7 @@ urlpatterns = [
     # Apps Vendas - SIAPE é a rota principal
     path('', include('apps.vendas.siape.urls')),
     path('vendas/financeiro/', include('apps.vendas.financeiro_vendas.urls')),
+    path('vendas/plus/', include('apps.vendas.plus.urls')),
     
     # Apps Tesouraria
     path('tesouraria/financeiro/', include('apps.tesouraria.financeiro_geral.urls')),

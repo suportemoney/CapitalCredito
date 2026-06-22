@@ -1,0 +1,32 @@
+<section class="esteira-controles">
+  <div class="esteira-controles__campanha">
+    <label for="esteira-campanha">Campanha ativa</label>
+    <select id="esteira-campanha" class="esteira-select"></select>
+  </div>
+
+  <div class="esteira-controles__divider" aria-hidden="true"></div>
+
+  <div class="esteira-controles__status">
+    <label>Status do discador</label>
+    <span class="esteira-status-badge">
+      <span class="esteira-status-dot"></span>
+      <span id="esteira-status-texto">Conectado</span>
+    </span>
+  </div>
+
+  <div class="esteira-controles__acoes">
+    <button type="button" class="esteira-btn esteira-btn--primary" id="btn-proximo-cliente">
+      <span class="esteira-btn__icon" aria-hidden="true">📞</span>
+      Próximo cliente
+      <span class="esteira-btn__chev" aria-hidden="true">&gt;</span>
+    </button>
+    <button type="button" class="esteira-btn esteira-btn--ghost" id="btn-recarregar-ficha" disabled>
+      <span class="esteira-btn__icon" aria-hidden="true">↻</span>
+      Recarregar ficha
+    </button>
+    <button type="button" class="esteira-btn esteira-btn--ghost" id="btn-historico">
+      <span class="esteira-btn__icon" aria-hidden="true">🕐</span>
+      Histórico
+    </button>
+  </div>
+</section>

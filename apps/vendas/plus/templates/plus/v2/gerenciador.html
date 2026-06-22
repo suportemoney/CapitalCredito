@@ -1,0 +1,58 @@
+﻿{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Plus — Gerenciador{% endblock %}
+{% block header_title %}Plus{% endblock %}
+
+{% block addcss_extra %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<link rel="stylesheet" href="{% static 'plus/v2/css/plus-theme.css' %}">
+<link rel="stylesheet" href="{% static 'plus/v2/css/gerenciador.css' %}">
+{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+<div class="ger-page" id="gerenciador-root"
+     data-url-equipes="{% url 'plus:api_get_gerenciador_equipes_v2' %}"
+     data-url-campanhas="{% url 'plus:api_get_gerenciador_campanhas_lista_v2' %}"
+     data-url-kpis="{% url 'plus:api_get_gerenciador_kpis_v2' %}"
+     data-url-detalhe="{% url 'plus:api_get_gerenciador_campanha_detalhe_v2' %}"
+     data-url-clientes="{% url 'plus:api_get_gerenciador_clientes_detalhe_v2' %}"
+     data-url-importacao="{% url 'plus:api_get_gerenciador_ultima_importacao_v2' %}"
+     data-url-agendamentos="{% url 'plus:api_get_gerenciador_agendamentos_campanha_v2' %}"
+     data-url-post-equipe="{% url 'plus:api_post_gerenciador_equipe_v2' %}"
+     data-url-post-equipe-atualizar="{% url 'plus:api_post_gerenciador_equipe_atualizar_v2' %}"
+     data-url-equipe-filtros="{% url 'plus:api_get_gerenciador_equipe_filtros_v2' %}"
+     data-url-post-campanha="{% url 'plus:api_post_gerenciador_campanha_v2' %}"
+     data-url-campanha-atualizar="{% url 'plus:api_post_gerenciador_campanha_atualizar_v2' %}"
+     data-url-campanha-status="{% url 'plus:api_post_gerenciador_campanha_status_v2' %}"
+     data-url-siape-preview="{% url 'plus:api_sse_gerenciador_siape_preview_v2' %}"
+     data-url-siape-criar="{% url 'plus:api_sse_gerenciador_siape_criar_v2' %}"
+     data-url-import-preview="{% url 'plus:api_post_importacao_preview_v2' %}"
+     data-url-import-confirm="{% url 'plus:api_post_importacao_confirmar_v2' %}">
+
+  <header class="ger-header">
+    <div>
+      <h1 class="ger-header__title">Gerenciador de Campanhas</h1>
+      <p class="ger-header__subtitle">Centralize campanhas, equipes, clientes e importações do Plus.</p>
+    </div>
+  </header>
+
+  <nav class="ger-tabs" role="tablist">
+    <button type="button" class="ger-tabs__btn active" data-tab="siape"><i class="ph ph-briefcase"></i> SIAPE</button>
+    <button type="button" class="ger-tabs__btn" data-tab="outros"><i class="ph ph-files"></i> Outros</button>
+    <button type="button" class="ger-tabs__btn" data-tab="equipes"><i class="ph ph-users-three"></i> Equipes</button>
+  </nav>
+
+  {% include 'plus/v2/partials/_gerenciador_layout.html' %}
+  {% include 'plus/v2/partials/_gerenciador_equipes.html' %}
+  {% include 'plus/v2/partials/_gerenciador_modais.html' %}
+</div>
+{% endblock %}
+
+{% block addjs_extra %}
+<script src="{% static 'plus/v2/js/gerenciador.js' %}"></script>
+{% endblock %}
