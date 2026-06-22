@@ -8,7 +8,7 @@
   --esteira-surface: #fff;
   --esteira-bg: #f1f5f9;
   --esteira-border: #e2e8f0;
-  --esteira-muted: #64748b;
+  --esteira-muted: #4a4a4a;
   padding: 20px 24px 32px;
   background: var(--esteira-bg);
   min-height: 70vh;
@@ -22,10 +22,10 @@
 }
 
 .esteira-page--outros {
-  --esteira-accent: #6366f1;
-  --esteira-accent-dark: #4f46e5;
-  --esteira-bar: #1e1b4b;
-  --esteira-insights-bg: #1e1b4b;
+  --esteira-accent: #D4AF37;
+  --esteira-accent-dark: #b8941f;
+  --esteira-bar: #2d2d2d;
+  --esteira-insights-bg: #2d2d2d;
 }
 
 .esteira-hero {
@@ -68,6 +68,7 @@
   display: block;
   font-size: 11px;
   color: var(--esteira-muted);
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.02em;
 }
@@ -94,9 +95,10 @@
   display: block;
   font-size: 10px;
   text-transform: uppercase;
-  opacity: 0.75;
+  color: #e8e8e8;
   margin-bottom: 6px;
   letter-spacing: 0.04em;
+  font-weight: 600;
 }
 
 .esteira-controles__campanha {
@@ -122,7 +124,7 @@
   align-items: center;
   gap: 8px;
   background: var(--esteira-accent);
-  color: #fff;
+  color: #1a1a1a;
   font-size: 11px;
   font-weight: 800;
   text-transform: uppercase;
@@ -210,11 +212,12 @@
 .esteira-btn--primary {
   background: var(--esteira-accent);
   border-color: var(--esteira-accent-dark);
-  color: #fff;
+  color: #1a1a1a;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   padding: 12px 20px;
   font-size: 13px;
+  font-weight: 800;
 }
 
 .esteira-btn--primary:hover:not(:disabled) {
@@ -271,9 +274,10 @@
 }
 
 .ficha-vazia {
-  color: #94a3b8;
+  color: #5a5a5a;
   font-style: italic;
   margin: 0;
+  font-size: 0.95rem;
 }
 
 /* Sidebar */
@@ -374,6 +378,7 @@
   padding: 10px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   font-size: 13px;
+  color: #e8e8e8;
 }
 
 .insights-lista li:last-child {
@@ -417,6 +422,12 @@
 .ag-card__nome {
   margin-top: 4px;
   font-weight: 600;
+}
+
+.ag-card__meta {
+  font-size: 11px;
+  color: var(--esteira-muted);
+  margin-top: 4px;
 }
 
 .ag-card__badge {

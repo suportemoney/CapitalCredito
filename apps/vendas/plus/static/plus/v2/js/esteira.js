@@ -327,7 +327,7 @@
           '<div class="ag-card">' +
           '<div class="ag-card__data">' + (a.dia || '') + ' ' + (a.hora || '') + '</div>' +
           '<div class="ag-card__nome">' + formatCpf(a.cpf) + '</div>' +
-          '<div style="font-size:11px;color:#64748b;margin-top:4px;">' + (a.responsavel || '') + '</div>' +
+          '<div class="ag-card__meta">' + (a.responsavel || '') + '</div>' +
           '<span class="ag-card__badge ag-card__badge--pendente">Pendente</span>' +
           '</div>'
         ).join('');

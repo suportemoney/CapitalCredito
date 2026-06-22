@@ -9,13 +9,13 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
-<link rel="stylesheet" href="{% static 'plus/v2/css/plus-theme.css' %}">
 <link rel="stylesheet" href="{% static 'plus/v2/css/gerenciador.css' %}">
+<link rel="stylesheet" href="{% static 'plus/v2/css/plus-theme.css' %}">
 {% endblock %}
 
 {% block content %}
 {% csrf_token %}
-<div class="ger-page" id="gerenciador-root"
+<div class="ger-page" id="gerenciador-root" data-plus-theme="light"
      data-url-equipes="{% url 'plus:api_get_gerenciador_equipes_v2' %}"
      data-url-campanhas="{% url 'plus:api_get_gerenciador_campanhas_lista_v2' %}"
      data-url-kpis="{% url 'plus:api_get_gerenciador_kpis_v2' %}"
@@ -33,12 +33,14 @@
      data-url-siape-criar="{% url 'plus:api_sse_gerenciador_siape_criar_v2' %}"
      data-url-import-preview="{% url 'plus:api_post_importacao_preview_v2' %}"
      data-url-import-confirm="{% url 'plus:api_post_importacao_confirmar_v2' %}">
+  {% include 'plus/v2/partials/_plus_theme_boot.html' %}
 
   <header class="ger-header">
     <div>
       <h1 class="ger-header__title">Gerenciador de Campanhas</h1>
       <p class="ger-header__subtitle">Centralize campanhas, equipes, clientes e importações do Plus.</p>
     </div>
+    {% include 'plus/v2/partials/_plus_theme_toggle.html' %}
   </header>
 
   <nav class="ger-tabs" role="tablist">
@@ -54,5 +56,6 @@
 {% endblock %}
 
 {% block addjs_extra %}
+<script src="{% static 'plus/v2/js/plus-theme.js' %}"></script>
 <script src="{% static 'plus/v2/js/gerenciador.js' %}"></script>
 {% endblock %}

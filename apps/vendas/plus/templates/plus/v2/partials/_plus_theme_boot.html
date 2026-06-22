@@ -1,0 +1,15 @@
+<script>
+(function () {
+  try {
+    var saved = localStorage.getItem('plus-theme');
+    var theme = saved === 'dark' || saved === 'light'
+      ? saved
+      : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    var root = document.currentScript && document.currentScript.parentElement;
+    if (root) root.setAttribute('data-plus-theme', theme);
+    document.documentElement.setAttribute('data-plus-theme', theme);
+  } catch (e) {
+    document.documentElement.setAttribute('data-plus-theme', 'light');
+  }
+})();
+</script>

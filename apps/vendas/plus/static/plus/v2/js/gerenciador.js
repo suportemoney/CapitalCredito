@@ -6,7 +6,7 @@
 
   const csrf = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
   const TAB_TIPO = { siape: 'SIAPE', outros: 'OUTROS' };
-  const DONUT_CORES = { SIAPE: '#D4AF37', OUTROS: '#6366f1', MISTA: '#94a3b8' };
+  const DONUT_CORES = { SIAPE: '#D4AF37', OUTROS: '#D4AF37', MISTA: '#78716c' };
 
   let tabAtual = 'siape';
   let campanhasCache = [];
@@ -351,7 +351,7 @@
     const lista = campanhasFiltradas();
     const tbody = document.querySelector('#tabela-campanhas tbody');
     if (!lista.length) {
-      tbody.innerHTML = '<tr><td colspan="7" style="color:#64748b;font-style:italic">Nenhuma campanha encontrada.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" class="ger-table-empty">Nenhuma campanha encontrada.</td></tr>';
       return;
     }
     tbody.innerHTML = lista.map(c =>
@@ -573,7 +573,7 @@
     const tbody = document.querySelector('#tabela-clientes-campanha tbody');
     const lista = clientesFiltrados();
     if (!lista.length) {
-      tbody.innerHTML = '<tr><td colspan="7" style="color:#64748b;font-style:italic">Nenhum cliente.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" class="ger-table-empty">Nenhum cliente.</td></tr>';
       return;
     }
     tbody.innerHTML = lista.map(c => {
