@@ -1,0 +1,17 @@
+name: Deploy VPS
+
+on:
+  push:
+    branches: [primeira-versao]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: bash /home/capitalcredito/sistema-capitalcredito/vps/deploy.sh

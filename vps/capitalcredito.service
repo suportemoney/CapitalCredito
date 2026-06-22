@@ -1,0 +1,26 @@
+[Unit]
+Description=Django Server – CapitalCredito
+After=network.target
+
+[Service]
+Type=simple
+User=capitalcredito
+Group=capitalcredito
+WorkingDirectory=/home/capitalcredito/sistema-capitalcredito
+Environment="PATH=/home/capitalcredito/sistema-capitalcredito/ubvenv/bin"
+Environment="DJANGO_SETTINGS_MODULE=setup.settings"
+
+# Django na porta 6001 (StatReloader ativo — sem --noreload)
+ExecStart=/home/capitalcredito/sistema-capitalcredito/ubvenv/bin/python \
+    /home/capitalcredito/sistema-capitalcredito/manage.py runserver 127.0.0.1:6001
+
+Restart=on-failure
+RestartSec=5
+KillMode=mixed
+TimeoutStopSec=30
+
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
