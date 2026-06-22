@@ -34,7 +34,9 @@
 
   function aplicarTema(tipo) {
     tipoCampanhaAtual = tipo || 'OUTROS';
+    const theme = root.getAttribute('data-plus-theme') || document.documentElement.getAttribute('data-plus-theme') || 'light';
     root.className = 'esteira-page esteira-page--' + tipoCampanhaAtual.toLowerCase();
+    root.setAttribute('data-plus-theme', theme);
     const cfg = TITULOS[tipoCampanhaAtual] || TITULOS.OUTROS;
     document.getElementById('esteira-titulo').textContent = cfg.titulo;
     document.getElementById('esteira-subtitulo').textContent = cfg.subtitulo;

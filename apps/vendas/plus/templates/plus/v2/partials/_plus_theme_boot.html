@@ -5,11 +5,14 @@
     var theme = saved === 'dark' || saved === 'light'
       ? saved
       : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-plus-theme', theme);
+    document.body.classList.add('plus-active');
+    document.body.setAttribute('data-plus-theme', theme);
     var root = document.currentScript && document.currentScript.parentElement;
     if (root) root.setAttribute('data-plus-theme', theme);
-    document.documentElement.setAttribute('data-plus-theme', theme);
   } catch (e) {
     document.documentElement.setAttribute('data-plus-theme', 'light');
+    document.body.classList.add('plus-active');
   }
 })();
 </script>

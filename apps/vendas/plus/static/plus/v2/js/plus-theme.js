@@ -26,8 +26,14 @@
   }
 
   function applyTheme(theme) {
-    root.setAttribute('data-plus-theme', theme);
+    document.body.classList.add('plus-active');
     document.documentElement.setAttribute('data-plus-theme', theme);
+    document.body.setAttribute('data-plus-theme', theme);
+
+    document.querySelectorAll('.esteira-page, .ger-page').forEach(function (el) {
+      el.setAttribute('data-plus-theme', theme);
+    });
+
     localStorage.setItem(STORAGE_KEY, theme);
     updateToggleLabel(theme);
   }
@@ -36,8 +42,16 @@
 
   if (toggle) {
     toggle.addEventListener('click', function () {
-      var next = root.getAttribute('data-plus-theme') === 'dark' ? 'light' : 'dark';
-      applyTheme(next);
+      var current = document.documentElement.getAttribute('data-plus-theme') || 'light';
+      applyTheme(current === 'dark' ? 'light' : 'dark');
     });
   }
+
+  /* Expõe para esteira.js preservar tema ao trocar campanha */
+  window.PlusTheme = {
+    reapply: function () {
+      var theme = document.documentElement.getAttribute('data-plus-theme') || 'light';
+      applyTheme(theme);
+    },
+  };
 })();
