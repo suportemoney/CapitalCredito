@@ -148,6 +148,17 @@ html[data-plus-theme="dark"] .plus-theme-toggle:hover {
   gap: 12px;
 }
 
+/* Evita herdar estilo de header global (main.css) */
+.esteira-page .esteira-hero,
+.ger-page .ger-header {
+  background: transparent !important;
+  border: none !important;
+  border-left: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
 .ger-header {
   display: flex;
   flex-wrap: wrap;
@@ -361,11 +372,11 @@ html[data-plus-theme="dark"] .plus-theme-toggle:hover {
 .esteira-page[data-plus-theme="dark"] .esteira-ficha-head h2,
 .esteira-page[data-plus-theme="dark"] .esteira-card__title,
 .esteira-page[data-plus-theme="dark"] .esteira-kpi strong {
-  color: var(--plus-text) !important;
+  color: #f5f5f5 !important;
 }
 
 .esteira-page[data-plus-theme="dark"] .esteira-hero__subtitle {
-  color: var(--plus-text-soft) !important;
+  color: #c9c9c9 !important;
 }
 
 .esteira-page[data-plus-theme="dark"] .esteira-kpi {
@@ -541,7 +552,10 @@ html[data-plus-theme="dark"] .plus-theme-toggle:hover {
   --ger-shadow: 0 1px 3px rgba(0, 0, 0, 0.35), 0 8px 24px rgba(0, 0, 0, 0.25);
 }
 
-.ger-page[data-plus-theme="dark"] .ger-header__title,
+.ger-page[data-plus-theme="dark"] .ger-header__title {
+  color: #f5f5f5 !important;
+}
+
 .ger-page[data-plus-theme="dark"] .ger-kpi-card strong,
 .ger-page[data-plus-theme="dark"] .ger-table th,
 .ger-page[data-plus-theme="dark"] .ger-table td {
