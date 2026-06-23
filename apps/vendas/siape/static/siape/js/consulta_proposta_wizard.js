@@ -499,6 +499,19 @@
             alert('Selecione banco, convênio e produto.');
             return false;
         }
+        const tcmEl = el('prop_tabela_cms_id');
+        const tcm = tcmEl && tcmEl.value;
+        if (tcmEl && tcmEl.disabled) {
+            alert(
+                'Nenhuma tabela CMS disponível para a combinação selecionada. ' +
+                'Cadastre uma tabela antes de enviar a proposta.'
+            );
+            return false;
+        }
+        if (!tcm) {
+            alert('Selecione a Tabela CMS.');
+            return false;
+        }
         return true;
     }
 

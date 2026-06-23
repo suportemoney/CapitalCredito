@@ -2714,22 +2714,26 @@ def api_post_solicitar_propostas(request):
         else:
             liberado_calc = None
 
-        # Tabela CMS: obrigatória quando informada, validada contra a tripla (banco, convenio, produto)
-        # e contra o status ativo. Inválida -> None para não travar propostas antigas sem CMS.
-        tabela_cms_obj = None
+        # Tabela CMS obrigatória; deve pertencer à tripla (banco, convênio, produto) e estar ativa.
         tabela_cms_raw = prop.get('tabela_cms_id')
         tcm_pk = _int_pk_frontend(tabela_cms_raw)
-        if tcm_pk is not None:
-            try:
-                tabela_cms_obj = TabelaCms.objects.get(
-                    pk=tcm_pk,
-                    banco_id=banco_obj.id,
-                    convenio_id=convenio_obj.id,
-                    produto_id=produto_obj.id,
-                    status=True,
-                )
-            except (TabelaCms.DoesNotExist, ValueError):
-                tabela_cms_obj = None
+        if tcm_pk is None:
+            erros_linhas.append('Proposta #%d: Tabela CMS é obrigatória.' % idx)
+            continue
+        try:
+            tabela_cms_obj = TabelaCms.objects.get(
+                pk=tcm_pk,
+                banco_id=banco_obj.id,
+                convenio_id=convenio_obj.id,
+                produto_id=produto_obj.id,
+                status=True,
+            )
+        except (TabelaCms.DoesNotExist, ValueError):
+            erros_linhas.append(
+                'Proposta #%d: Tabela CMS inválida ou incompatível com Banco, Convênio e Produto.'
+                % idx
+            )
+            continue
 
         pd_obj = PropostaDados.objects.create(
             cliente_dados_pessoais=dp,
@@ -2817,7 +2821,7 @@ def api_post_solicitar_propostas(request):
             )
 
     if not propostas_criadas:
-        msg = 'Nenhuma proposta válida. Verifique Banco, Convênio e Produto em cada linha.'
+        msg = 'Nenhuma proposta válida. Verifique Banco, Convênio, Produto e Tabela CMS em cada linha.'
         if erros_linhas:
             msg = ' '.join(erros_linhas[:15])
             if len(erros_linhas) > 15:
