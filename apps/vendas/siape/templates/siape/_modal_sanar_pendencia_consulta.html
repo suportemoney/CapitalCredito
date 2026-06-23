@@ -1,19 +1,143 @@
 <div class="modal fade" id="modalNcSanarPendencia" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header bg-warning py-2">
-                <h5 class="modal-title fs-6"><i class="bx bx-error me-1"></i>Sanear Pendência</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <h5 class="modal-title fs-6"><i class="bx bx-error me-1"></i>Corrigir pendência</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
             </div>
             <div class="modal-body">
-                <p class="small mb-2" id="nc-pendencia-desc">Corrija os itens solicitados e confirme a conclusão.</p>
-                <div id="nc-pendencias-lista" class="small mb-2"></div>
-                <p class="small text-muted mb-0">Anexe arquivos pelo botão Arquivos, se necessário, antes de concluir.</p>
+                <div id="nc-pendencia-obs-operador" class="alert alert-warning py-2 small mb-3 d-none"></div>
+                <div class="mb-3">
+                    <div class="fw-semibold small mb-1">Pendências em aberto</div>
+                    <div id="nc-pendencias-lista" class="small text-muted">Carregando...</div>
+                </div>
+                <ul class="nav nav-tabs mb-3" id="ncPendTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="nc-pend-tab-dados-btn" data-bs-toggle="tab"
+                                data-bs-target="#nc-pend-tab-dados" type="button" role="tab">
+                            <i class="bx bx-id-card me-1"></i>Dados e Proposta
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="nc-pend-tab-arq-btn" data-bs-toggle="tab"
+                                data-bs-target="#nc-pend-tab-arquivos" type="button" role="tab">
+                            <i class="bx bx-folder me-1"></i>Arquivos
+                        </button>
+                    </li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane fade show active" id="nc-pend-tab-dados" role="tabpanel">
+                        <div id="nc-pend-bloco-cliente">
+                            <h6 class="small fw-semibold text-uppercase text-muted">Dados do cliente</h6>
+                            <div class="row g-2 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label small mb-0">Nome completo</label>
+                                    <input type="text" class="form-control form-control-sm" data-nc-edit-field="cliente.nome_completo">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small mb-0">E-mail</label>
+                                    <input type="email" class="form-control form-control-sm" data-nc-edit-field="cliente.email">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small mb-0">Telefone</label>
+                                    <input type="text" class="form-control form-control-sm" data-nc-edit-field="cliente.telefone">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small mb-0">RG</label>
+                                    <input type="text" class="form-control form-control-sm" data-nc-edit-field="cliente.numero_rg">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small mb-0">Data nascimento</label>
+                                    <input type="date" class="form-control form-control-sm" data-nc-edit-field="cliente.data_nascimento">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small mb-0">Nome da mãe</label>
+                                    <input type="text" class="form-control form-control-sm" data-nc-edit-field="cliente.nome_mae">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small mb-0">Nome do pai</label>
+                                    <input type="text" class="form-control form-control-sm" data-nc-edit-field="cliente.nome_pai">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small mb-0">Naturalidade</label>
+                                    <input type="text" class="form-control form-control-sm" data-nc-edit-field="cliente.naturalidade">
+                                </div>
+                            </div>
+                        </div>
+                        <div id="nc-pend-bloco-proposta">
+                            <h6 class="small fw-semibold text-uppercase text-muted">Dados da proposta</h6>
+                            <div class="row g-2 mb-3">
+                                <div class="col-md-4">
+                                    <label class="form-label small mb-0">Valor parcela</label>
+                                    <input type="text" class="form-control form-control-sm" data-nc-edit-field="proposta.valor_parcela" inputmode="decimal">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small mb-0">Valor AF</label>
+                                    <input type="text" class="form-control form-control-sm" data-nc-edit-field="proposta.valor_af" inputmode="decimal">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small mb-0">Valor liberado</label>
+                                    <input type="text" class="form-control form-control-sm" data-nc-edit-field="proposta.valor_liberado" inputmode="decimal">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small mb-0">Coeficiente</label>
+                                    <input type="text" class="form-control form-control-sm" data-nc-edit-field="proposta.coeficiente" inputmode="decimal">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small mb-0">Prazo</label>
+                                    <input type="number" min="1" class="form-control form-control-sm" data-nc-edit-field="proposta.prazo">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small mb-0">Valor TC</label>
+                                    <input type="text" class="form-control form-control-sm" data-nc-edit-field="proposta.valor_tc" inputmode="decimal">
+                                </div>
+                            </div>
+                        </div>
+                        <div id="nc-pend-bloco-contrato">
+                            <h6 class="small fw-semibold text-uppercase text-muted">Contrato</h6>
+                            <div class="row g-2 mb-0">
+                                <div class="col-md-6">
+                                    <label class="form-label small mb-0">Nº contrato (banco)</label>
+                                    <input type="text" class="form-control form-control-sm" data-nc-edit-field="contrato.numero_contrato">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small mb-0">Link formalização</label>
+                                    <input type="url" class="form-control form-control-sm" data-nc-edit-field="contrato.link_formalizacao">
+                                </div>
+                            </div>
+                        </div>
+                        <div id="nc-pend-dados-alerta" class="alert alert-danger d-none py-2 small mt-3"></div>
+                    </div>
+                    <div class="tab-pane fade" id="nc-pend-tab-arquivos" role="tabpanel">
+                        <p class="small text-muted mb-2">Anexe os arquivos solicitados pelo operacional.</p>
+                        <ul class="list-group list-group-flush small mb-3" id="nc-pend-arq-lista"></ul>
+                        <p class="text-muted small mb-2 d-none" id="nc-pend-arq-vazio">Nenhum arquivo anexado.</p>
+                        <div class="row g-2 align-items-end border-top pt-2">
+                            <div class="col-md-5">
+                                <label class="form-label small mb-0">Arquivo</label>
+                                <input type="file" class="form-control form-control-sm" id="nc-pend-arq-file">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small mb-0">Título (opcional)</label>
+                                <input type="text" class="form-control form-control-sm" id="nc-pend-arq-titulo" placeholder="Ex.: RG, Comprovante">
+                            </div>
+                            <div class="col-md-3 d-grid">
+                                <button type="button" class="btn btn-sm btn-outline-primary" id="nc-btn-pend-anexar-arquivo">
+                                    <i class="bx bx-upload me-1"></i>Anexar
+                                </button>
+                            </div>
+                        </div>
+                        <div id="nc-pend-arq-alerta" class="alert alert-danger d-none py-2 small mt-3"></div>
+                    </div>
+                </div>
             </div>
-            <div class="modal-footer py-2">
-                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Fechar</button>
+            <div class="modal-footer py-2 flex-wrap gap-2">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary btn-sm" id="nc-btn-salvar-pendencia">
+                    <i class="bx bx-save me-1"></i>Salvar alterações
+                </button>
                 <button type="button" class="btn btn-warning btn-sm" id="nc-btn-sanar-pendencia">
-                    <i class="bx bx-check me-1"></i>Concluir correção
+                    <i class="bx bx-check me-1"></i>Sanear pendência
                 </button>
             </div>
         </div>
