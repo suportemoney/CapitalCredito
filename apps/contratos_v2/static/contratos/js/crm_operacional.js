@@ -115,6 +115,139 @@
     let _crmArquivosContratoId = null;
     let _crmArquivosTipo = null;
     let _crmArquivosPendente = null;
+    /** Callback pendente após gerar contrato no modal obrigatório */
+    let _crmAcaoPendentePosContrato = null;
+
+    function crmBuscarItem(tipo, id) {
+        return (_todosItens || []).find(function (it) {
+            return String(it.tipo) === String(tipo) && String(it.id) === String(id);
+        }) || null;
+    }
+
+    function crmDeveForcarGeracaoContrato(it) {
+        if (!it || it.tipo !== 'solicitacao_dig') return false;
+        if (it.requer_geracao_contrato === true) return true;
+        if (it.requer_geracao_contrato === false) return false;
+        if (it.etapa === 'CANCELADO') return false;
+        if (it.tem_pendencia || it.etapa === 'PENDENCIAS' || it.sub_status === 'PENDENTE_CORRECAO') return false;
+        if (it.etapa === 'DIGITACAO' && it.sub_status === 'PENDENTE_OPERACIONAL') return false;
+        return true;
+    }
+
+    function crmExecutarAcaoProposta(tipo, id, callback) {
+        const it = crmBuscarItem(tipo, id);
+        if (crmDeveForcarGeracaoContrato(it)) {
+            _crmAcaoPendentePosContrato = { fn: callback, tipoOriginal: tipo, idOriginal: id };
+            abrirModalGerarContratoObrigatorio(it);
+            return;
+        }
+        if (typeof callback === 'function') callback();
+    }
+
+    function _carregarTabelasCmsSolicitacao(solId, selEl) {
+        if (!selEl) return;
+        selEl.innerHTML = '<option value="">Carregando...</option>';
+        selEl.disabled = true;
+        getJson(base + 'tabelas-cms/?solicitacao_digitacao_id=' + encodeURIComponent(solId)).then(function (d) {
+            selEl.disabled = false;
+            if (!d.ok || !d.tabelas || !d.tabelas.length) {
+                selEl.innerHTML = '<option value="">Nenhuma tabela disponível para este banco/produto</option>';
+                return;
+            }
+            selEl.innerHTML = '<option value="">Selecione a tabela CMS...</option>';
+            const _labelClassif = { M1: 'M1 - 100%', M2: 'M2 - 50%', M3: 'M3 - 0%' };
+            d.tabelas.forEach(function (t) {
+                const opt = document.createElement('option');
+                opt.value = t.id;
+                const cls = (t.classificador_banco || '').toString().toUpperCase();
+                const sufixo = _labelClassif[cls] ? ' [' + _labelClassif[cls] + ']' : '';
+                opt.textContent = t.titulo + sufixo;
+                selEl.appendChild(opt);
+            });
+            const idProposta = d.tabela_cms_id_proposta != null ? String(d.tabela_cms_id_proposta) : '';
+            if (idProposta) {
+                const jaExiste = Array.from(selEl.options).some(function (o) {
+                    return String(o.value) === idProposta;
+                });
+                if (!jaExiste) {
+                    const extra = document.createElement('option');
+                    extra.value = idProposta;
+                    extra.textContent = d.tabela_cms_titulo_proposta || 'Tabela da proposta';
+                    selEl.appendChild(extra);
+                }
+                selEl.value = idProposta;
+            }
+        }).catch(function () {
+            selEl.disabled = false;
+            selEl.innerHTML = '<option value="">Erro ao carregar tabelas</option>';
+        });
+    }
+
+    function abrirModalGerarContratoObrigatorio(item) {
+        if (!item) return;
+        document.getElementById('gerarContratoSolId').value = String(item.id);
+        document.getElementById('gerarContratoProposta').textContent = item.proposta_codigo || '—';
+        document.getElementById('gerarContratoCliente').textContent = item.nome_cliente || '—';
+        document.getElementById('gerarContratoBanco').textContent = item.banco || '—';
+        document.getElementById('gerarContratoConvenio').textContent = item.convenio || '—';
+        document.getElementById('gerarContratoProduto').textContent = item.produto || '—';
+        const inpNum = document.getElementById('gerarContratoNum');
+        if (inpNum) inpNum.value = item.numero_contrato_banco_pre || '';
+        const sel = document.getElementById('gerarContratoTabelaCms');
+        _carregarTabelasCmsSolicitacao(item.id, sel);
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('modalGerarContratoObrigatorio')).show();
+    }
+
+    function confirmarGerarContratoObrigatorio() {
+        const solId = parseInt(document.getElementById('gerarContratoSolId').value, 10);
+        const numContrato = String((document.getElementById('gerarContratoNum') || {}).value || '').trim().toUpperCase();
+        const tabelaCmsId = (document.getElementById('gerarContratoTabelaCms') || {}).value;
+        const btn = document.getElementById('btnConfirmarGerarContrato');
+        if (!solId) {
+            showToast('Solicitação inválida.', 'warning');
+            return;
+        }
+        if (!numContrato) {
+            showToast('Informe o Nº Contrato.', 'warning');
+            return;
+        }
+        if (!/^[A-Z0-9\-\.\/]{1,30}$/.test(numContrato)) {
+            showToast('Nº Contrato inválido. Use apenas letras, números e -./ (até 30 caracteres).', 'warning');
+            return;
+        }
+        if (!tabelaCmsId) {
+            showToast('Selecione uma tabela CMS.', 'warning');
+            return;
+        }
+        if (btn) btn.disabled = true;
+        postJson(base + 'evoluir/', {
+            tipo: 'solicitacao_dig',
+            id: solId,
+            acao: 'gerar_contrato',
+            contrato_codigo: numContrato,
+            tabela_cms_id: parseInt(tabelaCmsId, 10),
+        }).then(function (r) {
+            if (btn) btn.disabled = false;
+            if (!r || !r.ok) {
+                showToast((r && r.erro) || 'Erro ao gerar contrato.', 'danger');
+                return;
+            }
+            showToast('Contrato ' + (r.codigo || '') + ' gerado com sucesso.', 'success');
+            blurFocoAtivo();
+            bootstrap.Modal.getInstance(document.getElementById('modalGerarContratoObrigatorio')).hide();
+            const contratoId = r.contrato_id;
+            const pendente = _crmAcaoPendentePosContrato;
+            _crmAcaoPendentePosContrato = null;
+            loadTabelaUnificada().finally(function () {
+                if (pendente && typeof pendente.fn === 'function' && contratoId) {
+                    pendente.fn('contrato', contratoId);
+                }
+            });
+        }).catch(function () {
+            if (btn) btn.disabled = false;
+            showToast('Erro de comunicação.', 'danger');
+        });
+    }
 
     function crmMostrarBotaoArquivos(it) {
         // Mostra para contratos (exceto DIG_AGUARDANDO antes do upload do vídeo)
@@ -194,12 +327,24 @@
             });
         }
         const ro = !!d.somente_leitura;
-        ['crmArqBtnVideo', 'crmArqBtnArquivo'].forEach(function (bid) {
-            const b = document.getElementById(bid);
-            if (b) b.classList.toggle('d-none', ro);
-        });
+        const btnVid = document.getElementById('crmArqBtnVideo');
+        const btnArq = document.getElementById('crmArqBtnArquivo');
+        if (btnVid) btnVid.classList.toggle('d-none', ro || ehSol);
+        if (btnArq) btnArq.classList.toggle('d-none', ro);
         const al = document.getElementById('crmArqAlertaLeitura');
         if (al) al.classList.toggle('d-none', !ro);
+        const bannerPre = document.getElementById('crmArqBannerPreContrato');
+        if (bannerPre) {
+            const itArq = _crmArquivosTipo === 'solicitacao_dig'
+                ? crmBuscarItem('solicitacao_dig', _crmArquivosContratoId)
+                : null;
+            const mostrarBanner = !!(
+                itArq
+                && itArq.etapa === 'DIGITACAO'
+                && itArq.sub_status === 'PENDENTE_OPERACIONAL'
+            );
+            bannerPre.classList.toggle('d-none', !mostrarBanner);
+        }
     }
 
     function abrirModalArquivosContrato(tipo, id) {
@@ -218,10 +363,14 @@
         document.getElementById('crmArqSemArquivos').classList.add('d-none');
         const al0 = document.getElementById('crmArqAlertaLeitura');
         if (al0) al0.classList.add('d-none');
+        const bannerPre0 = document.getElementById('crmArqBannerPreContrato');
+        if (bannerPre0) bannerPre0.classList.add('d-none');
         ['crmArqBtnVideo', 'crmArqBtnArquivo'].forEach(function (bid) {
             const b = document.getElementById(bid);
             if (b) b.classList.remove('d-none');
         });
+        const btnVidInit = document.getElementById('crmArqBtnVideo');
+        if (btnVidInit && tipo === 'solicitacao_dig') btnVidInit.classList.add('d-none');
         const url = tipo === 'solicitacao_dig'
             ? base + 'solicitacao-dig/' + encodeURIComponent(id) + '/midia-arquivos/'
             : base + 'contrato/' + encodeURIComponent(id) + '/midia-arquivos/';
@@ -944,26 +1093,50 @@
     ══════════════════════════════ */
     document.getElementById('tbodyUnif').addEventListener('click', function (e) {
         const btn = e.target.closest('.btn-ficha');
-        if (btn) abrirModalFicha(btn.getAttribute('data-tipo'), btn.getAttribute('data-id'));
+        if (btn) {
+            const t = btn.getAttribute('data-tipo');
+            const i = btn.getAttribute('data-id');
+            crmExecutarAcaoProposta(t, i, function (rt, ri) {
+                abrirModalFicha(rt || t, ri || i);
+            });
+        }
 
         const btnPdfGrid = e.target.closest('.btn-ficha-pdf-grid');
         if (btnPdfGrid) {
-            baixarFichaPdfGrid(btnPdfGrid.getAttribute('data-tipo'), btnPdfGrid.getAttribute('data-id'));
+            const t = btnPdfGrid.getAttribute('data-tipo');
+            const i = btnPdfGrid.getAttribute('data-id');
+            crmExecutarAcaoProposta(t, i, function (rt, ri) {
+                baixarFichaPdfGrid(rt || t, ri || i);
+            });
         }
 
         const btnAud = e.target.closest('.btn-auditoria');
         if (btnAud) {
-            abrirModalAuditoria(btnAud.getAttribute('data-tipo'), btnAud.getAttribute('data-id'));
+            const t = btnAud.getAttribute('data-tipo');
+            const i = btnAud.getAttribute('data-id');
+            crmExecutarAcaoProposta(t, i, function (rt, ri) {
+                abrirModalAuditoria(rt || t, ri || i);
+            });
         }
 
         const btnEv = e.target.closest('.btn-evoluir');
-        if (btnEv) abrirModalEvoluir(btnEv.getAttribute('data-tipo'), btnEv.getAttribute('data-id'));
+        if (btnEv) {
+            const t = btnEv.getAttribute('data-tipo');
+            const i = btnEv.getAttribute('data-id');
+            crmExecutarAcaoProposta(t, i, function (rt, ri) {
+                abrirModalEvoluir(rt || t, ri || i);
+            });
+        }
 
         const btnArq = e.target.closest('.btn-arquivos-contrato');
         if (btnArq) {
             const cid = btnArq.getAttribute('data-id');
             const ctipo = btnArq.getAttribute('data-tipo') || 'contrato';
-            if (cid) abrirModalArquivosContrato(ctipo, cid);
+            if (cid) {
+                crmExecutarAcaoProposta(ctipo, cid, function (rt, ri) {
+                    abrirModalArquivosContrato(rt || ctipo, ri || cid);
+                });
+            }
         }
 
         const btnPendGrid = e.target.closest('.btn-crm-pendencias');
@@ -1111,7 +1284,12 @@
             if (f) f.value = '';
             if (t) t.value = '';
             const cid = _crmArquivosContratoId;
-            if (cid) document.getElementById('crmUpArqContratoId').value = cid;
+            const ctipo = _crmArquivosTipo || 'contrato';
+            if (cid) {
+                document.getElementById('crmUpArqContratoId').value = cid;
+                const hidTipo = document.getElementById('crmUpArqTipo');
+                if (hidTipo) hidTipo.value = ctipo;
+            }
             bootstrap.Modal.getOrCreateInstance(document.getElementById('modalCrmUploadArquivo')).show();
         }
     });
@@ -1127,6 +1305,8 @@
     document.getElementById('crmArqBtnArquivo').addEventListener('click', function () {
         if (!_crmArquivosContratoId) return;
         document.getElementById('crmUpArqContratoId').value = _crmArquivosContratoId;
+        const hidTipo = document.getElementById('crmUpArqTipo');
+        if (hidTipo) hidTipo.value = _crmArquivosTipo || 'contrato';
         _crmArquivosPendente = 'arquivo';
         blurFocoAtivo();
         bootstrap.Modal.getOrCreateInstance(document.getElementById('modalArquivosContrato')).hide();
@@ -1186,6 +1366,8 @@
 
     document.getElementById('crmUpArqConfirmar').addEventListener('click', function () {
         const cid = document.getElementById('crmUpArqContratoId').value;
+        const hidTipo = document.getElementById('crmUpArqTipo');
+        const arqTipo = (hidTipo && hidTipo.value) || _crmArquivosTipo || 'contrato';
         const inp = document.getElementById('crmUpArqFile');
         const tit = document.getElementById('crmUpArqTitulo');
         const btn = document.getElementById('crmUpArqConfirmar');
@@ -1198,7 +1380,10 @@
         fd.append('arquivo', inp.files[0]);
         const tx = (tit && tit.value) ? String(tit.value).trim() : '';
         if (tx) fd.append('titulo', tx);
-        postMultipart(base + 'contrato/' + encodeURIComponent(cid) + '/cliente-arquivo/', fd).then(function (r) {
+        const urlUpload = arqTipo === 'solicitacao_dig'
+            ? base + 'solicitacao-dig/' + encodeURIComponent(cid) + '/cliente-arquivo/'
+            : base + 'contrato/' + encodeURIComponent(cid) + '/cliente-arquivo/';
+        postMultipart(urlUpload, fd).then(function (r) {
             btn.disabled = false;
             if (!r.ok) {
                 showToast(r.erro || 'Erro ao enviar arquivo.', 'danger');
@@ -1209,12 +1394,17 @@
             bootstrap.Modal.getInstance(document.getElementById('modalCrmUploadArquivo')).hide();
             inp.value = '';
             if (tit) tit.value = '';
-            abrirModalArquivosContrato(cid);
+            abrirModalArquivosContrato(arqTipo, cid);
         }).catch(function () {
             btn.disabled = false;
             showToast('Erro de comunicação.', 'danger');
         });
     });
+
+    const btnConfirmarGerarContrato = document.getElementById('btnConfirmarGerarContrato');
+    if (btnConfirmarGerarContrato) {
+        btnConfirmarGerarContrato.addEventListener('click', confirmarGerarContratoObrigatorio);
+    }
 
     function abrirModalFicha(tipo, id) {
         window._crmFichaContext = { tipo: tipo, id: id };

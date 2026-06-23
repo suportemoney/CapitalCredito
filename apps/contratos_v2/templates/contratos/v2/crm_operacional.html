@@ -675,6 +675,9 @@
             </div>
             <div class="modal-body">
                 <p class="small text-muted mb-3" id="crmArqSubtitulo"></p>
+                <p id="crmArqBannerPreContrato" class="alert alert-info py-2 small mb-3 d-none" role="status">
+                    Contrato ainda não gerado. Use <strong>Evoluir → Gerar contrato</strong> para registrar o nº e a tabela CMS.
+                </p>
                 <p id="crmArqAlertaLeitura" class="alert alert-warning py-2 small mb-3 d-none" role="status">Contrato cancelado: não é permitido adicionar ou alterar vídeo/arquivos.</p>
                 <div class="mb-3">
                     <div class="fw-semibold small mb-1"><i class="bx bx-video me-1"></i>Vídeo de conscientização</div>
@@ -690,6 +693,51 @@
                 <button type="button" class="btn btn-light" data-bs-dismiss="modal">Fechar</button>
                 <button type="button" class="btn btn-outline-primary btn-sm" id="crmArqBtnVideo"><i class="bx bx-video-plus me-1"></i>Adicionar vídeo</button>
                 <button type="button" class="btn btn-outline-secondary btn-sm" id="crmArqBtnArquivo"><i class="bx bx-upload me-1"></i>Adicionar arquivo</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: gerar contrato obrigatório (solicitação sem ContratoExecucao) -->
+<div class="modal fade" id="modalGerarContratoObrigatorio" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content rounded-3 overflow-hidden">
+            <div class="modal-header mh-anal">
+                <h5 class="modal-title fw-bold"><i class="bx bx-file-blank me-2"></i>Gerar contrato</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="gerarContratoSolId" value="">
+                <div class="alert alert-warning py-2 small mb-3" role="alert">
+                    Esta proposta deveria ter um contrato gerado. Informe o nº do contrato e confirme a tabela CMS para continuar.
+                </div>
+                <div class="border rounded-2 p-3 mb-3 bg-light small" id="gerarContratoResumo">
+                    <div class="row g-2">
+                        <div class="col-md-6"><span class="text-muted">Proposta:</span> <span id="gerarContratoProposta" class="fw-semibold">—</span></div>
+                        <div class="col-md-6"><span class="text-muted">Cliente:</span> <span id="gerarContratoCliente" class="fw-semibold">—</span></div>
+                        <div class="col-md-4"><span class="text-muted">Banco:</span> <span id="gerarContratoBanco">—</span></div>
+                        <div class="col-md-4"><span class="text-muted">Convênio:</span> <span id="gerarContratoConvenio">—</span></div>
+                        <div class="col-md-4"><span class="text-muted">Produto:</span> <span id="gerarContratoProduto">—</span></div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Nº Contrato <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="gerarContratoNum" maxlength="30" autocomplete="off"
+                           placeholder="Informe o nº do contrato (banco)">
+                    <div class="form-text">Alfanumérico, até 30 caracteres (letras, números, - . /).</div>
+                </div>
+                <div class="mb-0">
+                    <label class="form-label fw-semibold">Tabela CMS <span class="text-danger">*</span></label>
+                    <select class="form-select" id="gerarContratoTabelaCms">
+                        <option value="">Carregando tabelas...</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-anal" id="btnConfirmarGerarContrato">
+                    <i class="bx bx-check me-1"></i>Gerar contrato
+                </button>
             </div>
         </div>
     </div>
@@ -728,6 +776,7 @@
             </div>
             <div class="modal-body">
                 <input type="hidden" id="crmUpArqContratoId" value="">
+                <input type="hidden" id="crmUpArqTipo" value="contrato">
                 <div class="mb-2">
                     <label class="form-label small mb-0">Título <span class="text-muted">(opcional)</span></label>
                     <input type="text" class="form-control form-control-sm" id="crmUpArqTitulo" placeholder="Nome exibido na lista" maxlength="200">
@@ -905,7 +954,7 @@
 {% endblock %}
 
 {% block addjs_extra %}
-<script src="{% static 'contratos/js/crm_operacional.js' %}?v=20260526b"></script>
+<script src="{% static 'contratos/js/crm_operacional.js' %}?v=20260623a"></script>
 <script>
 /*
   Script auxiliar (layout novo: 2 tabs na ficha + botões separados).

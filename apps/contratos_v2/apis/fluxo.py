@@ -775,6 +775,26 @@ def _solicitacao_digitacao_permite_gerar_contrato(estado):
     )
 
 
+def _solicitacao_digitacao_requer_geracao_contrato(estado, em_pend_correcao=False):
+    """CRM: solicitação sem ContratoExecucao que deveria ter contrato (modal obrigatório)."""
+    if em_pend_correcao or estado == EstadoSolicitacaoDigitacao.PENDENTE_CORRECAO:
+        return False
+    if estado == EstadoSolicitacaoDigitacao.CANCELADA:
+        return False
+    if estado == EstadoSolicitacaoDigitacao.PENDENTE_OPERACIONAL:
+        return False
+    return True
+
+
+def _persistir_numero_contrato_banco_pre(sol, cc):
+    """Grava nº informado pelo operacional na solicitação (pré-geração)."""
+    try:
+        if getattr(sol, 'numero_contrato_banco_pre', None) != cc:
+            sol.numero_contrato_banco_pre = cc
+            sol.save(update_fields=['numero_contrato_banco_pre'])
+    except DatabaseError:
+        pass
+
 def _transicoes_disponiveis_solicitacao_digitacao(sol):
     """Transições do modal Evoluir (pré-contrato): gerar, pendência vendedor, cancelar ou reabrir.
 
@@ -889,6 +909,7 @@ def api_post_gerar_contrato_digitacao(request):
         ce = ContratoExecucao.objects.filter(solicitacao_digitacao=sol).first()
         if ce:
             return JsonResponse({'ok': True, 'contrato_id': ce.id, 'codigo': ce.codigo, 'ja_existia': True})
+    _persistir_numero_contrato_banco_pre(sol, cc)
     from apps.contratos_v2.services.repasse_carteira import kwargs_snapshot_repasse_contrato
 
     cart_snap = sol.carteira_clientes if sol.carteira_clientes_id else None
@@ -3260,6 +3281,7 @@ def _build_fila_unificada_itens():
         rep_est = _esteira_repasse_campos_de_solicitacao(s)
         st = s.estado
         em_pend_correcao = st == EstadoSolicitacaoDigitacao.PENDENTE_CORRECAO
+        num_pre, _ = _solicitacao_digitacao_campos_pre_contrato_seguros(s)
         out.append({
             'tipo': 'solicitacao_dig',
             'id': s.id,
@@ -3288,6 +3310,8 @@ def _build_fila_unificada_itens():
             ),
             'sub_status': st,
             'sub_status_label': _dig_labels.get(st, st),
+            'requer_geracao_contrato': _solicitacao_digitacao_requer_geracao_contrato(st, em_pend_correcao),
+            'numero_contrato_banco_pre': num_pre,
             'data_criacao_dt': _esteira_as_local_dt(s.data_criacao),
         })
 
@@ -4961,6 +4985,7 @@ def api_post_evoluir(request):
             if ce:
                 return JsonResponse({'ok': True, 'contrato_id': ce.id, 'codigo': ce.codigo, 'ja_existia': True})
         pd = sol.proposta_dados
+        _persistir_numero_contrato_banco_pre(sol, cc)
         from apps.contratos_v2.services.repasse_carteira import kwargs_snapshot_repasse_contrato
 
         cart_snap = sol.carteira_clientes if sol.carteira_clientes_id else None
