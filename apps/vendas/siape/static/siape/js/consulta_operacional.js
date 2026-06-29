@@ -9,13 +9,12 @@
     window.__clienteCpfAtual = null;
     window.__clienteDadosPessoaisId = null;
 
-    const STATUS_COM_PROPOSTA = [
-        'EM_NEGOCIACAO',
-        'NEGOCIO_FECHADO',
-        'SOLICITACAO_PROPOSTAS',
-        'PROPOSTAS',
-        'OPERACIONAL',
-        'DIGITACAO',
+    /** Status que impedem novo envio de proposta; demais status liberam o botão. */
+    const STATUS_BLOQUEIA_PROPOSTA = [
+        'FINALIZADA',
+        'SEM_INTERESSE',
+        'DESISTENCIA',
+        'NAO_E_O_CLIENTE',
     ];
 
     function setBotaoProposta() {
@@ -26,23 +25,27 @@
 
         const temCarteira = !!window.__carteiraIdAtual;
         const st = (window.__statusComercialAtual || '').toUpperCase();
+        const temPropostas = !!window.__carteiraTemPropostas;
 
         btnProp.style.display = 'none';
         btnProp.disabled = true;
 
         if (!temCarteira) return;
 
-        if (STATUS_COM_PROPOSTA.includes(st)) {
+        if (temPropostas || !STATUS_BLOQUEIA_PROPOSTA.includes(st)) {
             btnProp.style.display = 'inline-block';
             btnProp.disabled = false;
         }
     }
+
+    window.atualizarBotaoPropostaConsulta = setBotaoProposta;
 
     window.initConsultaOperacional = function (carteiraId, statusComercial, cpf, nome) {
         window.__carteiraIdAtual = carteiraId;
         window.__statusComercialAtual = statusComercial || 'EM_NEGOCIACAO';
         window.__clienteCpfAtual = cpf || '';
         window.__clienteNomeAtual = nome || '';
+        window.__carteiraTemPropostas = false;
         setBotaoProposta();
 
         const propCart = document.getElementById('prop_carteira_id');
@@ -204,10 +207,11 @@
         }
     });
 
-    window.consultaOperacionalAtualizarStatus = function (status) {
+    window.consultaOperacionalAtualizarStatus = function (status, opts) {
         window.__statusComercialAtual = status;
         setBotaoProposta();
-        if (typeof window.refreshContainerNovoContrato === 'function') {
+        var skipRefresh = opts && opts.refreshContainer === false;
+        if (!skipRefresh && typeof window.refreshContainerNovoContrato === 'function') {
             window.refreshContainerNovoContrato();
         }
     };

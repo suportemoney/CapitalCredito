@@ -151,7 +151,11 @@
                 typeof window.consultaOperacionalAtualizarStatus === 'function' &&
                 String(window.__statusComercialAtual || '').toUpperCase() !==
                 String(data.status_comercial || '').toUpperCase()) {
-                window.consultaOperacionalAtualizarStatus(data.status_comercial);
+                window.consultaOperacionalAtualizarStatus(data.status_comercial, { refreshContainer: false });
+            }
+            window.__carteiraTemPropostas = (data.itens || []).length > 0;
+            if (typeof window.atualizarBotaoPropostaConsulta === 'function') {
+                window.atualizarBotaoPropostaConsulta();
             }
         }
         renderItens(data.itens || [], modoAtual);
@@ -575,6 +579,7 @@
     window.esconderContainerNovoContrato = function () {
         carteiraIdAtual = null;
         window.__carteiraIdAtual = null;
+        window.__carteiraTemPropostas = false;
         return carregarContainer(null);
     };
 
