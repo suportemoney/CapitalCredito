@@ -531,6 +531,48 @@
         }
     }
 
+    function normalizarFingerprintProposta(proposta) {
+        function pk(v) {
+            var n = parseInt(v, 10);
+            return (n > 0) ? n : null;
+        }
+        function dec(v, casas) {
+            if (v === null || v === undefined || v === '') return null;
+            var s = String(v).trim();
+            if (s.indexOf(',') >= 0 && s.indexOf('.') < 0) {
+                s = s.replace(',', '.');
+            } else if (s.indexOf(',') >= 0 && s.indexOf('.') >= 0) {
+                s = s.replace(/\./g, '').replace(',', '.');
+            }
+            var n = parseFloat(s);
+            if (isNaN(n) || n < 0) return null;
+            return n.toFixed(casas);
+        }
+        function prazo(v) {
+            if (v === null || v === undefined || v === '' || v === 0 || v === '0') return null;
+            var n = parseInt(v, 10);
+            return (n >= 1) ? n : null;
+        }
+        return [
+            pk(proposta.banco_id),
+            pk(proposta.convenio_id),
+            pk(proposta.produto_id),
+            dec(proposta.valor_parcela, 2),
+            prazo(proposta.prazo),
+            dec(proposta.coeficiente, 6),
+        ];
+    }
+
+    function propostaDuplicadaLocal(proposta) {
+        var lista = window.__propostasExistentesCliente || [];
+        if (!lista.length) return false;
+        var alvo = normalizarFingerprintProposta(proposta);
+        if (!alvo[0] || !alvo[1] || !alvo[2]) return false;
+        return lista.some(function (item) {
+            return normalizarFingerprintProposta(item).join('|') === alvo.join('|');
+        });
+    }
+
     function enviarPropostas() {
         if (!validarPasso3()) return;
 
@@ -553,6 +595,11 @@
             prazo: el('prop_prazo').value,
             tabela_cms_id: el('prop_tabela_cms_id').value || null,
         };
+
+        if (propostaDuplicadaLocal(proposta)) {
+            alert('Proposta Já digitada com esses dados!');
+            return;
+        }
 
         const fd = new FormData();
         fd.append('carteira_id', carteiraId);
@@ -592,7 +639,8 @@
                         bootstrap.Modal.getInstance(m)?.hide();
                     }
                 } else {
-                    alert(res.message || res.erro || 'Erro ao enviar propostas.');
+                    var msgErro = res.message || res.erro || 'Erro ao enviar propostas.';
+                    alert(msgErro);
                 }
             })
             .catch(function () {

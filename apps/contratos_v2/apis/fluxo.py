@@ -100,6 +100,10 @@ from apps.vendas.siape.models import (
     TabulacaoVendedor,
 )
 from apps.vendas.siape.services.carteira_operacional import adicionar_proposta_operacional_na_carteira
+from apps.contratos_v2.services.proposta_duplicata import (
+    MSG_PROPOSTA_JA_DIGITADA,
+    proposta_ja_existe_para_cliente,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -2754,6 +2758,18 @@ def api_post_solicitar_propostas(request):
                 'Proposta #%d: Tabela CMS inválida ou incompatível com Banco, Convênio e Produto.'
                 % idx
             )
+            continue
+
+        if proposta_ja_existe_para_cliente(
+            dp,
+            banco_obj.id,
+            convenio_obj.id,
+            produto_obj.id,
+            valor_parcela,
+            prazo_val,
+            coeficiente,
+        ):
+            erros_linhas.append(MSG_PROPOSTA_JA_DIGITADA)
             continue
 
         pd_obj = PropostaDados.objects.create(

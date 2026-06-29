@@ -15,6 +15,7 @@
         'SOLICITACAO_PROPOSTAS',
         'PROPOSTAS',
         'OPERACIONAL',
+        'DIGITACAO',
     ];
 
     function setBotaoProposta() {
@@ -127,6 +128,26 @@
         return null;
     }
 
+    function carregarPropostasExistentes(carteiraId, clienteDpId) {
+        if (!carteiraId) {
+            window.__propostasExistentesCliente = [];
+            return Promise.resolve();
+        }
+        var url = '/api/consulta/operacional/?carteira_id=' + encodeURIComponent(carteiraId);
+        if (clienteDpId) {
+            url += '&cliente_dados_pessoais_id=' + encodeURIComponent(clienteDpId);
+        }
+        return fetch(url, { credentials: 'same-origin' })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                window.__propostasExistentesCliente =
+                    (data.status === 'sucesso' && data.itens) ? data.itens : [];
+            })
+            .catch(function () {
+                window.__propostasExistentesCliente = [];
+            });
+    }
+
     window.abrirModalPropostas = function () {
         if (!window.podeNovoContrato) return;
         if (!window.__carteiraIdAtual) {
@@ -149,6 +170,12 @@
             if (typeof window.propWizardCarregarFicha === 'function') {
                 return window.propWizardCarregarFicha(cpf, window.__carteiraIdAtual, nome);
             }
+        }).then(function () {
+            var dpId = document.getElementById('prop_cliente_dados_pessoais_id');
+            return carregarPropostasExistentes(
+                window.__carteiraIdAtual,
+                dpId && dpId.value ? dpId.value : null
+            );
         }).then(function () {
             const modal = document.getElementById('modalEnviarPropostas');
             if (modal && typeof bootstrap !== 'undefined') {

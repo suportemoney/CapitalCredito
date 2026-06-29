@@ -147,6 +147,12 @@
             if (el('nc-carteira-status')) {
                 el('nc-carteira-status').textContent = statusParts.length ? statusParts.join(' · ') : '—';
             }
+            if (data.status_comercial &&
+                typeof window.consultaOperacionalAtualizarStatus === 'function' &&
+                String(window.__statusComercialAtual || '').toUpperCase() !==
+                String(data.status_comercial || '').toUpperCase()) {
+                window.consultaOperacionalAtualizarStatus(data.status_comercial);
+            }
         }
         renderItens(data.itens || [], modoAtual);
         reparentContainer();

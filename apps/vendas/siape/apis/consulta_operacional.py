@@ -96,11 +96,26 @@ def api_get_operacional(request):
     ).first()
     if not carteira:
         return JsonResponse({'status': 'sucesso', 'itens': []})
-    propostas = (
-        PropostaDados.objects.filter(carteiras_siape_propostas=carteira)
-        .select_related('banco', 'convenio', 'produto')
-        .order_by('-data_criacao')[:100]
-    )
+
+    cliente_dp_raw = (request.GET.get('cliente_dados_pessoais_id') or '').strip()
+    try:
+        cliente_dp_param = int(cliente_dp_raw) if cliente_dp_raw else None
+    except (TypeError, ValueError):
+        cliente_dp_param = None
+
+    cliente_dp = cliente_dp_param or carteira.cliente_operacional_id
+    if cliente_dp:
+        propostas = (
+            PropostaDados.objects.filter(cliente_dados_pessoais_id=cliente_dp)
+            .select_related('banco', 'convenio', 'produto')
+            .order_by('-data_criacao')[:100]
+        )
+    else:
+        propostas = (
+            PropostaDados.objects.filter(carteiras_siape_propostas=carteira)
+            .select_related('banco', 'convenio', 'produto')
+            .order_by('-data_criacao')[:100]
+        )
     itens = []
     for pd in propostas:
         itens.append({
@@ -108,6 +123,12 @@ def api_get_operacional(request):
             'codigo': pd.codigo or '',
             'banco': pd.banco.titulo if pd.banco_id else '',
             'produto': pd.produto.titulo if pd.produto_id else '',
+            'banco_id': pd.banco_id,
+            'convenio_id': pd.convenio_id,
+            'produto_id': pd.produto_id,
+            'valor_parcela': str(pd.valor_parcela) if pd.valor_parcela is not None else '',
+            'prazo': pd.prazo,
+            'coeficiente': str(pd.coeficiente) if pd.coeficiente is not None else '',
             'valor_af': str(pd.valor_af) if pd.valor_af is not None else '',
             'aceita_pelo_cliente': bool(pd.aceita_pelo_cliente),
             'data_criacao': pd.data_criacao.isoformat() if pd.data_criacao else '',
