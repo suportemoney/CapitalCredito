@@ -2301,6 +2301,7 @@
             valor_cms_plastico: snapCms('valor_cms_plastico'),
             flag_cms_pago: fc ? !!fc.checked : false,
             classificacao_valor_id: selC && selC.value ? parseInt(selC.value, 10) : null,
+            classificador_id: selC && selC.value ? parseInt(selC.value, 10) : null,
             venda_associada_loja: lp.venda_associada_loja,
             loja_id: lp.loja_id,
             forcar_m3: fm3 ? !!fm3.checked : false,
@@ -2324,6 +2325,7 @@
             valor_cms_plastico: rm.valor_cms_plastico,
             flag_cms_pago: rm.flag_cms_pago,
             classificacao_valor_id: rm.classificacao_valor_id,
+            classificador_id: rm.classificador_id,
             venda_associada_loja: rm.venda_associada_loja,
             loja_id: rm.loja_id,
             forcar_m3: rm.forcar_m3,
@@ -2495,11 +2497,11 @@
             wrap.innerHTML = '<span class="text-muted small">Nenhum destinatário informado para prévia.</span>';
             return;
         }
-        if (!isFinite(tc) || tc <= 0 || !isFinite(pct)) {
+        if (!isFinite(tc) || tc <= 0) {
             let html = '';
             dest.forEach(function (d) {
                 html +=
-                    '<div class="text-muted small">Ranking estimado — ' +
+                    '<div class="text-muted small">Ranking SIAPE — ' +
                     esc(d.nome) +
                     ' (' +
                     _labelPapelPctc(d.papel) +
@@ -2507,21 +2509,30 @@
             });
             wrap.innerHTML =
                 html ||
-                '<span class="text-muted small">Informe TC e classificador para prévia do ranking.</span>';
+                '<span class="text-muted small">Informe TC e classificador para prévia.</span>';
             return;
         }
         const fatia = temRep ? tc / 2 : tc;
         let html = '';
         dest.forEach(function (d) {
-            const vr = fatia * (pct / 100);
             html +=
-                '<div class="small">Ranking estimado — ' +
+                '<div class="small">Ranking SIAPE — ' +
                 esc(d.nome) +
                 ' (' +
                 _labelPapelPctc(d.papel) +
                 '): ' +
-                _fmtBrlPctc(vr) +
+                _fmtBrlPctc(fatia) +
                 '</div>';
+            if (isFinite(pct)) {
+                html +=
+                    '<div class="small text-muted">Bonificação estimada — ' +
+                    esc(d.nome) +
+                    ': ' +
+                    _fmtBrlPctc(fatia * (pct / 100)) +
+                    ' (' +
+                    pct +
+                    '% do classificador)</div>';
+            }
         });
         wrap.innerHTML = html;
     }
@@ -2576,7 +2587,7 @@
         const selCl = document.getElementById('evoluirPctcClassificador');
         if (selCl) {
             selCl.innerHTML = '<option value="">Selecione...</option>';
-            (m.classificacoes || []).forEach(function (c) {
+            (m.classificadores || m.classificacoes || []).forEach(function (c) {
                 const o = document.createElement('option');
                 o.value = String(c.id);
                 const pctStr = c.percentual_num != null && c.percentual_num !== '' ? String(c.percentual_num) : String(c.percentual || '0');
@@ -3961,6 +3972,7 @@
             payload.flag_cms_pago = fc ? !!fc.checked : false;
             const selC = document.getElementById('evoluirPctcClassificador');
             payload.classificacao_valor_id = selC && selC.value ? parseInt(selC.value, 10) : null;
+            payload.classificador_id = selC && selC.value ? parseInt(selC.value, 10) : null;
             const lp = _pctcPayloadLojaRm();
             payload.venda_associada_loja = lp.venda_associada_loja;
             payload.loja_id = lp.loja_id;

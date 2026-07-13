@@ -31,9 +31,83 @@ def resolver_classificador_financeiro_por_cv_id(cv_id):
             cl = Classificador.objects.filter(status=True, percentual=cv.percentual).order_by('titulo').first()
             if cl:
                 return cl
+            cl = Classificador.objects.filter(percentual=cv.percentual).order_by('titulo').first()
+            if cl:
+                return cl
         except (ClassificacaoValor.DoesNotExist, ValueError, TypeError):
             pass
     return Classificador.objects.filter(status=True).order_by('titulo').first()
+
+
+def resolver_classificacao_valor_por_classificador_id(classificador_id):
+    """
+    Mapeia Classificador (financeiro_vendas) → ClassificacaoValor (siape) pelo percentual.
+    Cria ClassificacaoValor espelhada quando não existir registro equivalente.
+    """
+    from apps.vendas.siape.models import ClassificacaoValor
+
+    if classificador_id in (None, ''):
+        return None
+    try:
+        cl = Classificador.objects.get(pk=int(classificador_id), status=True)
+    except (Classificador.DoesNotExist, ValueError, TypeError):
+        try:
+            cl = Classificador.objects.get(pk=int(classificador_id))
+        except (Classificador.DoesNotExist, ValueError, TypeError):
+            return None
+
+    cv = (
+        ClassificacaoValor.objects.filter(status=True, percentual=cl.percentual).order_by('titulo').first()
+        or ClassificacaoValor.objects.filter(percentual=cl.percentual).order_by('titulo').first()
+    )
+    if not cv:
+        cv = ClassificacaoValor.objects.create(
+            titulo=(cl.titulo or 'CLASSIFICADOR')[:120],
+            percentual=cl.percentual,
+            status=True,
+        )
+    return cv
+
+
+def resolver_classificador_financeiro_de_rm_payload(rm_payload):
+    """Resolve Classificador financeiro a partir do payload do modal Pago TC."""
+    if not rm_payload:
+        return Classificador.objects.filter(status=True).order_by('titulo').first()
+
+    cl_raw = rm_payload.get('classificador_id')
+    if cl_raw not in (None, ''):
+        try:
+            return Classificador.objects.get(pk=int(cl_raw), status=True)
+        except (Classificador.DoesNotExist, ValueError, TypeError):
+            try:
+                return Classificador.objects.get(pk=int(cl_raw))
+            except (Classificador.DoesNotExist, ValueError, TypeError):
+                return None
+
+    return resolver_classificador_financeiro_por_cv_id(rm_payload.get('classificacao_valor_id'))
+
+
+def resolver_classificacao_valor_de_rm_payload(rm_payload):
+    """Resolve ClassificacaoValor (RegisterMoney) a partir do payload do modal Pago TC."""
+    if not rm_payload:
+        return None
+
+    cl_raw = rm_payload.get('classificador_id')
+    if cl_raw not in (None, ''):
+        return resolver_classificacao_valor_por_classificador_id(cl_raw)
+
+    cv_raw = rm_payload.get('classificacao_valor_id')
+    if cv_raw in (None, ''):
+        return None
+    from apps.vendas.siape.models import ClassificacaoValor
+
+    try:
+        return ClassificacaoValor.objects.get(pk=int(cv_raw), status=True)
+    except (ClassificacaoValor.DoesNotExist, ValueError, TypeError):
+        try:
+            return ClassificacaoValor.objects.get(pk=int(cv_raw))
+        except (ClassificacaoValor.DoesNotExist, ValueError, TypeError):
+            return None
 
 
 def _setor_por_user(user):
@@ -114,10 +188,7 @@ def _dados_base_contrato_pagamento(ce, rm_payload=None):
             valor_af = af_rm
 
     valor_tc = _valor_tc_de_rm_payload(rm_payload, ce)
-    cv_id = None
-    if rm_payload:
-        cv_id = rm_payload.get('classificacao_valor_id')
-    classificador = resolver_classificador_financeiro_por_cv_id(cv_id)
+    classificador = resolver_classificador_financeiro_de_rm_payload(rm_payload)
     if not classificador:
         raise ValueError('Nenhum classificador financeiro disponível para sync do ranking.')
 

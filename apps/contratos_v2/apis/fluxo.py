@@ -99,6 +99,12 @@ from apps.vendas.siape.models import (
     RegisterMoney,
     TabulacaoVendedor,
 )
+from apps.vendas.financeiro_vendas.models import Classificador
+from apps.vendas.financeiro_vendas.services.sincronizar_comprovante import (
+    resolver_classificacao_valor_de_rm_payload,
+    resolver_classificacao_valor_por_classificador_id,
+    resolver_classificador_financeiro_de_rm_payload,
+)
 from apps.vendas.siape.services.carteira_operacional import adicionar_proposta_operacional_na_carteira
 from apps.contratos_v2.services.proposta_duplicata import (
     MSG_PROPOSTA_JA_DIGITADA,
@@ -342,10 +348,10 @@ def _montar_pago_tc_modal_defaults(ce):
         return None
     if not d:
         return None
-    qs_classificacoes = ClassificacaoValor.objects.filter(status=True).order_by('titulo')
-    if not qs_classificacoes.exists():
-        # Evita dropdown vazio quando não há classificadores ativos.
-        qs_classificacoes = ClassificacaoValor.objects.all().order_by('titulo')
+    qs_classificadores = Classificador.objects.filter(status=True).order_by('titulo')
+    if not qs_classificadores.exists():
+        # Evita dropdown vazio quando não há classificadores ativos no financeiro.
+        qs_classificadores = Classificador.objects.all().order_by('titulo')
     classificacoes = [
         {
             'id': c.id,
@@ -353,11 +359,11 @@ def _montar_pago_tc_modal_defaults(ce):
             'percentual': str(c.percentual),
             'percentual_num': str(c.percentual),
         }
-        for c in qs_classificacoes
+        for c in qs_classificadores
     ]
     classif_100 = (
-        ClassificacaoValor.objects.filter(status=True, percentual=Decimal('100.00')).order_by('titulo').first()
-        or ClassificacaoValor.objects.filter(percentual=Decimal('100.00')).order_by('titulo').first()
+        Classificador.objects.filter(status=True, percentual=Decimal('100.00')).order_by('titulo').first()
+        or Classificador.objects.filter(percentual=Decimal('100.00')).order_by('titulo').first()
     )
     from apps.contratos_v2.services.repasse_carteira import resolver_contexto_repasse_contrato
 
@@ -416,6 +422,7 @@ def _montar_pago_tc_modal_defaults(ce):
         'valor_cms_plastico': pct(tpl),
         'flag_cms_pago': False,
         'classificacoes': classificacoes,
+        'classificadores': classificacoes,
         'classificacao_default_id': classif_100.id if classif_100 else None,
         'tem_repasse': tem_repasse,
         'eh_repasse': tem_repasse,
@@ -428,7 +435,7 @@ def _montar_pago_tc_modal_defaults(ce):
         'exige_escolha_loja': True,
         'flag_video_enviado': bool(ce.flag_video_enviado),
         'exige_video_conscientizacao': bool(contrato_exige_video_conscientizacao_para_pagamento(ce)),
-        'ranking_formula_hint': 'Ranking estimado = fatia de TC (total ou metade se repasse) × percentual do classificador ÷ 100.',
+        'ranking_formula_hint': 'Ranking SIAPE = fatia de TC (total ou metade se repasse). O % do classificador define a bonificação do consultor, não o ranking.',
     }
 
 
@@ -493,26 +500,34 @@ def _montar_registermoney_extra_supervisor_pago_tc(data, ce):
                 return None
         return None
 
-    cv_raw = data.get('classificacao_valor_id')
-    cv = None
-    if cv_raw in (None, ''):
-        cv = (
-            ClassificacaoValor.objects.filter(status=True, percentual=Decimal('100.00')).order_by('titulo').first()
-            or ClassificacaoValor.objects.filter(percentual=Decimal('100.00')).order_by('titulo').first()
-        )
-        if not cv and not sem_tc:
-            return None, 'Selecione o classificador de valor.'
-    else:
-        try:
-            cv = ClassificacaoValor.objects.get(pk=int(cv_raw), status=True)
-        except ClassificacaoValor.DoesNotExist:
-            # Compatibilidade: se o modal exibiu fallback sem ativos, aceita o selecionado.
-            try:
-                cv = ClassificacaoValor.objects.get(pk=int(cv_raw))
-            except (ValueError, TypeError, ClassificacaoValor.DoesNotExist):
-                return None, 'Classificador inválido ou inativo.'
-        except (ValueError, TypeError):
+    has_cls_input = (
+        data.get('classificador_id') not in (None, '')
+        or data.get('classificacao_valor_id') not in (None, '')
+    )
+    cv = resolver_classificacao_valor_de_rm_payload(data) if has_cls_input else None
+    if not cv and not sem_tc:
+        if has_cls_input:
             return None, 'Classificador inválido ou inativo.'
+        cl_100 = (
+            Classificador.objects.filter(status=True, percentual=Decimal('100.00')).order_by('titulo').first()
+            or Classificador.objects.filter(percentual=Decimal('100.00')).order_by('titulo').first()
+        )
+        cv = resolver_classificacao_valor_por_classificador_id(cl_100.pk if cl_100 else None)
+        if not cv:
+            return None, 'Selecione o classificador de valor.'
+
+    cl_fin = None
+    if data.get('classificador_id') not in (None, ''):
+        try:
+            cl_fin = Classificador.objects.get(pk=int(data.get('classificador_id')), status=True)
+        except (Classificador.DoesNotExist, ValueError, TypeError):
+            try:
+                cl_fin = Classificador.objects.get(pk=int(data.get('classificador_id')))
+            except (Classificador.DoesNotExist, ValueError, TypeError):
+                if not sem_tc:
+                    return None, 'Classificador inválido ou inativo.'
+    elif cv is not None:
+        cl_fin = resolver_classificador_financeiro_de_rm_payload({'classificacao_valor_id': cv.id})
 
     extra = {
         'valor_est': valor_est,
@@ -522,6 +537,7 @@ def _montar_registermoney_extra_supervisor_pago_tc(data, ce):
         'valor_cms_plastico': cms_ou_calc('valor_cms_plastico', tpl),
         'flag_cms_pago': bool(data.get('flag_cms_pago')),
         'classificacao_valor_id': cv.id if cv else None,
+        'classificador_id': cl_fin.id if cl_fin else None,
     }
     # Pago TC (CRM): associação explícita de loja via M2M do funcionário destinatário
     if 'venda_associada_loja' in data:
@@ -5358,7 +5374,8 @@ def api_get_ranking_supervisor_context(request, contrato_id):
         'valor_cms_recebido': _fmt_dec_br(v_rec),
         'valor_cms_repassado': _fmt_dec_br(v_rep),
         'registermoney_ja_existe': ja_rm,
-        'classificacoes': ptc.get('classificacoes', []),
+        'classificacoes': ptc.get('classificadores', ptc.get('classificacoes', [])),
+        'classificadores': ptc.get('classificadores', ptc.get('classificacoes', [])),
         'lojas_elegiveis': ptc.get('lojas_elegiveis', []),
     })
 

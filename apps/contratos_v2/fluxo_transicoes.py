@@ -447,7 +447,12 @@ def sincronizar_register_money_dados_modal_pago_tc(ce, rm_payload):
         loja = resolve_loja_register_money_de_rm_payload(ce, rm_payload)
     except ValueError as exc:
         return False, str(exc)
-    cv_id = rm_payload.get('classificacao_valor_id')
+    from apps.vendas.financeiro_vendas.services.sincronizar_comprovante import (
+        resolver_classificacao_valor_de_rm_payload,
+    )
+
+    cv = resolver_classificacao_valor_de_rm_payload(rm_payload)
+    cv_id = cv.id if cv else rm_payload.get('classificacao_valor_id')
     af = rm_payload.get('af')
     for r in rms:
         upd = []
@@ -825,11 +830,18 @@ def _disparar_registermoney_se_necessario(ce, rm_payload=None):
                     else valor_cms_pla
                 )
                 flag_cms = bool(rm_payload.get('flag_cms_pago'))
-                cv_raw = rm_payload.get('classificacao_valor_id')
-                try:
-                    cv_id = int(cv_raw) if cv_raw not in (None, '') else None
-                except (TypeError, ValueError):
-                    cv_id = None
+                from apps.vendas.financeiro_vendas.services.sincronizar_comprovante import (
+                    resolver_classificacao_valor_de_rm_payload,
+                )
+
+                cv = resolver_classificacao_valor_de_rm_payload(rm_payload)
+                cv_id = cv.id if cv else None
+                if cv_id is None:
+                    cv_raw = rm_payload.get('classificacao_valor_id')
+                    try:
+                        cv_id = int(cv_raw) if cv_raw not in (None, '') else None
+                    except (TypeError, ValueError):
+                        cv_id = None
             agora = timezone.now()
             user_rm = ctx_rep.get('user_responsavel')
             if not user_rm and ctx_rep.get('user_responsavel_id'):
@@ -885,11 +897,18 @@ def _disparar_registermoney_se_necessario(ce, rm_payload=None):
         valor_cms_rep = _parse_dec_rm(rm_payload.get('valor_cms_repassado'))
         valor_cms_pla = _parse_dec_rm(rm_payload.get('valor_cms_plastico'))
         flag_cms = bool(rm_payload.get('flag_cms_pago'))
-        cv_id = rm_payload.get('classificacao_valor_id')
-        try:
-            cv_id = int(cv_id) if cv_id not in (None, '') else None
-        except (TypeError, ValueError):
-            cv_id = None
+        from apps.vendas.financeiro_vendas.services.sincronizar_comprovante import (
+            resolver_classificacao_valor_de_rm_payload,
+        )
+
+        cv = resolver_classificacao_valor_de_rm_payload(rm_payload)
+        cv_id = cv.id if cv else None
+        if cv_id is None:
+            cv_raw = rm_payload.get('classificacao_valor_id')
+            try:
+                cv_id = int(cv_raw) if cv_raw not in (None, '') else None
+            except (TypeError, ValueError):
+                cv_id = None
         if valor_tc_total is None or valor_tc_total <= 0:
             raise ValueError(
                 'Pago TC: valor_est (Valor TC) inválido ou <= 0 em rm_payload.'
@@ -2184,15 +2203,29 @@ def criar_registermoney_ranking_supervisor(ce, user, rm_payload):
     if valor_cms_pla is None:
         valor_cms_pla = _cms_calc(tpl)
 
-    cv_raw = rm_payload.get('classificacao_valor_id')
-    cv_id = None
-    if cv_raw not in (None, ''):
+    cv_id = rm_payload.get('classificacao_valor_id')
+    cl_fin_id = rm_payload.get('classificador_id')
+    if cl_fin_id not in (None, ''):
+        from apps.vendas.financeiro_vendas.services.sincronizar_comprovante import (
+            resolver_classificacao_valor_por_classificador_id,
+        )
+
+        cv = resolver_classificacao_valor_por_classificador_id(cl_fin_id)
+        if not cv:
+            return False, 'Classificador inválido ou inativo.'
+        cv_id = cv.id
+        rm_payload = dict(rm_payload)
+        rm_payload['classificacao_valor_id'] = cv_id
+    elif cv_id not in (None, ''):
         try:
             from apps.vendas.siape.models import ClassificacaoValor
-            cv_id = int(cv_raw)
+
+            cv_id = int(cv_id)
             ClassificacaoValor.objects.get(pk=cv_id)
         except Exception:
             return False, 'Classificador de valor inválido.'
+    else:
+        cv_id = None
 
     cpf = (ce.cliente_dados_pessoais.cpf or '').strip() if ce.cliente_dados_pessoais_id else ''
     produto_id = _siape_produto_id_por_contratos_produto(d.produto) if d and d.produto_id else None
