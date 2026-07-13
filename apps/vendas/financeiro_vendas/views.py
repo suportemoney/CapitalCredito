@@ -36,6 +36,13 @@ def render_index(request):
     return render(request, 'financeiro_vendas/index.html', context)
 
 @login_required
+@controle_acess('SCT52')
+def render_pagamento_tc(request):
+    """Página dedicada ao fluxo Pagamento TC (contratos v2 em Pago Cliente)."""
+    return render(request, 'financeiro_vendas/pagamento_tc.html')
+
+
+@login_required
 @controle_acess('SS29')
 def render_classificador(request):
     """Página de gerenciamento de classificadores"""

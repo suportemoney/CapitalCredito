@@ -375,7 +375,7 @@
             {% endif %}
 
             {# Financeiro Vendas - SubCategoria #}
-            {% if user|has_access:'SCT13' %}
+            {% if user|has_access:'SCT13' or user|has_access:'SCT52' or user|has_access:'SS27' or user|has_access:'SS29' %}
             <li class="subcategory-item" data-subcategory="financeiro-vendas">
               <a href="javascript:void(0)" class="subcategory-toggle">
                 <i class="bx bx-money"></i>
@@ -396,6 +396,14 @@
                   <a href="{% url 'financeiro_vendas:classificador' %}">
                     <i class="bx bx-category"></i>
                     <span class="menu-label">Classificador</span>
+                  </a>
+                </li>
+                {% endif %}
+                {% if user|has_access:'SCT52' %}
+                <li>
+                  <a href="{% url 'financeiro_vendas:pagamento_tc' %}">
+                    <i class="bx bx-receipt"></i>
+                    <span class="menu-label">Pagamento TC</span>
                   </a>
                 </li>
                 {% endif %}

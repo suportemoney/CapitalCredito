@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Pagamento TC - Financeiro Vendas{% endblock %}
+{% block header_title %}Pagamento TC{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <h5 class="mb-0"><i class="bx bx-money me-1"></i>Contratos — Pagamento TC</h5>
+            <button type="button" class="btn btn-sm btn-outline-primary" id="btnRecarregarLista">
+                <i class="bx bx-refresh me-1"></i>Atualizar
+            </button>
+        </div>
+        <div class="card-body">
+            <ul class="nav nav-tabs mb-3" id="pctcTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="tab-aguardando" data-bs-toggle="tab" data-bs-target="#pane-aguardando" type="button" role="tab">
+                        Aguardando TC <span class="badge bg-primary ms-1" id="badgeAguardando">0</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="tab-parcial" data-bs-toggle="tab" data-bs-target="#pane-parcial" type="button" role="tab">
+                        Parcial <span class="badge bg-warning text-dark ms-1" id="badgeParcial">0</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="tab-concluidos" data-bs-toggle="tab" data-bs-target="#pane-concluidos" type="button" role="tab">
+                        Concluídos <span class="badge bg-success ms-1" id="badgeConcluidos">0</span>
+                    </button>
+                </li>
+            </ul>
+            <div class="tab-content">
+                <div class="tab-pane fade show active" id="pane-aguardando" role="tabpanel">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm align-middle mb-0">
+                            <thead class="table-light small">
+                                <tr>
+                                    <th>Cliente</th>
+                                    <th>CPF</th>
+                                    <th>Vendedor</th>
+                                    <th>Produto</th>
+                                    <th>Banco</th>
+                                    <th class="text-end">AF</th>
+                                    <th class="text-end">TC meta</th>
+                                    <th class="text-end">TC pago</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyAguardando">
+                                <tr><td colspan="10" class="text-center text-muted py-3">Carregando...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="pane-parcial" role="tabpanel">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm align-middle mb-0">
+                            <thead class="table-light small">
+                                <tr>
+                                    <th>Cliente</th>
+                                    <th>CPF</th>
+                                    <th>Vendedor</th>
+                                    <th>Produto</th>
+                                    <th>Banco</th>
+                                    <th class="text-end">AF</th>
+                                    <th class="text-end">TC meta</th>
+                                    <th class="text-end">TC pago</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyParcial">
+                                <tr><td colspan="10" class="text-center text-muted py-3">Carregando...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="pane-concluidos" role="tabpanel">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm align-middle mb-0">
+                            <thead class="table-light small">
+                                <tr>
+                                    <th>Cliente</th>
+                                    <th>CPF</th>
+                                    <th>Vendedor</th>
+                                    <th>Produto</th>
+                                    <th>Banco</th>
+                                    <th class="text-end">AF</th>
+                                    <th class="text-end">TC meta</th>
+                                    <th class="text-end">TC pago</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyConcluidos">
+                                <tr><td colspan="9" class="text-center text-muted py-3">Carregando...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Pago TC completo -->
+<div class="modal fade" id="modalPagoTc" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+        <div class="modal-content rounded-3 overflow-hidden">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title fw-bold"><i class="bx bx-money me-2"></i>Pagar TC</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="pctcContratoId" value="">
+                <div class="border rounded-2 p-2 mb-3 bg-light small" id="pctcResumoContrato">
+                    <div class="row g-1">
+                        <div class="col-md-6"><span class="text-muted">Cliente:</span> <strong id="pctcResumoCliente">—</strong></div>
+                        <div class="col-md-6"><span class="text-muted">CPF:</span> <strong id="pctcResumoCpf">—</strong></div>
+                        <div class="col-md-6"><span class="text-muted">Vendedor:</span> <strong id="pctcResumoVendedor">—</strong></div>
+                        <div class="col-md-6"><span class="text-muted">Produto:</span> <strong id="pctcResumoProduto">—</strong></div>
+                    </div>
+                </div>
+                <div class="border rounded-2 p-3 bg-light pctc-financeiro-modal" id="evoluirGrupoPagoTc">
+                    {% include 'contratos/v2/_pago_tc_modal_body.html' %}
+                </div>
+                <div class="mt-2">
+                    <label class="form-label small text-muted mb-0">Observação (opcional)</label>
+                    <textarea class="form-control form-control-sm" id="pctcObservacao" rows="2" placeholder="Observação..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-primary d-none" id="btnConfirmarPagoTc" title="Apenas quando Valor TC for zero">
+                    <i class="bx bx-check me-1"></i>Confirmar Pago TC (sem comprovante)
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include 'financeiro_vendas/_modal_comprovante_parcial.html' %}
+{% endblock %}
+
+{% block addcss_extra %}
+<link rel="stylesheet" href="{% static 'financeiro_vendas/css/pagamento_tc.css' %}">
+{% endblock %}
+
+{% block addjs_extra %}
+<script src="{% static 'financeiro_vendas/js/pagamento_tc.js' %}"></script>
+{% endblock %}

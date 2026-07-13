@@ -3,12 +3,14 @@ from . import views
 from .apis import gerenciar as apis_gerenciar
 from .apis import classificador as apis_classificador
 from .apis import comprovante as apis_comprovante
+from .apis import pagamento_tc as apis_pagamento_tc
 
 app_name = 'financeiro_vendas'
 
 urlpatterns = [
     path('', views.render_index, name='index'),
     path('classificador/', views.render_classificador, name='classificador'),
+    path('pagamento-tc/', views.render_pagamento_tc, name='pagamento_tc'),
     
     # APIs Contratos
     path('api/contratos/resumo/', apis_gerenciar.api_resumo_contratos, name='api_resumo_contratos'),
@@ -29,5 +31,14 @@ urlpatterns = [
     path('api/classificador/criar/', apis_classificador.api_criar_classificador, name='api_criar_classificador'),
     path('api/classificador/editar/<int:classificador_id>/', apis_classificador.api_editar_classificador, name='api_editar_classificador'),
     path('api/classificador/deletar/<int:classificador_id>/', apis_classificador.api_deletar_classificador, name='api_deletar_classificador'),
+
+    # APIs Pagamento TC (contratos v2)
+    path('api/pagamento-tc/listar/', apis_pagamento_tc.api_listar_pagamento_tc, name='api_listar_pagamento_tc'),
+    path('api/pagamento-tc/modal-defaults/', apis_pagamento_tc.api_modal_defaults_pagamento_tc, name='api_modal_defaults_pagamento_tc'),
+    path('api/pagamento-tc/salvar-dados/', apis_pagamento_tc.api_salvar_dados_pagamento_tc, name='api_salvar_dados_pagamento_tc'),
+    path('api/pagamento-tc/comprovantes/', apis_pagamento_tc.api_comprovantes_pagamento_tc, name='api_comprovantes_pagamento_tc'),
+    path('api/pagamento-tc/comprovante/', apis_pagamento_tc.api_upload_comprovante_pagamento_tc, name='api_upload_comprovante_pagamento_tc'),
+    path('api/pagamento-tc/comprovante/excluir/', apis_pagamento_tc.api_excluir_comprovante_pagamento_tc, name='api_excluir_comprovante_pagamento_tc'),
+    path('api/pagamento-tc/confirmar/', apis_pagamento_tc.api_confirmar_pagamento_tc, name='api_confirmar_pagamento_tc'),
 ]
 

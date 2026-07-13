@@ -57,6 +57,7 @@ class Command(BaseCommand):
             {'id': 11, 'codigo': 'SCT11', 'tipo': Acesso.SUBCATEGORIA_RENDER, 'nome': 'TESOURARIA | FINANCEIRO GERAL', 'descricao': 'SubCategoria Financeiro Geral', 'pai': 'CT4'},
             {'id': 12, 'codigo': 'SCT12', 'tipo': Acesso.SUBCATEGORIA_RENDER, 'nome': 'VENDAS | SIAPE', 'descricao': 'SubCategoria SIAPE', 'pai': 'CT5'},
             {'id': 13, 'codigo': 'SCT13', 'tipo': Acesso.SUBCATEGORIA_RENDER, 'nome': 'VENDAS | FINANCEIRO VENDAS', 'descricao': 'SubCategoria Financeiro Vendas', 'pai': 'CT5'},
+            {'id': 52, 'codigo': 'SCT52', 'tipo': Acesso.SUBCATEGORIA_RENDER, 'nome': 'FINANCEIRO | PAGAMENTO TC', 'descricao': 'Sistema para pagar TC e enviar ranking', 'pai': 'SCT13'},
             {'id': 44, 'codigo': 'SCT44', 'tipo': Acesso.SUBCATEGORIA_RENDER, 'nome': 'TESOURARIA | BONIFICACOES', 'descricao': 'SubCategoria Bonificações', 'pai': 'CT4'},
             
             # SESSÕES (SS) - IDs: 14-31, 45

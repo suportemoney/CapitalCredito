@@ -1,0 +1,13 @@
+/* Pagamento TC — financeiro_vendas */
+.pctc-financeiro-modal .pctc-hide-flat {
+    display: none !important;
+}
+
+#pctcTabs .nav-link {
+    font-weight: 500;
+}
+
+#modalPagoTc .modal-body {
+    max-height: calc(100vh - 12rem);
+    overflow-y: auto;
+}

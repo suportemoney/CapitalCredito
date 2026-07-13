@@ -1,0 +1,61 @@
+<!-- Modal leve: apenas comprovantes (Pago TC Parcial) -->
+<div class="modal fade" id="modalCompParcial" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content rounded-3 overflow-hidden">
+            <div class="modal-header bg-warning bg-opacity-25">
+                <h5 class="modal-title fw-bold"><i class="bx bx-receipt me-2"></i>Adicionar comprovante TC</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="compParcialContratoId" value="">
+                <div class="border rounded-2 p-3 mb-3 bg-light small" id="compParcialResumo">
+                    <div class="row g-2">
+                        <div class="col-md-6"><span class="text-muted">Cliente:</span> <strong id="compParcialCliente">—</strong></div>
+                        <div class="col-md-6"><span class="text-muted">CPF:</span> <strong id="compParcialCpf">—</strong></div>
+                        <div class="col-md-4"><span class="text-muted">TC meta:</span> <strong id="compParcialTcMeta">—</strong></div>
+                        <div class="col-md-4"><span class="text-muted">TC pago:</span> <strong id="compParcialTcPago">—</strong></div>
+                        <div class="col-md-4"><span class="text-muted">Saldo:</span> <strong id="compParcialSaldo">—</strong></div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="fw-semibold small">Comprovantes</span>
+                    <span class="badge rounded-pill bg-secondary" id="compParcialBadgeStatus">—</span>
+                </div>
+                <div class="row g-2 mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label small mb-0">Valor <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control form-control-sm" id="compParcialValor" inputmode="decimal" placeholder="0,00">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small mb-0">Arquivo <span class="text-danger">*</span></label>
+                        <input type="file" class="form-control form-control-sm" id="compParcialArquivo" accept="image/*,application/pdf">
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="button" class="btn btn-sm btn-success w-100" id="compParcialEnviar">
+                            <i class="bx bx-upload me-1"></i>Enviar
+                        </button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover mb-0">
+                        <thead class="small text-muted">
+                            <tr>
+                                <th>Data</th>
+                                <th>Valor</th>
+                                <th>Por</th>
+                                <th>Arquivo</th>
+                                <th class="text-end">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="compParcialLista">
+                            <tr><td colspan="5" class="text-center text-muted small py-2">Carregando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>

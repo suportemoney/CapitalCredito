@@ -53,6 +53,7 @@ class Command(BaseCommand):
             {'codigo': 'SCT6', 'tipo': Acesso.SUBCATEGORIA_RENDER, 'nome': 'COMUNICADOS / FINANCEIRO GERAL', 'descricao': 'SubCategoria de Comunicados (CT1) e Financeiro Geral (CT4)', 'pai': 'CT1'},
             {'codigo': 'SCT12', 'tipo': Acesso.SUBCATEGORIA_RENDER, 'nome': 'VENDAS | SIAPE', 'descricao': 'SubCategoria SIAPE', 'pai': 'CT5'},
             {'codigo': 'SCT13', 'tipo': Acesso.SUBCATEGORIA_RENDER, 'nome': 'VENDAS | FINANCEIRO VENDAS', 'descricao': 'SubCategoria Financeiro Vendas', 'pai': 'CT5'},
+            {'codigo': 'SCT52', 'tipo': Acesso.SUBCATEGORIA_RENDER, 'nome': 'FINANCEIRO | PAGAMENTO TC', 'descricao': 'Sistema para pagar TC e enviar ranking', 'pai': 'SCT13'},
             
             # SESSÕES (SS) - IDs: 3, 5, 7, 8, 9, 10, 14, 15, 24, 25, 26, 27, 28, 29, 30, 31
             {'codigo': 'SS3', 'tipo': Acesso.SESSAO_SECTION, 'nome': 'RECURSOS HUMANOS | ADMINISTRATIVO | GERENCIAMENTO GERAL', 'descricao': 'Acesso ao gerenciamento administrativo geral', 'pai': 'SCT2'},

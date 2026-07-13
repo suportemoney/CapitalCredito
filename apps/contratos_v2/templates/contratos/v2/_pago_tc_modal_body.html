@@ -1,0 +1,154 @@
+<div class="fw-semibold mb-2"><i class="bx bx-money me-1"></i>{% if pctc_show_flats %}Confirmar Pago TC e valores CMS{% else %}Confirmar Pago TC{% endif %}</div>
+<p class="small text-muted mb-2" id="evoluirPagoTcHint">Valores sugeridos a partir do snapshot da tabela na contratação.</p>
+<div class="alert alert-danger py-2 small mb-2 d-none" id="evoluirPctcVideoAlert" role="alert">
+    Envio do vídeo de conscientização é obrigatório antes do Pago TC. Faça o upload do vídeo no contrato e tente novamente.
+</div>
+<div class="border rounded-2 p-3 mb-3 bg-white" id="evoluirPctcRepasseCard">
+    <div class="fw-semibold small mb-2"><i class="bx bx-transfer-alt me-1"></i>Repasse de carteira</div>
+    <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+        <span class="badge rounded-pill bg-secondary" id="evoluirPctcRepasseBadge">Repasse: —</span>
+    </div>
+    <div class="row g-2 small">
+        <div class="col-md-4">
+            <div class="text-muted mb-0">Solicitante (responsável atual)</div>
+            <div class="fw-semibold" id="evoluirPctcRepasseSolicitante">—</div>
+        </div>
+        <div class="col-md-4" id="evoluirPctcRepasseOrigemWrap">
+            <div class="text-muted mb-0">Repassado por (origem)</div>
+            <div class="fw-semibold" id="evoluirPctcRepasseOrigem">—</div>
+        </div>
+        <div class="col-md-4">
+            <div class="text-muted mb-0">Quem abriu a solicitação</div>
+            <div class="fw-semibold" id="evoluirPctcRepasseCriador">—</div>
+        </div>
+    </div>
+    <p class="small mb-0 mt-2 text-muted" id="evoluirPctcRepasseResumo"></p>
+</div>
+<p class="small text-info mb-2 d-none" id="evoluirPctcRepasseBanner" aria-hidden="true"></p>
+<div class="mb-2 d-none" id="evoluirPctcDestinatariosWrap">
+    <div class="small fw-semibold mb-1">Destinatário(s) do RegisterMoney</div>
+    <ul class="small mb-0 ps-3" id="evoluirPctcDestinatarios"></ul>
+</div>
+<div class="mb-2 border-bottom pb-2" id="evoluirPctcLojaWrap">
+    <div class="small fw-semibold mb-1">Venda associada a uma loja?</div>
+    <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="evoluirPctcAssocLoja" id="evoluirPctcAssocLojaNao" value="0" checked>
+        <label class="form-check-label small" for="evoluirPctcAssocLojaNao">Não</label>
+    </div>
+    <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="evoluirPctcAssocLoja" id="evoluirPctcAssocLojaSim" value="1">
+        <label class="form-check-label small" for="evoluirPctcAssocLojaSim">Sim</label>
+    </div>
+    <div class="alert alert-warning py-1 small mb-0 mt-2 d-none" id="evoluirPctcLojaSemOpcoes" role="alert">
+        Não há loja em comum entre os destinatários para associar à venda. Use &quot;Não&quot; ou cadastre o M2M de lojas nos funcionários.
+    </div>
+    <div class="mt-2 d-none" id="evoluirPctcLojaSelectWrap">
+        <label class="form-label small mb-0">Loja <span class="text-danger">*</span></label>
+        <select class="form-select form-select-sm" id="evoluirPctcLojaId">
+            <option value="">Selecione...</option>
+        </select>
+    </div>
+</div>
+<div class="row g-2">
+    <div class="col-md-6">
+        <label class="form-label small mb-0">Classificador (bonificação) <span class="text-danger">*</span></label>
+        <select class="form-select form-select-sm" id="evoluirPctcClassificador">
+            <option value="">Selecione...</option>
+        </select>
+        <div class="form-text">Percentual aplicado na bonificação do consultor sobre o TC pago.</div>
+    </div>
+    <div class="col-md-4">
+        <label class="form-label small mb-0">Valor TC (valor_est) <span class="text-danger">*</span></label>
+        <input type="text" class="form-control form-control-sm" id="evoluirPctcValorEst" inputmode="decimal" autocomplete="off">
+    </div>
+    <div class="col-md-4{% if not pctc_show_flats %} pctc-hide-flat d-none{% endif %}">
+        <label class="form-label small mb-0">AF</label>
+        <input type="text" class="form-control form-control-sm" id="evoluirPctcAf" inputmode="decimal" autocomplete="off">
+    </div>
+    <div class="col-md-4 d-flex align-items-end{% if not pctc_show_flats %} pctc-hide-flat d-none{% endif %}">
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="evoluirPctcFlagCms">
+            <label class="form-check-label small" for="evoluirPctcFlagCms">Marcar CMS como pago</label>
+        </div>
+    </div>
+    <div class="col-12{% if not pctc_show_flats %} pctc-hide-flat d-none{% endif %}">
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="evoluirPctcForcarM3">
+            <label class="form-check-label small" for="evoluirPctcForcarM3">
+                Exceção M3 manual (0% — apenas casos excepcionais)
+            </label>
+        </div>
+    </div>
+</div>
+<p class="small text-muted mb-1 mt-2{% if not pctc_show_flats %} d-none pctc-hide-flat{% else %} d-none{% endif %}" id="evoluirPctcRankingFormula"></p>
+<div class="small{% if not pctc_show_flats %} pctc-hide-flat d-none{% endif %}" id="evoluirPctcRankingLinhas"></div>
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-2 pt-2 border-top">
+    <p class="small text-muted mb-0 flex-grow-1" id="evoluirPctcSalvarHint">
+        Salve TC, classificador e loja antes dos comprovantes. <strong>Confirmar</strong> evolui o status do contrato.
+    </p>
+    <button type="button" class="btn btn-sm btn-outline-primary" id="evoluirPctcSalvarDados">
+        <i class="bx bx-save me-1"></i>Salvar dados (TC, classificador, loja)
+    </button>
+</div>
+
+<!-- Boletos / comprovantes TC (parcial/total) -->
+<div class="border-top mt-3 pt-3">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <div class="fw-semibold small"><i class="bx bx-receipt me-1"></i>Adicionar Boletos</div>
+        <span class="badge rounded-pill bg-secondary" id="evoluirTcBadgeStatus" title="Status calculado pela soma de comprovantes">—</span>
+    </div>
+    <p class="small text-muted mb-2">Anexe comprovantes de pagamento TC do cliente.</p>
+    <p class="small text-muted mb-2 d-none" id="evoluirTcEnviosPendentesEmpty">Nenhum boleto pendente do consultor/vendedor.</p>
+    <div class="table-responsive mb-3 d-none" id="evoluirTcEnviosPendentesWrap">
+        <table class="table table-sm table-borderless align-middle mb-0">
+            <thead class="small text-muted">
+                <tr>
+                    <th>Título</th>
+                    <th>Arquivo</th>
+                    <th style="min-width: 7rem;">Valor</th>
+                    <th class="text-end">Ação</th>
+                </tr>
+            </thead>
+            <tbody id="evoluirTcEnviosPendentes"></tbody>
+        </table>
+    </div>
+    <div class="small fw-semibold text-muted mb-1">Salvar comprovante</div>
+    <div class="row g-2 mb-2">
+        <div class="col-md-4">
+            <label class="form-label small mb-0">Valor do comprovante <span class="text-danger">*</span></label>
+            <input type="text" class="form-control form-control-sm" id="evoluirTcCompValor" inputmode="decimal" autocomplete="off" placeholder="0,00">
+        </div>
+        <div class="col-md-6">
+            <label class="form-label small mb-0">Arquivo <span class="text-danger">*</span></label>
+            <input type="file" class="form-control form-control-sm" id="evoluirTcCompArquivo" accept="image/*,application/pdf">
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+            <button type="button" class="btn btn-sm btn-success w-100" id="evoluirTcCompEnviar">
+                <i class="bx bx-receipt me-1"></i>Salvar comprovante
+            </button>
+        </div>
+    </div>
+    <div class="small fw-semibold text-muted mb-1 mt-2">Comprovantes confirmados</div>
+    <div class="alert alert-danger py-1 small mb-2 d-none" id="evoluirTcCompAlerta" role="alert"></div>
+    <div class="d-flex justify-content-between small text-muted mb-1">
+        <span>Total TC: <strong id="evoluirTcValorTc">R$ 0,00</strong></span>
+        <span>Soma comprovantes: <strong id="evoluirTcSomaAcumulada">R$ 0,00</strong></span>
+        <span>Saldo: <strong id="evoluirTcSaldo">R$ 0,00</strong></span>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-sm table-borderless align-middle mb-0">
+            <thead class="small text-muted">
+                <tr>
+                    <th>Data</th>
+                    <th>Valor</th>
+                    <th>Por</th>
+                    <th>Arquivo</th>
+                    <th class="text-end">Ações</th>
+                </tr>
+            </thead>
+            <tbody id="evoluirTcCompLista">
+                <tr><td colspan="5" class="text-muted small text-center py-2">Nenhum comprovante registrado.</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
