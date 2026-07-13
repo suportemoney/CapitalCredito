@@ -4,32 +4,36 @@
     Envio do vídeo de conscientização é obrigatório antes do Pago TC. Faça o upload do vídeo no contrato e tente novamente.
 </div>
 <div class="border rounded-2 p-3 mb-3 bg-white" id="evoluirPctcRepasseCard">
+    {% if pctc_show_flats %}
     <div class="fw-semibold small mb-2"><i class="bx bx-transfer-alt me-1"></i>Repasse de carteira</div>
     <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
         <span class="badge rounded-pill bg-secondary" id="evoluirPctcRepasseBadge">Repasse: —</span>
     </div>
+    {% else %}
+    <div class="fw-semibold small mb-2"><i class="bx bx-user me-1"></i>Solicitante</div>
+    {% endif %}
     <div class="row g-2 small">
-        <div class="col-md-4">
+        <div class="col-md-{% if pctc_show_flats %}4{% else %}6{% endif %}">
             <div class="text-muted mb-0">Solicitante (responsável atual)</div>
             <div class="fw-semibold" id="evoluirPctcRepasseSolicitante">—</div>
         </div>
-        <div class="col-md-4" id="evoluirPctcRepasseOrigemWrap">
+        <div class="col-md-4{% if not pctc_show_flats %} d-none{% endif %}" id="evoluirPctcRepasseOrigemWrap">
             <div class="text-muted mb-0">Repassado por (origem)</div>
             <div class="fw-semibold" id="evoluirPctcRepasseOrigem">—</div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-{% if pctc_show_flats %}4{% else %}6{% endif %}">
             <div class="text-muted mb-0">Quem abriu a solicitação</div>
             <div class="fw-semibold" id="evoluirPctcRepasseCriador">—</div>
         </div>
     </div>
-    <p class="small mb-0 mt-2 text-muted" id="evoluirPctcRepasseResumo"></p>
+    <p class="small mb-0 mt-2 text-muted{% if not pctc_show_flats %} d-none{% endif %}" id="evoluirPctcRepasseResumo"></p>
 </div>
 <p class="small text-info mb-2 d-none" id="evoluirPctcRepasseBanner" aria-hidden="true"></p>
 <div class="mb-2 d-none" id="evoluirPctcDestinatariosWrap">
     <div class="small fw-semibold mb-1">Destinatário(s) do RegisterMoney</div>
     <ul class="small mb-0 ps-3" id="evoluirPctcDestinatarios"></ul>
 </div>
-<div class="mb-2 border-bottom pb-2" id="evoluirPctcLojaWrap">
+<div class="mb-2 border-bottom pb-2{% if not pctc_show_flats %} d-none{% endif %}" id="evoluirPctcLojaWrap">
     <div class="small fw-semibold mb-1">Venda associada a uma loja?</div>
     <div class="form-check form-check-inline">
         <input class="form-check-input" type="radio" name="evoluirPctcAssocLoja" id="evoluirPctcAssocLojaNao" value="0" checked>

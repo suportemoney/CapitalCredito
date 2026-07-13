@@ -100,15 +100,7 @@
     }
 
     function _pctcPayloadLojaRm() {
-        const rSim = document.getElementById('evoluirPctcAssocLojaSim');
-        const assoc = !!(rSim && rSim.checked);
-        const sel = document.getElementById('evoluirPctcLojaId');
-        let lid = null;
-        if (assoc && sel && sel.value) {
-            const n = parseInt(sel.value, 10);
-            lid = isFinite(n) && n > 0 ? n : null;
-        }
-        return { venda_associada_loja: assoc, loja_id: lid };
+        return { venda_associada_loja: false, loja_id: null };
     }
 
     function _buildRegistermoneyJson(opts) {
@@ -164,12 +156,6 @@
     function _validarDadosModal() {
         const cl = document.getElementById('evoluirPctcClassificador');
         if (!cl || !cl.value) return 'Selecione o classificador.';
-        const lp = _pctcPayloadLojaRm();
-        const lojas = (_pagoTcModal || {}).lojas_elegiveis || [];
-        if (lp.venda_associada_loja && lojas.length === 0) {
-            return 'Marque “Não” em venda associada a loja ou cadastre lojas nos funcionários.';
-        }
-        if (lp.venda_associada_loja && !lp.loja_id) return 'Selecione a loja da venda.';
         return null;
     }
 
@@ -197,25 +183,24 @@
     }
 
     function _preencherRepasse(m) {
-        const tem = !!m.tem_repasse;
-        const badge = document.getElementById('evoluirPctcRepasseBadge');
-        if (badge) {
-            badge.textContent = tem ? 'Repasse: Sim' : 'Repasse: Não';
-            badge.className = 'badge rounded-pill ' + (tem ? 'bg-warning text-dark' : 'bg-secondary');
-        }
         const set = function (id, v) {
             const el = document.getElementById(id);
             if (el) el.textContent = v || '—';
         };
         set('evoluirPctcRepasseSolicitante', m.nome_responsavel);
-        set('evoluirPctcRepasseOrigem', tem ? m.nome_repasse : '—');
-        const ow = document.getElementById('evoluirPctcRepasseOrigemWrap');
-        if (ow) ow.classList.toggle('d-none', !tem);
         const criador =
             (m.destinatarios || []).find(function (d) {
                 return d.papel === 'vendedor';
             })?.nome || m.nome_responsavel;
         set('evoluirPctcRepasseCriador', criador);
+        const badge = document.getElementById('evoluirPctcRepasseBadge');
+        if (!badge) return;
+        const tem = !!m.tem_repasse;
+        badge.textContent = tem ? 'Repasse: Sim' : 'Repasse: Não';
+        badge.className = 'badge rounded-pill ' + (tem ? 'bg-warning text-dark' : 'bg-secondary');
+        set('evoluirPctcRepasseOrigem', tem ? m.nome_repasse : '—');
+        const ow = document.getElementById('evoluirPctcRepasseOrigemWrap');
+        if (ow) ow.classList.toggle('d-none', !tem);
         const resumo = document.getElementById('evoluirPctcRepasseResumo');
         if (resumo) {
             resumo.textContent = tem
@@ -244,17 +229,6 @@
             if (m.classificacao_default_id) selCl.value = String(m.classificacao_default_id);
         }
         _preencherRepasse(m);
-        const lojas = m.lojas_elegiveis || [];
-        const selLj = document.getElementById('evoluirPctcLojaId');
-        if (selLj) {
-            selLj.innerHTML = '<option value="">Selecione...</option>';
-            lojas.forEach(function (L) {
-                const o = document.createElement('option');
-                o.value = String(L.id);
-                o.textContent = L.nome || 'Loja #' + L.id;
-                selLj.appendChild(o);
-            });
-        }
         const hint = document.getElementById('evoluirPagoTcHint');
         if (hint) {
             hint.textContent = m.tabela_cms_titulo
@@ -267,17 +241,6 @@
         _atualizarBadgeTc(0, _tcCompValorTc);
         _syncVisibilidadeBlocoBoletosTc();
         _carregarComprovantesModal();
-    }
-
-    function _atualizarUiLoja() {
-        const m = _pagoTcModal || {};
-        const lojas = m.lojas_elegiveis || [];
-        const rSim = document.getElementById('evoluirPctcAssocLojaSim');
-        const wrapSel = document.getElementById('evoluirPctcLojaSelectWrap');
-        const altSem = document.getElementById('evoluirPctcLojaSemOpcoes');
-        const sim = !!(rSim && rSim.checked);
-        if (altSem) altSem.classList.toggle('d-none', !(sim && lojas.length === 0));
-        if (wrapSel) wrapSel.classList.toggle('d-none', !(sim && lojas.length > 0));
     }
 
     function _atualizarBadgeTc(soma, valorTc) {
@@ -722,20 +685,6 @@
             const btn = e.target.closest('.js-excluir-comp');
             if (btn) excluirComprovante(btn.getAttribute('data-id'), true);
         });
-
-        const wrapLoja = document.getElementById('evoluirPctcLojaWrap');
-        if (wrapLoja) {
-            wrapLoja.addEventListener('change', function (e) {
-                if (
-                    e.target &&
-                    (e.target.id === 'evoluirPctcAssocLojaSim' ||
-                        e.target.id === 'evoluirPctcAssocLojaNao' ||
-                        e.target.id === 'evoluirPctcLojaId')
-                ) {
-                    _atualizarUiLoja();
-                }
-            });
-        }
 
         ['evoluirTcCompValor', 'compParcialValor'].forEach(function (id) {
             const inp = document.getElementById(id);
