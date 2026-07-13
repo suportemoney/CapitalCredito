@@ -2365,12 +2365,6 @@
     }
 
     function _validarDadosPagoTcModal() {
-        const veNum = _tcModalInputNum();
-        const semTc = !isFinite(veNum) || veNum <= 0;
-        const zerando = _estaZerandoTcModal();
-        if (semTc && !zerando) {
-            return 'Informe o Valor TC maior que zero para salvar.';
-        }
         const cl = document.getElementById('evoluirPctcClassificador');
         if (!cl || !cl.value) {
             return 'Selecione o classificador de valor.';
@@ -2559,7 +2553,7 @@
     /** Bloco Adicionar Boletos: oculto quando Valor TC do modal é zero ou vazio. */
     function _syncVisibilidadeBlocoBoletosTc() {
         const gr = document.getElementById('evoluirGrupoPagoTc');
-        const blocoComp = document.querySelector('#evoluirGrupoPagoTc .border-top.mt-3.pt-3');
+        const blocoComp = document.getElementById('evoluirPctcBlocoComprovantes');
         if (!gr || gr.classList.contains('d-none') || !blocoComp) return;
         const inp = document.getElementById('evoluirPctcValorEst');
         const valorTcNum = inp ? _parseNumFlex(inp.value) : NaN;

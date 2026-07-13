@@ -49,29 +49,31 @@
         </select>
     </div>
 </div>
-<div class="row g-2">
-    <div class="col-md-6">
+<div class="row g-2 mb-2" id="evoluirPctcCamposFinanceiros">
+    <div class="col-md-4">
+        <label class="form-label small mb-0">Valor AF</label>
+        <input type="text" class="form-control form-control-sm" id="evoluirPctcAf" inputmode="decimal" autocomplete="off">
+    </div>
+    <div class="col-md-4">
+        <label class="form-label small mb-0">Valor TC <span class="text-danger">*</span></label>
+        <input type="text" class="form-control form-control-sm" id="evoluirPctcValorEst" inputmode="decimal" autocomplete="off">
+    </div>
+    <div class="col-md-4">
         <label class="form-label small mb-0">Classificador (bonificação) <span class="text-danger">*</span></label>
         <select class="form-select form-select-sm" id="evoluirPctcClassificador">
             <option value="">Selecione...</option>
         </select>
         <div class="form-text">Percentual aplicado na bonificação do consultor sobre o TC pago.</div>
     </div>
-    <div class="col-md-4">
-        <label class="form-label small mb-0">Valor TC (valor_est) <span class="text-danger">*</span></label>
-        <input type="text" class="form-control form-control-sm" id="evoluirPctcValorEst" inputmode="decimal" autocomplete="off">
-    </div>
-    <div class="col-md-4{% if not pctc_show_flats %} pctc-hide-flat d-none{% endif %}">
-        <label class="form-label small mb-0">AF</label>
-        <input type="text" class="form-control form-control-sm" id="evoluirPctcAf" inputmode="decimal" autocomplete="off">
-    </div>
-    <div class="col-md-4 d-flex align-items-end{% if not pctc_show_flats %} pctc-hide-flat d-none{% endif %}">
+</div>
+<div class="row g-2{% if not pctc_show_flats %} d-none pctc-hide-flat{% endif %}">
+    <div class="col-md-4 d-flex align-items-end">
         <div class="form-check">
             <input class="form-check-input" type="checkbox" id="evoluirPctcFlagCms">
             <label class="form-check-label small" for="evoluirPctcFlagCms">Marcar CMS como pago</label>
         </div>
     </div>
-    <div class="col-12{% if not pctc_show_flats %} pctc-hide-flat d-none{% endif %}">
+    <div class="col-12">
         <div class="form-check">
             <input class="form-check-input" type="checkbox" id="evoluirPctcForcarM3">
             <label class="form-check-label small" for="evoluirPctcForcarM3">
@@ -84,15 +86,19 @@
 <div class="small{% if not pctc_show_flats %} pctc-hide-flat d-none{% endif %}" id="evoluirPctcRankingLinhas"></div>
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-2 pt-2 border-top">
     <p class="small text-muted mb-0 flex-grow-1" id="evoluirPctcSalvarHint">
-        Salve TC, classificador e loja antes dos comprovantes. <strong>Confirmar</strong> evolui o status do contrato.
+        {% if pctc_show_flats %}
+        Salve AF, TC, classificador e loja antes dos comprovantes. <strong>Confirmar</strong> evolui o status do contrato.
+        {% else %}
+        Salve AF, TC e classificador antes dos comprovantes (disponíveis quando TC &gt; 0).
+        {% endif %}
     </p>
     <button type="button" class="btn btn-sm btn-outline-primary" id="evoluirPctcSalvarDados">
-        <i class="bx bx-save me-1"></i>Salvar dados (TC, classificador, loja)
+        <i class="bx bx-save me-1"></i>Salvar dados (AF, TC, classificador{% if pctc_show_flats %}, loja{% endif %})
     </button>
 </div>
 
-<!-- Boletos / comprovantes TC (parcial/total) -->
-<div class="border-top mt-3 pt-3">
+<!-- Boletos / comprovantes TC (parcial/total) — visível quando Valor TC > 0 -->
+<div class="border-top mt-3 pt-3" id="evoluirPctcBlocoComprovantes">
     <div class="d-flex justify-content-between align-items-center mb-2">
         <div class="fw-semibold small"><i class="bx bx-receipt me-1"></i>Adicionar Boletos</div>
         <span class="badge rounded-pill bg-secondary" id="evoluirTcBadgeStatus" title="Status calculado pela soma de comprovantes">—</span>

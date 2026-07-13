@@ -161,12 +161,7 @@
         );
     }
 
-    function _validarDadosModal(permiteSemTc) {
-        const ve = _parseNumFlex((document.getElementById('evoluirPctcValorEst') || {}).value);
-        const semTc = !isFinite(ve) || ve <= 0;
-        if (semTc && !permiteSemTc) {
-            return 'Informe o Valor TC maior que zero.';
-        }
+    function _validarDadosModal() {
         const cl = document.getElementById('evoluirPctcClassificador');
         if (!cl || !cl.value) return 'Selecione o classificador.';
         const lp = _pctcPayloadLojaRm();
@@ -176,6 +171,29 @@
         }
         if (lp.venda_associada_loja && !lp.loja_id) return 'Selecione a loja da venda.';
         return null;
+    }
+
+    /** Bloco de comprovantes: visível somente quando Valor TC > 0. */
+    function _syncVisibilidadeBlocoBoletosTc() {
+        const blocoComp = document.getElementById('evoluirPctcBlocoComprovantes');
+        if (!blocoComp) return;
+        const inp = document.getElementById('evoluirPctcValorEst');
+        const valorTcNum = inp ? _parseNumFlex(inp.value) : NaN;
+        const semTcInput = !isFinite(valorTcNum) || valorTcNum <= 0;
+        blocoComp.classList.toggle('d-none', semTcInput);
+        const btnConf = document.getElementById('btnConfirmarPagoTc');
+        if (btnConf) btnConf.classList.toggle('d-none', !semTcInput);
+        const hint = document.getElementById('evoluirPagoTcHint');
+        if (hint) {
+            if (semTcInput) {
+                hint.textContent = 'Sem TC — confirme para registrar (sem comprovante).';
+            } else {
+                const m = _pagoTcModal || {};
+                hint.textContent = m.tabela_cms_titulo
+                    ? 'Tabela (snapshot): ' + m.tabela_cms_titulo
+                    : 'Salve AF, TC e classificador; depois adicione os comprovantes.';
+            }
+        }
     }
 
     function _preencherRepasse(m) {
@@ -214,7 +232,6 @@
         }
         setv('evoluirPctcValorEst', m.valor_est_tc);
         setv('evoluirPctcAf', m.af);
-        setv('evoluirPctcAf', m.af);
         const selCl = document.getElementById('evoluirPctcClassificador');
         if (selCl) {
             selCl.innerHTML = '<option value="">Selecione...</option>';
@@ -248,11 +265,7 @@
         _tcCompValorTc = isFinite(vTcIni) ? vTcIni : 0;
         _tcCompSomaServidor = 0;
         _atualizarBadgeTc(0, _tcCompValorTc);
-        const btnConf = document.getElementById('btnConfirmarPagoTc');
-        if (btnConf) {
-            const semTc = !isFinite(vTcIni) || vTcIni <= 0;
-            btnConf.classList.toggle('d-none', !semTc);
-        }
+        _syncVisibilidadeBlocoBoletosTc();
         _carregarComprovantesModal();
     }
 
@@ -503,7 +516,7 @@
     }
 
     function salvarDadosModal() {
-        const err = _validarDadosModal(false);
+        const err = _validarDadosModal();
         if (err) {
             showToast(err, 'warning');
             return;
@@ -519,6 +532,7 @@
                 }
                 const vTc = parseFloat(String(r.valor_tc || '').replace(',', '.'));
                 if (isFinite(vTc)) _tcCompValorTc = vTc;
+                _syncVisibilidadeBlocoBoletosTc();
                 _carregarComprovantesModal();
                 showToast('Dados salvos.', 'success');
             })
@@ -658,7 +672,7 @@
             showToast('Com TC > 0, registre o pagamento pelos comprovantes.', 'info');
             return;
         }
-        const err = _validarDadosModal(true);
+        const err = _validarDadosModal();
         if (err) {
             showToast(err, 'warning');
             return;
@@ -741,6 +755,7 @@
                     _tcCompValorTc = v;
                     _atualizarBadgeTc(_tcCompSomaServidor, _tcCompValorTc);
                 }
+                _syncVisibilidadeBlocoBoletosTc();
             });
         }
     }
