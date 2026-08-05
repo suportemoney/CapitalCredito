@@ -20,6 +20,7 @@ urlpatterns = [
     path('api/contas-pagar/criar/', apis_contas_pagar.api_post_contas_pagar_criar, name='api_post_contas_pagar_criar'),
     path('api/contas-pagar/marcar-pago/', apis_contas_pagar.api_post_contas_pagar_marcar_pago, name='api_post_contas_pagar_marcar_pago'),
     path('api/contas-pagar/editar/', apis_contas_pagar.api_post_contas_pagar_editar, name='api_post_contas_pagar_editar'),
+    path('api/contas-pagar/deletar/', apis_contas_pagar.api_post_contas_pagar_deletar, name='api_post_contas_pagar_deletar'),
     path('api/bonificacoes-pagar/listar/', apis_bonificacoes_pagar.api_get_bonificacoes_pagar, name='api_get_bonificacoes_pagar'),
     path('api/bonificacoes-pagar/criar/', apis_bonificacoes_pagar.api_post_bonificacoes_pagar_criar, name='api_post_bonificacoes_pagar_criar'),
     path('api/bonificacoes-pagar/criar-ja-paga/', apis_bonificacoes_pagar.api_post_bonificacoes_pagar_criar_ja_paga, name='api_post_bonificacoes_pagar_criar_ja_paga'),

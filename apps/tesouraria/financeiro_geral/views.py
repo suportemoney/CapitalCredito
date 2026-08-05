@@ -4,6 +4,7 @@ Views para renderizar templates (apenas renders)
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from apps.seguranca.permissoes.decorators import controle_acess
+from apps.seguranca.permissoes.utils import user_has_access
 from apps.tesouraria.financeiro_geral.models import CategoriaConta, TipoBeneficio
 from apps.rh.funcionarios.models import Funcionario
 
@@ -25,6 +26,8 @@ def render_contas_a_pagar(request):
         'tipos_beneficio': tipos_beneficio,
         'funcionarios': funcionarios,
         'is_superuser': request.user.is_superuser,
+        # CX53: pode ver ícone e excluir contas a pagar
+        'has_perm_delet': user_has_access(request.user, 'CX53'),
     }
     return render(request, 'financeiro_geral/contas_a_pagar.html', context)
 

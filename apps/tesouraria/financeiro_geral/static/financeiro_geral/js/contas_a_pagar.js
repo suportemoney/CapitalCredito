@@ -4,6 +4,7 @@
     var urlCriar = base + 'api/contas-pagar/criar/';
     var urlMarcarPago = base + 'api/contas-pagar/marcar-pago/';
     var urlEditar = base + 'api/contas-pagar/editar/';
+    var urlDeletar = base + 'api/contas-pagar/deletar/';
     var urlSubcategorias = base + 'api/gerenciador/subcategorias/';
     var urlBonifListar = base + 'api/bonificacoes-pagar/listar/';
     var urlBonifCriar = base + 'api/bonificacoes-pagar/criar/';
@@ -215,9 +216,11 @@
             r.result.forEach(function(c) {
                 var status = badgeStatus(c.pago);
                 var podeEditar = !c.pago || (window.IS_SUPERUSER === true);
+                var podeExcluir = window.HAS_PERM_DELET === true;
                 var btnEditar = podeEditar ? '<button type="button" class="btn btn-sm btn-outline-secondary btn-acao-editar me-1" onclick="window.financeiroGeralContasPagar.abrirModalEditar(' + c.id + ', \'' + tipo + '\')"><i class="bx bx-edit"></i> Editar</button>' : '';
-                var btnPagar = c.pago ? '' : '<button type="button" class="btn btn-sm btn-primary btn-acao-pagar" onclick="window.financeiroGeralContasPagar.abrirModalPago(' + c.id + ', \'' + (c.descricao || '').replace(/'/g, "\\'") + '\', ' + c.valor + ', \'' + c.data_vencimento + '\')"><i class="bx bx-money"></i> Pagar</button>';
-                var acoes = '<span class="d-flex flex-wrap gap-1 td-acoes">' + btnEditar + btnPagar + '</span>';
+                var btnPagar = c.pago ? '' : '<button type="button" class="btn btn-sm btn-primary btn-acao-pagar me-1" onclick="window.financeiroGeralContasPagar.abrirModalPago(' + c.id + ', \'' + (c.descricao || '').replace(/'/g, "\\'") + '\', ' + c.valor + ', \'' + c.data_vencimento + '\')"><i class="bx bx-money"></i> Pagar</button>';
+                var btnExcluir = podeExcluir ? '<button type="button" class="btn btn-sm btn-outline-danger btn-acao-excluir" onclick="window.financeiroGeralContasPagar.excluirConta(' + c.id + ', \'' + tipo + '\')" title="Excluir"><i class="bx bx-trash"></i></button>' : '';
+                var acoes = '<span class="d-flex flex-wrap gap-1 td-acoes">' + btnEditar + btnPagar + btnExcluir + '</span>';
                 var anexoCell = celulaAnexo(c);
                 var comprovanteCell = celulaComprovante(c);
                 var linha = '';
@@ -619,6 +622,21 @@
             else alert(r.message || 'Erro ao inativar.');
         }).fail(function() { alert('Erro ao inativar.'); });
     }
+    function excluirConta(id, tipo) {
+        if (!window.HAS_PERM_DELET) {
+            alert('Você não tem permissão para excluir.');
+            return;
+        }
+        if (!confirm('Excluir esta conta a pagar?')) return;
+        $.ajax({
+            url: urlDeletar,
+            type: 'POST',
+            data: { tipo: tipo || tipoAtual, conta_id: id }
+        }).done(function(r) {
+            if (r.success) carregarTabela(tipo || tipoAtual);
+            else alert(r.message || 'Erro ao excluir.');
+        }).fail(function() { alert('Erro ao excluir.'); });
+    }
     $(document).ready(function() {
         initUploadArea('upload-area-nova', 'nova-anexo', 'preview-nova', 'preview-nova-nome');
         initUploadArea('upload-area-editar-anexo', 'editar-anexo', 'preview-editar-anexo', 'preview-editar-anexo-nome');
@@ -670,6 +688,6 @@
         $('#nova-categoria').on('change', function() { carregarSubcategorias($(this).val()); });
         $('#btnSalvarNovaConta').on('click', salvarModalConta);
     });
-    window.financeiroGeralContasPagar = { abrirModalPago: abrirModalPago, abrirModalNovaConta: abrirModalNovaConta, abrirModalNovaContaPorTab: abrirModalNovaContaPorTab, abrirModalEditar: abrirModalEditar, abrirModalBonifPagarAgora: abrirModalBonifPagarAgora, abrirModalEditarBonif: abrirModalEditarBonif, inativarBonif: inativarBonif };
+    window.financeiroGeralContasPagar = { abrirModalPago: abrirModalPago, abrirModalNovaConta: abrirModalNovaConta, abrirModalNovaContaPorTab: abrirModalNovaContaPorTab, abrirModalEditar: abrirModalEditar, abrirModalBonifPagarAgora: abrirModalBonifPagarAgora, abrirModalEditarBonif: abrirModalEditarBonif, inativarBonif: inativarBonif, excluirConta: excluirConta };
     window.abrirModalNovaContaPorTab = abrirModalNovaContaPorTab;
 })();

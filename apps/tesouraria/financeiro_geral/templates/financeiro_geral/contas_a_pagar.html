@@ -557,6 +557,6 @@
 {% endblock %}
 
 {% block addjs_extra %}
-<script>window.FINANCEIRO_GERAL_BASE = "{% url 'financeiro_geral:index' %}"; window.IS_SUPERUSER = {{ is_superuser|yesno:"true,false" }};</script>
+<script>window.FINANCEIRO_GERAL_BASE = "{% url 'financeiro_geral:index' %}"; window.IS_SUPERUSER = {{ is_superuser|yesno:"true,false" }}; window.HAS_PERM_DELET = {{ has_perm_delet|yesno:"true,false" }};</script>
 <script src="{% static 'financeiro_geral/js/contas_a_pagar.js' %}"></script>
 {% endblock %}

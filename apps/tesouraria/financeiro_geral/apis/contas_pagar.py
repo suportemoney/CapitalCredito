@@ -519,3 +519,29 @@ def api_post_contas_pagar_editar(request):
         return JsonResponse({'success': False, 'message': str(e)})
     except Exception as e:
         return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+@login_required
+@controle_acess('CX53')
+@require_http_methods(["POST"])
+def api_post_contas_pagar_deletar(request):
+    """Exclui (soft delete) conta a pagar. Requer CX53. POST: tipo (CONTA|SALARIO|BENEFICIO), conta_id."""
+    try:
+        tipo = request.POST.get('tipo', '').strip()
+        conta_id = request.POST.get('conta_id')
+        if not tipo or tipo not in ('CONTA', 'SALARIO', 'BENEFICIO'):
+            return JsonResponse({'success': False, 'message': 'Tipo inválido'})
+        if not conta_id:
+            return JsonResponse({'success': False, 'message': 'ID da conta é obrigatório'})
+        if tipo == 'CONTA':
+            obj = Conta.objects.get(id=conta_id, status_ativo=True)
+        elif tipo == 'SALARIO':
+            obj = Salario.objects.get(id=conta_id, status_ativo=True)
+        else:
+            obj = Beneficio.objects.get(id=conta_id, status_ativo=True)
+        obj.status_ativo = False
+        obj.save(update_fields=['status_ativo'])
+        return JsonResponse({'success': True, 'message': 'Conta excluída com sucesso.', 'result': None})
+    except (Conta.DoesNotExist, Salario.DoesNotExist, Beneficio.DoesNotExist):
+        return JsonResponse({'success': False, 'message': 'Registro não encontrado'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
