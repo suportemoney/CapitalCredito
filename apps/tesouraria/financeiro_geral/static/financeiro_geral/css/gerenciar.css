@@ -1,1 +1,116 @@
 /* Gerenciador Financeiro Geral */
+
+.page-gerenciar-financeiro .section-header {
+    background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%);
+    color: #D4AF37;
+    padding: 12px 20px;
+    border-radius: 8px 8px 0 0;
+    font-weight: 600;
+    font-size: 1.05rem;
+    border-left: 4px solid #D4AF37;
+}
+
+.page-gerenciar-financeiro .section-header h5 {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: inherit;
+    color: inherit;
+}
+
+.page-gerenciar-financeiro .section-body {
+    background: #fff;
+    border: 1px solid #e8e8e8;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    padding: 16px 20px 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.page-gerenciar-financeiro .nav-tabs {
+    border-bottom: 2px solid #e8e8e8;
+    gap: 4px;
+}
+
+.page-gerenciar-financeiro .nav-tabs .nav-link {
+    color: #555;
+    font-weight: 500;
+    border: none;
+    border-bottom: 3px solid transparent;
+    padding: 10px 18px;
+    border-radius: 6px 6px 0 0;
+}
+
+.page-gerenciar-financeiro .nav-tabs .nav-link:hover {
+    color: #D4AF37;
+    background: rgba(212, 175, 55, 0.08);
+}
+
+.page-gerenciar-financeiro .nav-tabs .nav-link.active {
+    color: #D4AF37;
+    background: rgba(212, 175, 55, 0.1);
+    border-bottom-color: #D4AF37;
+    font-weight: 600;
+}
+
+.page-gerenciar-financeiro .gerenciar-card {
+    border: 1px solid #e8e8e8;
+    border-radius: 8px;
+    box-shadow: none;
+}
+
+.page-gerenciar-financeiro .gerenciar-table thead th {
+    font-size: 0.85rem;
+    color: #666;
+    border-bottom-width: 1px;
+    white-space: nowrap;
+}
+
+.page-gerenciar-financeiro .gerenciar-table td {
+    vertical-align: middle;
+}
+
+.page-gerenciar-financeiro .badge-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 999px;
+}
+
+.page-gerenciar-financeiro .badge-status-ativo {
+    background: rgba(25, 135, 84, 0.12);
+    color: #198754;
+}
+
+.page-gerenciar-financeiro .badge-status-inativo {
+    background: rgba(108, 117, 125, 0.15);
+    color: #6c757d;
+}
+
+.page-gerenciar-financeiro .td-acoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.page-gerenciar-financeiro .linha-loading td,
+.page-gerenciar-financeiro .linha-vazia td {
+    text-align: center;
+    color: #888;
+    padding: 24px 12px;
+}
+
+.page-gerenciar-financeiro .linha-vazia i,
+.page-gerenciar-financeiro .linha-loading i {
+    margin-right: 6px;
+}
+
+@media (max-width: 767.98px) {
+    .page-gerenciar-financeiro .section-body {
+        padding: 12px;
+    }
+}

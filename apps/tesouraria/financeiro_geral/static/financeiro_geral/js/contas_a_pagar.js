@@ -150,7 +150,7 @@
         $.get(urlSubcategorias, { categoria_id: categoriaId, ativos: 'true' }).done(function(r) {
             if (r.success && r.result) {
                 r.result.forEach(function(s) {
-                    $sub.append('<option value="' + s.id + '">' + (s.nome || '') + '</option>');
+                    $sub.append($('<option></option>').val(s.id).text(s.nome || ''));
                 });
             }
         });
@@ -287,13 +287,36 @@
             $('#nova-data-vencimento').val(c.data_vencimento || '');
             $('#nova-observacao').val(c.observacao || '');
             if (tipo === 'CONTA') {
-                $('#nova-categoria').val(c.categoria_id || '');
+                var $cat = $('#nova-categoria');
+                if (c.categoria_id && $cat.find('option[value="' + c.categoria_id + '"]').length === 0) {
+                    var rotuloCat = (c.categoria_nome || ('#' + c.categoria_id)) + ' (inativa)';
+                    $cat.append($('<option></option>').val(c.categoria_id).text(rotuloCat));
+                }
+                $cat.val(c.categoria_id || '');
                 var $sub = $('#nova-subcategoria');
                 $sub.html('<option value="">Selecione...</option>');
                 if (c.categoria_id) {
                     $.get(urlSubcategorias, { categoria_id: c.categoria_id, ativos: 'true' }).done(function(sr) {
-                        if (sr.success && sr.result) { sr.result.forEach(function(s) { $sub.append('<option value="' + s.id + '">' + (s.nome || '') + '</option>'); }); }
+                        var ids = {};
+                        if (sr.success && sr.result) {
+                            sr.result.forEach(function(s) {
+                                ids[s.id] = true;
+                                $sub.append($('<option></option>').val(s.id).text(s.nome || ''));
+                            });
+                        }
+                        // Preserva vínculo se a subcategoria atual estiver inativa
+                        if (c.subcategoria_id && !ids[c.subcategoria_id]) {
+                            var rotulo = (c.subcategoria_nome || ('#' + c.subcategoria_id)) + ' (inativa)';
+                            $sub.append($('<option></option>').val(c.subcategoria_id).text(rotulo));
+                        }
                         $sub.val(c.subcategoria_id || '');
+                        new bootstrap.Modal(document.getElementById('modalNovaConta')).show();
+                    }).fail(function() {
+                        if (c.subcategoria_id) {
+                            var rotuloFail = (c.subcategoria_nome || ('#' + c.subcategoria_id)) + ' (inativa)';
+                            $sub.append($('<option></option>').val(c.subcategoria_id).text(rotuloFail));
+                            $sub.val(c.subcategoria_id);
+                        }
                         new bootstrap.Modal(document.getElementById('modalNovaConta')).show();
                     });
                 } else {
@@ -432,7 +455,7 @@
         $.get(urlSubcategorias, { categoria_id: categoriaId, ativos: 'true' }).done(function(r) {
             if (r.success && r.result) {
                 r.result.forEach(function(s) {
-                    $sub.append('<option value="' + s.id + '">' + (s.nome || '') + '</option>');
+                    $sub.append($('<option></option>').val(s.id).text(s.nome || ''));
                 });
             }
         });

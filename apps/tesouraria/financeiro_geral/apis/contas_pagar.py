@@ -304,9 +304,18 @@ def api_post_contas_pagar_criar(request):
             categoria_id = request.POST.get('categoria_id')
             if not categoria_id:
                 return JsonResponse({'success': False, 'message': 'Categoria é obrigatória para conta da empresa'})
-            categoria = CategoriaConta.objects.get(id=categoria_id)
-            subcategoria_id = request.POST.get('subcategoria_id')
-            subcategoria = SubcategoriaConta.objects.filter(id=subcategoria_id, categoria=categoria).first() if subcategoria_id else None
+            categoria = CategoriaConta.objects.get(id=categoria_id, status=True)
+            subcategoria_id = (request.POST.get('subcategoria_id') or '').strip()
+            subcategoria = None
+            if subcategoria_id:
+                subcategoria = SubcategoriaConta.objects.filter(
+                    id=subcategoria_id, categoria=categoria, status=True
+                ).first()
+                if not subcategoria:
+                    return JsonResponse({
+                        'success': False,
+                        'message': 'Subcategoria inválida ou inativa para a categoria selecionada.',
+                    }, status=400)
             with transaction.atomic():
                 Conta.objects.create(
                     descricao=descricao,
@@ -441,9 +450,28 @@ def api_post_contas_pagar_editar(request):
             categoria_id = request.POST.get('categoria_id')
             if not categoria_id:
                 return JsonResponse({'success': False, 'message': 'Categoria é obrigatória'})
-            categoria = CategoriaConta.objects.get(id=categoria_id)
-            subcategoria_id = request.POST.get('subcategoria_id')
-            subcategoria = SubcategoriaConta.objects.filter(id=subcategoria_id, categoria=categoria).first() if subcategoria_id else None
+            # Permite manter categoria atual mesmo se inativa; nova escolha deve estar ativa
+            try:
+                categoria = CategoriaConta.objects.get(id=categoria_id)
+            except CategoriaConta.DoesNotExist:
+                return JsonResponse({'success': False, 'message': 'Categoria não encontrada'}, status=400)
+            if not categoria.status and obj.categoria_id != categoria.id:
+                return JsonResponse({'success': False, 'message': 'Categoria inativa não pode ser selecionada.'}, status=400)
+            subcategoria_id = (request.POST.get('subcategoria_id') or '').strip()
+            subcategoria = None
+            if subcategoria_id:
+                subcategoria = SubcategoriaConta.objects.filter(id=subcategoria_id, categoria=categoria).first()
+                if not subcategoria:
+                    return JsonResponse({
+                        'success': False,
+                        'message': 'Subcategoria inválida para a categoria selecionada.',
+                    }, status=400)
+                # Nova subcategoria inativa bloqueada; manter a mesma já vinculada é permitido
+                if not subcategoria.status and obj.subcategoria_id != subcategoria.id:
+                    return JsonResponse({
+                        'success': False,
+                        'message': 'Subcategoria inativa não pode ser selecionada.',
+                    }, status=400)
             obj.descricao = descricao
             obj.valor = valor_dec
             obj.data_vencimento = data_venc

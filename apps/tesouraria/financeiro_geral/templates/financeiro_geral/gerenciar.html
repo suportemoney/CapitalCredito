@@ -5,33 +5,42 @@
 
 {% block header_title %}Gerenciador Financeiro Geral{% endblock %}
 
+{% block addcss_extra %}
+<link rel="stylesheet" href="{% static 'financeiro_geral/css/gerenciar.css' %}">
+{% endblock %}
+
 {% block content %}
-<div class="container-fluid">
+<div class="container-fluid page-gerenciar-financeiro">
     <div class="section-header">
-        <h5>Categorias e Tipos</h5>
+        <h5><i class="bx bx-cog"></i> Categorias e Tipos</h5>
     </div>
     <div class="section-body">
         <ul class="nav nav-tabs" id="tabsGerenciador" role="tablist">
             <li class="nav-item" role="presentation">
-                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-categorias" type="button" role="tab">Categorias de Contas</button>
+                <button class="nav-link active" id="tab-btn-categorias" data-bs-toggle="tab" data-bs-target="#tab-categorias" type="button" role="tab" aria-controls="tab-categorias" aria-selected="true">Categorias de Contas</button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-subcategorias" type="button" role="tab">Subcategorias</button>
+                <button class="nav-link" id="tab-btn-subcategorias" data-bs-toggle="tab" data-bs-target="#tab-subcategorias" type="button" role="tab" aria-controls="tab-subcategorias" aria-selected="false">Subcategorias</button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-tipos-beneficio" type="button" role="tab">Tipos de Benefício</button>
+                <button class="nav-link" id="tab-btn-tipos" data-bs-toggle="tab" data-bs-target="#tab-tipos-beneficio" type="button" role="tab" aria-controls="tab-tipos-beneficio" aria-selected="false">Tipos de Benefício</button>
             </li>
         </ul>
         <div class="tab-content mt-3" id="tabsGerenciadorContent">
-            <div class="tab-pane fade show active" id="tab-categorias" role="tabpanel">
-                <div class="card">
+            <div class="tab-pane fade show active" id="tab-categorias" role="tabpanel" aria-labelledby="tab-btn-categorias">
+                <div class="card gerenciar-card">
                     <div class="card-body">
-                        <div class="d-flex gap-2 mb-3">
-                            <input type="text" class="form-control" id="nova-categoria-nome" placeholder="Nome da categoria">
-                            <button type="button" class="btn btn-primary" id="btnCriarCategoria">Criar</button>
+                        <div class="row g-2 mb-3 align-items-end">
+                            <div class="col-md-8">
+                                <label class="form-label" for="nova-categoria-nome">Nome da categoria</label>
+                                <input type="text" class="form-control" id="nova-categoria-nome" placeholder="Ex: Aluguel" maxlength="255" autocomplete="off">
+                            </div>
+                            <div class="col-md-4">
+                                <button type="button" class="btn btn-primary w-100" id="btnCriarCategoria"><i class="bx bx-plus"></i> Criar</button>
+                            </div>
                         </div>
                         <div class="table-responsive">
-                            <table class="table table-hover">
+                            <table class="table table-hover gerenciar-table">
                                 <thead>
                                     <tr>
                                         <th>Nome</th>
@@ -39,32 +48,34 @@
                                         <th>Ações</th>
                                     </tr>
                                 </thead>
-                                <tbody id="tabela-categorias"></tbody>
+                                <tbody id="tabela-categorias">
+                                    <tr class="linha-loading"><td colspan="3">Carregando...</td></tr>
+                                </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="tab-pane fade" id="tab-subcategorias" role="tabpanel">
-                <div class="card">
+            <div class="tab-pane fade" id="tab-subcategorias" role="tabpanel" aria-labelledby="tab-btn-subcategorias">
+                <div class="card gerenciar-card">
                     <div class="card-body">
-                        <div class="row mb-3">
+                        <div class="row g-2 mb-3 align-items-end">
                             <div class="col-md-4">
-                                <label class="form-label">Categoria</label>
+                                <label class="form-label" for="subcategoria-categoria">Categoria</label>
                                 <select class="form-select" id="subcategoria-categoria">
                                     <option value="">Selecione...</option>
                                 </select>
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label">Nome subcategoria</label>
-                                <input type="text" class="form-control" id="nova-subcategoria-nome" placeholder="Nome">
+                                <label class="form-label" for="nova-subcategoria-nome">Nome subcategoria</label>
+                                <input type="text" class="form-control" id="nova-subcategoria-nome" placeholder="Nome" maxlength="255" autocomplete="off">
                             </div>
-                            <div class="col-md-4 d-flex align-items-end">
-                                <button type="button" class="btn btn-primary" id="btnCriarSubcategoria">Criar</button>
+                            <div class="col-md-4">
+                                <button type="button" class="btn btn-primary w-100" id="btnCriarSubcategoria"><i class="bx bx-plus"></i> Criar</button>
                             </div>
                         </div>
                         <div class="table-responsive">
-                            <table class="table table-hover">
+                            <table class="table table-hover gerenciar-table">
                                 <thead>
                                     <tr>
                                         <th>Categoria</th>
@@ -73,21 +84,28 @@
                                         <th>Ações</th>
                                     </tr>
                                 </thead>
-                                <tbody id="tabela-subcategorias"></tbody>
+                                <tbody id="tabela-subcategorias">
+                                    <tr class="linha-loading"><td colspan="4">Carregando...</td></tr>
+                                </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="tab-pane fade" id="tab-tipos-beneficio" role="tabpanel">
-                <div class="card">
+            <div class="tab-pane fade" id="tab-tipos-beneficio" role="tabpanel" aria-labelledby="tab-btn-tipos">
+                <div class="card gerenciar-card">
                     <div class="card-body">
-                        <div class="d-flex gap-2 mb-3">
-                            <input type="text" class="form-control" id="nova-tipo-beneficio-nome" placeholder="Nome (ex: Vale Transporte)">
-                            <button type="button" class="btn btn-primary" id="btnCriarTipoBeneficio">Criar</button>
+                        <div class="row g-2 mb-3 align-items-end">
+                            <div class="col-md-8">
+                                <label class="form-label" for="nova-tipo-beneficio-nome">Nome do tipo</label>
+                                <input type="text" class="form-control" id="nova-tipo-beneficio-nome" placeholder="Ex: Vale Transporte" maxlength="255" autocomplete="off">
+                            </div>
+                            <div class="col-md-4">
+                                <button type="button" class="btn btn-primary w-100" id="btnCriarTipoBeneficio"><i class="bx bx-plus"></i> Criar</button>
+                            </div>
                         </div>
                         <div class="table-responsive">
-                            <table class="table table-hover">
+                            <table class="table table-hover gerenciar-table">
                                 <thead>
                                     <tr>
                                         <th>Nome</th>
@@ -95,11 +113,45 @@
                                         <th>Ações</th>
                                     </tr>
                                 </thead>
-                                <tbody id="tabela-tipos-beneficio"></tbody>
+                                <tbody id="tabela-tipos-beneficio">
+                                    <tr class="linha-loading"><td colspan="3">Carregando...</td></tr>
+                                </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Modal único de edição (categoria / subcategoria / tipo) #}
+<div class="modal fade" id="modalEditarGerenciador" tabindex="-1" aria-labelledby="modalEditarGerenciadorTitulo" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalEditarGerenciadorTitulo"><i class="bx bx-edit"></i> Editar</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="edit-tipo-entidade" value="">
+                <input type="hidden" id="edit-entidade-id" value="">
+                <div class="mb-3">
+                    <label class="form-label" for="edit-nome">Nome</label>
+                    <input type="text" class="form-control" id="edit-nome" maxlength="255" autocomplete="off">
+                    <div class="form-text">O nome será salvo em maiúsculas.</div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="edit-status">Status</label>
+                    <select class="form-select" id="edit-status">
+                        <option value="true">Ativo</option>
+                        <option value="false">Inativo</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnSalvarEdicaoGerenciador">Salvar</button>
             </div>
         </div>
     </div>
