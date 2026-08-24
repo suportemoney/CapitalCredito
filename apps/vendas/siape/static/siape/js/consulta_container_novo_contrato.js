@@ -7,6 +7,7 @@
     var carteiraIdAtual = null;
     var modoAtual = 'todas';
     var ctxModal = {};
+    var cacheItensNc = {};
 
     function el(id) {
         return document.getElementById(id);
@@ -31,6 +32,58 @@
         return d.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
     }
 
+    function txtOuTraco(v) {
+        if (v === null || v === undefined || String(v).trim() === '') return '—';
+        return String(v);
+    }
+
+    function fmtMoedaNc(v) {
+        if (v === null || v === undefined || v === '') return '—';
+        var n = parseFloat(String(v).replace(',', '.'));
+        if (isNaN(n)) return '—';
+        return 'R$ ' + n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function fmtCoefNc(v) {
+        if (v === null || v === undefined || v === '') return '—';
+        var n = parseFloat(String(v).replace(',', '.'));
+        if (isNaN(n)) return '—';
+        return n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 6 });
+    }
+
+    function setTxtNc(id, v) {
+        var n = el(id);
+        if (n) n.textContent = v;
+    }
+
+    function abrirModalDetalhesProposta(it) {
+        if (!it) return;
+        var prod = [it.banco, it.produto].filter(Boolean).join(' · ');
+        setTxtNc('nc-det-nome', txtOuTraco(it.cliente_nome));
+        setTxtNc('nc-det-cpf', formatCpf(it.cliente_cpf));
+        setTxtNc('nc-det-tabulacao', txtOuTraco(it.tabulacao_operacional));
+        setTxtNc('nc-det-tabulacao-produto', txtOuTraco(prod));
+        setTxtNc('nc-det-status-proposta', txtOuTraco(it.status_linha));
+        setTxtNc('nc-det-status-operacional', txtOuTraco(it.tag_status_operacional_label || it.tag_status_operacional));
+        setTxtNc('nc-det-status-comercial', txtOuTraco(it.status_comercial_label || it.status_comercial));
+        setTxtNc('nc-det-codigo', txtOuTraco(it.proposta_codigo));
+        setTxtNc('nc-det-contrato', txtOuTraco(it.contrato_codigo));
+        setTxtNc('nc-det-banco', txtOuTraco(it.banco));
+        setTxtNc('nc-det-convenio', txtOuTraco(it.convenio));
+        setTxtNc('nc-det-produto', txtOuTraco(it.produto));
+        setTxtNc('nc-det-tabela', txtOuTraco(it.tabela_cms));
+        setTxtNc('nc-det-parcela', fmtMoedaNc(it.valor_parcela));
+        setTxtNc('nc-det-coeficiente', fmtCoefNc(it.coeficiente));
+        setTxtNc('nc-det-prazo', it.prazo ? String(it.prazo) + ' meses' : '—');
+        setTxtNc('nc-det-af', fmtMoedaNc(it.valor_af));
+        setTxtNc('nc-det-tc', fmtMoedaNc(it.valor_tc));
+        setTxtNc('nc-det-liberado', fmtMoedaNc(it.valor_liberado));
+        var m = el('modalNcDetalhesProposta');
+        if (m && typeof bootstrap !== 'undefined') {
+            bootstrap.Modal.getOrCreateInstance(m).show();
+        }
+    }
+
     function reparentContainer() {
         var box = el('siape-container-novo-contrato');
         if (!box) return;
@@ -48,6 +101,7 @@
         var lista = el('nc-itens-lista');
         var vazio = el('nc-itens-vazio');
         if (!lista) return;
+        cacheItensNc = {};
         if (!itens || !itens.length) {
             lista.innerHTML = '';
             if (vazio) {
@@ -61,6 +115,7 @@
         if (vazio) vazio.classList.add('d-none');
         var html = '';
         itens.forEach(function (it) {
+            cacheItensNc[String(it.proposta_id)] = it;
             var cpfLimpo = String(it.cliente_cpf || '').replace(/\D/g, '');
             var cpfAttr = cpfLimpo.length === 11
                 ? ' data-cliente-cpf="' + escHtml(cpfLimpo) + '"'
@@ -84,6 +139,8 @@
             }
             html += '<div class="siape-container-nc__item-meta">' + escHtml(it.status_linha) + '</div>';
             html += '<div class="siape-container-nc__item-btns">';
+            html += '<button type="button" class="btn siape-btn-outline-gold btn-sm btn-nc-detalhes" data-proposta-id="' +
+                escHtml(it.proposta_id) + '"><i class="bx bx-info-circle"></i> Detalhes da proposta</button>';
             if (it.link_formalizacao) {
                 html += '<button type="button" class="btn btn-outline-secondary btn-sm btn-nc-copiar-link" data-link="' +
                     escHtml(it.link_formalizacao) + '"><i class="bx bx-copy"></i> Link</button>';
@@ -594,7 +651,14 @@
         }
 
         document.addEventListener('click', function (e) {
-            var t = e.target.closest('.btn-nc-copiar-link');
+            var t = e.target.closest('.btn-nc-detalhes');
+            if (t) {
+                var pid = t.getAttribute('data-proposta-id');
+                abrirModalDetalhesProposta(cacheItensNc[String(pid)]);
+                return;
+            }
+
+            t = e.target.closest('.btn-nc-copiar-link');
             if (t) {
                 var link = t.getAttribute('data-link') || '';
                 if (link && navigator.clipboard) {

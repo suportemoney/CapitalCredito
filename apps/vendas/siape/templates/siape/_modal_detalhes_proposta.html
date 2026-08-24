@@ -1,0 +1,111 @@
+{# Modal somente leitura: dados da proposta, tabulação, status, nome e CPF #}
+<div class="modal fade" id="modalNcDetalhesProposta" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header py-2">
+                <h5 class="modal-title fs-6">
+                    <i class="bx bx-file me-1"></i>Detalhes da proposta
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <section class="siape-nc-detalhes-secao mb-3">
+                    <h6 class="siape-nc-detalhes-titulo">Cliente</h6>
+                    <div class="siape-nc-detalhes-grid">
+                        <div class="siape-nc-detalhes-item">
+                            <span class="siape-nc-detalhes-label">Nome</span>
+                            <strong id="nc-det-nome">—</strong>
+                        </div>
+                        <div class="siape-nc-detalhes-item">
+                            <span class="siape-nc-detalhes-label">CPF</span>
+                            <strong id="nc-det-cpf">—</strong>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="siape-nc-detalhes-secao mb-3">
+                    <h6 class="siape-nc-detalhes-titulo">Tabulação e status</h6>
+                    <div class="siape-nc-detalhes-grid">
+                        <div class="siape-nc-detalhes-item">
+                            <span class="siape-nc-detalhes-label">Tabulação operacional</span>
+                            <strong id="nc-det-tabulacao">—</strong>
+                        </div>
+                        <div class="siape-nc-detalhes-item">
+                            <span class="siape-nc-detalhes-label">Banco / produto</span>
+                            <strong id="nc-det-tabulacao-produto">—</strong>
+                        </div>
+                        <div class="siape-nc-detalhes-item">
+                            <span class="siape-nc-detalhes-label">Status da proposta</span>
+                            <strong id="nc-det-status-proposta">—</strong>
+                        </div>
+                        <div class="siape-nc-detalhes-item">
+                            <span class="siape-nc-detalhes-label">Status operacional</span>
+                            <strong id="nc-det-status-operacional">—</strong>
+                        </div>
+                        <div class="siape-nc-detalhes-item">
+                            <span class="siape-nc-detalhes-label">Status comercial</span>
+                            <strong id="nc-det-status-comercial">—</strong>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="siape-nc-detalhes-secao">
+                    <h6 class="siape-nc-detalhes-titulo">Dados da proposta</h6>
+                    <div class="siape-nc-detalhes-grid">
+                        <div class="siape-nc-detalhes-item">
+                            <span class="siape-nc-detalhes-label">Código</span>
+                            <strong id="nc-det-codigo">—</strong>
+                        </div>
+                        <div class="siape-nc-detalhes-item">
+                            <span class="siape-nc-detalhes-label">Contrato</span>
+                            <strong id="nc-det-contrato">—</strong>
+                        </div>
+                        <div class="siape-nc-detalhes-item">
+                            <span class="siape-nc-detalhes-label">Banco</span>
+                            <strong id="nc-det-banco">—</strong>
+                        </div>
+                        <div class="siape-nc-detalhes-item">
+                            <span class="siape-nc-detalhes-label">Convênio</span>
+                            <strong id="nc-det-convenio">—</strong>
+                        </div>
+                        <div class="siape-nc-detalhes-item">
+                            <span class="siape-nc-detalhes-label">Produto</span>
+                            <strong id="nc-det-produto">—</strong>
+                        </div>
+                        <div class="siape-nc-detalhes-item">
+                            <span class="siape-nc-detalhes-label">Tabela CMS</span>
+                            <strong id="nc-det-tabela">—</strong>
+                        </div>
+                        <div class="siape-nc-detalhes-item">
+                            <span class="siape-nc-detalhes-label">Parcela</span>
+                            <strong id="nc-det-parcela">—</strong>
+                        </div>
+                        <div class="siape-nc-detalhes-item">
+                            <span class="siape-nc-detalhes-label">Coeficiente</span>
+                            <strong id="nc-det-coeficiente">—</strong>
+                        </div>
+                        <div class="siape-nc-detalhes-item">
+                            <span class="siape-nc-detalhes-label">Prazo</span>
+                            <strong id="nc-det-prazo">—</strong>
+                        </div>
+                        <div class="siape-nc-detalhes-item">
+                            <span class="siape-nc-detalhes-label">Valor AF</span>
+                            <strong id="nc-det-af">—</strong>
+                        </div>
+                        <div class="siape-nc-detalhes-item">
+                            <span class="siape-nc-detalhes-label">Valor TC</span>
+                            <strong id="nc-det-tc">—</strong>
+                        </div>
+                        <div class="siape-nc-detalhes-item">
+                            <span class="siape-nc-detalhes-label">Valor liberado</span>
+                            <strong id="nc-det-liberado">—</strong>
+                        </div>
+                    </div>
+                </section>
+            </div>
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -612,3 +612,43 @@
 #mount-container-nc-filter .siape-container-nc {
     margin-bottom: 1rem;
 }
+
+/* Modal de detalhes da proposta (somente leitura) */
+.siape-nc-detalhes-titulo {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #D4AF37;
+    margin-bottom: 0.5rem;
+}
+
+.siape-nc-detalhes-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.55rem 1rem;
+}
+
+.siape-nc-detalhes-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+}
+
+.siape-nc-detalhes-label {
+    font-size: 0.7rem;
+    color: #6c757d;
+    text-transform: uppercase;
+}
+
+.siape-nc-detalhes-item strong {
+    font-size: 0.85rem;
+    font-weight: 600;
+    word-break: break-word;
+}
+
+@media (max-width: 575.98px) {
+    .siape-nc-detalhes-grid {
+        grid-template-columns: 1fr;
+    }
+}

@@ -29,6 +29,39 @@ def _status_linha(contrato, solicitacao):
     return 'Aguardando contrato'
 
 
+def _anexar_tabulacao_status(item, carteira):
+    """Inclui tabulação e status da carteira no item da proposta."""
+    if not carteira:
+        item['tabulacao_operacional'] = ''
+        item['tag_status_operacional'] = ''
+        item['tag_status_operacional_label'] = ''
+        item['status_comercial'] = ''
+        item['status_comercial_label'] = ''
+        item['carteira_status'] = ''
+        return item
+    tab = (carteira.tabulacao_operacional or '').strip()
+    tag = (carteira.tag_status_operacional or '').strip()
+    st = (carteira.status_comercial or '').strip()
+    item['tabulacao_operacional'] = tab
+    item['tag_status_operacional'] = tag
+    item['tag_status_operacional_label'] = _label_choice(
+        CarteiraClientes.TAG_STATUS_OPERACIONAL_CHOICES, tag
+    ) or tag
+    item['status_comercial'] = st
+    item['status_comercial_label'] = _label_choice(
+        CarteiraClientes.STATUS_COMERCIAL_CHOICES, st
+    ) or st
+    item['carteira_status'] = _status_carteira_resumo(carteira)
+    return item
+
+
+def _num_str(valor):
+    """Serializa decimal/int para o JSON do modal de detalhes."""
+    if valor is None:
+        return ''
+    return str(valor)
+
+
 def _montar_item_proposta(user, carteira, pd, contrato, solicitacao):
     link_formalizacao = ''
     contrato_id = None
@@ -82,7 +115,15 @@ def _montar_item_proposta(user, carteira, pd, contrato, solicitacao):
         'proposta_id': pd.id,
         'proposta_codigo': pd.codigo or '',
         'banco': pd.banco.titulo if pd.banco_id else '',
+        'convenio': pd.convenio.titulo if pd.convenio_id else '',
         'produto': pd.produto.titulo if pd.produto_id else '',
+        'tabela_cms': pd.tabela_cms.titulo if pd.tabela_cms_id else '',
+        'valor_parcela': _num_str(pd.valor_parcela),
+        'prazo': pd.prazo if pd.prazo is not None else '',
+        'coeficiente': _num_str(pd.coeficiente),
+        'valor_af': _num_str(pd.valor_af),
+        'valor_tc': _num_str(pd.valor_tc),
+        'valor_liberado': _num_str(pd.valor_liberado),
         'contrato_id': contrato_id,
         'contrato_codigo': contrato_codigo,
         'etapa_operacional': etapa_operacional,
@@ -160,7 +201,7 @@ def montar_container_novo_contrato(carteira: CarteiraClientes, user: User) -> di
             carteiras_siape_propostas=carteira,
             criado_por=user,
         )
-        .select_related('banco', 'produto', 'convenio')
+        .select_related('banco', 'produto', 'convenio', 'tabela_cms')
         .order_by('-data_criacao')
     )
 
@@ -171,6 +212,7 @@ def montar_container_novo_contrato(carteira: CarteiraClientes, user: User) -> di
         item['cliente_nome'] = cliente_nome
         item['cliente_cpf'] = cliente_cpf
         item['carteira_id'] = carteira.id
+        _anexar_tabulacao_status(item, carteira)
         itens.append(item)
 
     tabulacao = (carteira.tabulacao_operacional or '').strip()
@@ -199,7 +241,7 @@ def montar_container_todas_propostas(user: User, limite: int = 100) -> dict:
             criado_por=user,
             carteiras_siape_propostas__user_responsavel=user,
         )
-        .select_related('banco', 'produto', 'convenio', 'cliente_dados_pessoais')
+        .select_related('banco', 'produto', 'convenio', 'tabela_cms', 'cliente_dados_pessoais')
         .distinct()
         .order_by('-data_criacao')[:limite]
     )
@@ -223,7 +265,7 @@ def montar_container_todas_propostas(user: User, limite: int = 100) -> dict:
         item['cliente_nome'] = nome
         item['cliente_cpf'] = cpf
         item['carteira_id'] = carteira.id
-        item['carteira_status'] = _status_carteira_resumo(carteira)
+        _anexar_tabulacao_status(item, carteira)
         itens.append(item)
 
     return {
